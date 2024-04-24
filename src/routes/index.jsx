@@ -5,11 +5,16 @@ import ProfilePage from "../pages/customer/ProfilePage";
 import EditProfilePage from "../pages/customer/EditProfilePage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import HomePage from "../pages/customer/HomePage";
+import DashboardAdmin from "../layouts/dashboard";
 
 const router = createBrowserRouter([
   {
     path: "*",
     element: <div>Routes Not Found!</div>,
+  },
+  {
+    path: "/admin",
+    element: <Dashboard></Dashboard>
   },
   {
     children: [
