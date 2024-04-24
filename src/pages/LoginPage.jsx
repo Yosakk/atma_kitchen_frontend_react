@@ -34,7 +34,7 @@ const LoginPage = () => {
     return (
         <div className=" font-poppins bg-cover bg-black">
             <NavbarLogin />
-            <div className="bg-cover" style={{ backgroundImage: `url(${imgBg})` }}>
+            <div className="bg-cover" style={{ backgroundImage: `url(${imgBg})`, backgroundSize: 'cover' }}>
                 <div className="justify-center items-center flex">
                     <div className="border w-full md:w-2/3 m-10 p-10 rounded-lg bg-white bg-opacity-30 shadow-lg ">
                         <div className=" m-0 p-0 grid grid-cols-1 md:grid-cols-2 gap-5">

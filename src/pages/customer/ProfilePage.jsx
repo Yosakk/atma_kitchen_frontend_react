@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenSquare } from "@fortawesome/free-solid-svg-icons";
 import SideNav from "../../components/SideNav";
 import HistoryCard from "../../components/HistoryCard";
+import { Link } from "react-router-dom";
 
 const ProfilePage = () => {
     return (
@@ -25,10 +26,10 @@ const ProfilePage = () => {
                             <Typography variant="h5" className="text-center md:text-center lg:text-left">Gede Pandu Prayaksa</Typography>
                             <Typography variant="paragraph" className="mb-3 text-center md:text-center lg:text-left">Username</Typography>
                             <div className="flex justify-center lg:justify-start">
-                                <Button className="flex items-center gap-3">
-                                    <FontAwesomeIcon icon={faPenSquare} className="h-5 w-5" />
+                                <Link to="/customer/profile/edit" className="flex items-center gap-3 text-black rounded bg-black text-white font-bold py-2 px-4 transition-colors duration-300 hover:bg-black hover:text-yellow-300">
+                                    <FontAwesomeIcon icon={faPenSquare} className="h-5 w-5 " />
                                     Edit
-                                </Button>
+                                </Link>
                             </div>
                         </div>
                         <div className="col-span-1 md:col-span-2 lg:col-span-1 pr-3 md:order-2 lg:order-1 ">
@@ -77,7 +78,7 @@ const ProfilePage = () => {
             </div>
             <div className="m-3 flex">
                 <div className="hidden lg:block">
-                <SideNav />
+                    <SideNav />
                 </div>
                 <div className="ml-3 w-full rounded-lg bg-transparent ">
                     <div>
