@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { Cog6ToothIcon } from "@heroicons/react/24/solid";
 import { IconButton } from "@material-tailwind/react";
 import {
@@ -6,18 +6,18 @@ import {
   DashboardNavbar,
   Configurator,
   Footer,
-} from "@/widgets/layout";
-import routes from "@/routes";
-import { useMaterialTailwindController, setOpenConfigurator } from "@/context";
+} from "../widgets/layout";
+import navbarRoutes from "../routes/routeData";
+import { useMaterialTailwindController, setOpenConfigurator } from "../context";
 
-export function Dashboard() {
+const DashboardAdmin = ({children}) => {
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavType } = controller;
 
   return (
     <div className="min-h-screen bg-blue-gray-50/50">
       <Sidenav
-        routes={routes}
+        routes={navbarRoutes}
         brandImg={
           sidenavType === "dark" ? "/img/logo-ct.png" : "/img/logo-ct-dark.png"
         }
@@ -34,15 +34,9 @@ export function Dashboard() {
         >
           <Cog6ToothIcon className="h-5 w-5" />
         </IconButton>
-        <Routes>
-          {routes.map(
-            ({ layout, pages }) =>
-              layout === "dashboard" &&
-              pages.map(({ path, element }) => (
-                <Route exact path={path} element={element} />
-              ))
-          )}
-        </Routes>
+        <div >
+          {children ? children : <Outlet />}
+        </div>
         <div className="text-blue-gray-600">
           <Footer />
         </div>
@@ -51,6 +45,6 @@ export function Dashboard() {
   );
 }
 
-Dashboard.displayName = "/src/layout/dashboard.jsx";
+DashboardAdmin.displayName = "/src/layouts/dashboard.jsx";
 
-export default Dashboard;
+export default DashboardAdmin;

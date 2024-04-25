@@ -6,6 +6,7 @@ import EditProfilePage from "../pages/customer/EditProfilePage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import HomePage from "../pages/customer/HomePage";
 import DashboardAdmin from "../layouts/dashboard";
+import HomeAdmin from "../pages/dashboard/home";
 
 const router = createBrowserRouter([
   {
@@ -14,7 +15,13 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin",
-    element: <Dashboard></Dashboard>
+    element: <DashboardAdmin />,
+    children : [
+      {
+        path : "/admin/home",
+        element : <HomeAdmin />
+      }
+    ]
   },
   {
     children: [
@@ -52,7 +59,6 @@ const router = createBrowserRouter([
 const AppRouter = () => {
   return (
     <>
-     
       <RouterProvider router={router} />
     </>
   );

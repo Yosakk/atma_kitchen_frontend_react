@@ -17,17 +17,17 @@ import {
   EllipsisVerticalIcon,
   ArrowUpIcon,
 } from "@heroicons/react/24/outline";
-import { StatisticsCard } from "@/widgets/cards";
-import { StatisticsChart } from "@/widgets/charts";
+import { StatisticsCard } from "../../widgets/cards";
+import { StatisticsChart } from "../../widgets/charts";
 import {
   statisticsCardsData,
   statisticsChartsData,
   projectsTableData,
   ordersOverviewData,
-} from "@/data";
+} from "../../data";
 import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
 
-export function Home() {
+const HomeAdmin = () => {
   return (
     <div className="mt-12">
       <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
@@ -255,4 +255,4 @@ export function Home() {
   );
 }
 
-export default Home;
+export default HomeAdmin;
