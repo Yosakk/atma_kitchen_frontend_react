@@ -6,7 +6,12 @@ import {
     InformationCircleIcon,
     ServerStackIcon,
     RectangleStackIcon,
+    ShoppingBagIcon,
+    UserGroupIcon,
+    BookOpenIcon,
   } from "@heroicons/react/24/solid";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBox } from '@fortawesome/free-solid-svg-icons';
   
   const icon = {
     className: "w-5 h-5 text-inherit",
@@ -24,7 +29,7 @@ import {
         {
           icon: <CakeIcon {...icon} />,
           name: "Product",
-          path: "/admin/product",
+          path: "/admin/product/read",
           pages: [ 
             {
               icon: <RectangleStackIcon {...icon} />,
@@ -39,10 +44,75 @@ import {
           ],
         },
         {
-          icon: <RectangleStackIcon {...icon} />,
-          name: "Resep",
-          path: "/resep",
+          icon: <ShoppingBagIcon {...icon} />,
+          name: "Hampers",
+          path: "/admin/hampers/read",
+          pages: [ 
+            {
+              icon: <RectangleStackIcon {...icon} />,
+              name: "addHampers",
+              path: "/admin/hampers/add",
+            },
+            {
+              icon: <RectangleStackIcon {...icon} />,
+              name: "editHampers",
+              path: "/admin/hampers/edit",
+            },
+          ],
         },
+        {
+          icon: <BookOpenIcon {...icon} />,
+          name: "Resep",
+          path: "/admin/resep/read",
+          pages: [ 
+            {
+              icon: <RectangleStackIcon {...icon} />,
+              name: "readResep",
+              path: "/admin/resep/add",
+            },
+            {
+              icon: <RectangleStackIcon {...icon} />,
+              name: "editResep",
+              path: "/admin/resep/edit",
+            },
+          ],
+        },
+        {
+          icon: <FontAwesomeIcon icon={faBox} {...icon} />,
+          name: "Bahan Baku",
+          path: "/admin/bahanBaku/read",
+          pages: [ 
+            {
+              icon: <RectangleStackIcon {...icon} />,
+              name: "readbahanBaku",
+              path: "/admin/bahanBaku/add",
+            },
+            {
+              icon: <RectangleStackIcon {...icon} />,
+              name: "editbahanBaku",
+              path: "/admin/bahanBaku/edit",
+            },
+          ],
+        },
+        {
+          icon: <UserGroupIcon {...icon} />,
+          name: "Pelanggan",
+          path: "/admin/pelanggan/read",
+          pages: [ 
+            {
+              icon: <RectangleStackIcon {...icon} />,
+              name: "readpelanggan",
+              path: "/admin/pelanggan/add",
+            },
+            {
+              icon: <RectangleStackIcon {...icon} />,
+              name: "editpelanggan",
+              path: "/admin/pelanggan/edit",
+            },
+          ],
+        },
+        
+        
       ],
     },
   ];

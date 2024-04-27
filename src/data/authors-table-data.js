@@ -47,6 +47,7 @@ export const authorsTableData = [
     online: false,
     date: "14/09/20",
   },
+  
 ];
 
 export default authorsTableData;
