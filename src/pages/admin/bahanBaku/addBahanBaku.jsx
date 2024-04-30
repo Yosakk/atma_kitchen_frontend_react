@@ -69,11 +69,6 @@ const AddBahanBaku = () => {
                             {/* Tambahkan opsi-opsi lain sesuai kebutuhan */}
                         </select>
                     </div>
-
-
-
-                    
-
                 </div>
                 <div className="mt-10 flex justify-end">
                 <Link to="/admin/bahanBaku/read">
@@ -81,7 +76,7 @@ const AddBahanBaku = () => {
                         type="cancel"
                         className="inline-flex items-center px-4 py-2 mr-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                     >
-                    <FontAwesomeIcon icon={faClose} className="mr-2" /> Cancel
+                    <FontAwesomeIcon icon={faClose} className="mr-2" /> Batal
                     </button>
                 </Link>
                     <button

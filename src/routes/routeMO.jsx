@@ -10,7 +10,7 @@ import {
   DocumentTextIcon,
 } from "@heroicons/react/24/solid";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBox } from '@fortawesome/free-solid-svg-icons';
+import { faBox, faUserTie } from '@fortawesome/free-solid-svg-icons';
   const icon = {
     className: "w-5 h-5 text-inherit",
   };
@@ -26,7 +26,7 @@ import { faBox } from '@fortawesome/free-solid-svg-icons';
           path: "/mo/home",
         },
         {
-          icon: <UserGroupIcon {...icon} />,
+          icon: <FontAwesomeIcon icon={faUserTie} {...icon} />,
           name: "Pegawai",
           path: "/mo/pegawai/read",
           pages: [
@@ -78,7 +78,7 @@ import { faBox } from '@fortawesome/free-solid-svg-icons';
         },
         {
           icon: <DocumentTextIcon {...icon} />,
-          name: "Pencatatan Pengeluaran Lain",
+          name: "Pengeluaran Lain",
           path: "/mo/pencatatanPengeluaranLain/read",
           pages: [
             {

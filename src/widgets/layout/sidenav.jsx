@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { Link, NavLink } from "react-router-dom";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon,Bars3Icon } from "@heroicons/react/24/outline";
 import {
   Avatar,
   Button,
@@ -25,10 +25,12 @@ export function Sidenav({ brandImg, brandName, routes }) {
       className={`${sidenavTypes[sidenavType]} ${
         openSidenav ? "translate-x-0" : "-translate-x-80"
       } fixed inset-0 z-50 my-4 ml-4 h-[calc(100vh-32px)] w-72 rounded-xl transition-transform duration-300 xl:translate-x-0 border border-blue-gray-100`}
+      
     >
       <div
         className={`relative`}
       >
+        
         <Link to="/" className="py-6 px-8 text-center">
           <Typography
             variant="h6"
@@ -37,6 +39,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
             {brandName}
           </Typography>
         </Link>
+        
         <IconButton
           variant="text"
           color="white"
@@ -47,6 +50,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
         >
           <XMarkIcon strokeWidth={2.5} className="h-5 w-5 text-white" />
         </IconButton>
+        
       </div>
       <div className="m-4">
         {routes.map(({ layout, title, pages }, key) => (

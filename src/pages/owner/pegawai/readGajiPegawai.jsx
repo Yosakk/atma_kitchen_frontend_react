@@ -7,11 +7,18 @@ import {
   Chip,
   Tooltip,
   Progress,
+  Button,
+  Input,
 } from "@material-tailwind/react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus,faEdit,faTrash } from '@fortawesome/free-solid-svg-icons';
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { pegawaiTableData } from "../../../data/pegawaiTableData";
 
 const readPegawai = () => {
+  const [searchValue, setSearchValue] = useState("");
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
       <Card>
@@ -21,6 +28,13 @@ const readPegawai = () => {
           </Typography>
         </CardHeader>
         <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
+        <div className="ml-auto mt-1 mb-4 mr-4 w-56 flex justify-end items-center">
+          <Input
+            label="Search"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+          />
+        </div>
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
@@ -40,7 +54,12 @@ const readPegawai = () => {
               </tr>
             </thead>
             <tbody>
-              {pegawaiTableData.map(({ img, username, nama, email, jenisKelamin, tanggalLahir, NoTelepon, gaji, bonus }, key) => {
+              {pegawaiTableData.filter((item) =>
+                Object.values(item)
+                  .join(" ")
+                  .toLowerCase()
+                  .includes(searchValue.toLowerCase())
+              ).map(({ img, username, nama, email, jenisKelamin, tanggalLahir, NoTelepon, gaji, bonus }, key) => {
                 const className = `py-3 px-5 ${
                   key === pegawaiTableData.length - 1
                     ? ""
@@ -90,13 +109,13 @@ const readPegawai = () => {
                       </Typography>
                     </td>
                     <td className={className}>
-                      <Typography
-                        as="a"
-                        href="#"
-                        className="text-xs font-semibold text-blue-gray-600"
-                      >
-                        Edit
-                      </Typography>
+                    <div className="btn-group text-center">
+                      <Link to="/owner/gajiPegawai/edit">
+                        <Button className="inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mr-2">
+                          <FontAwesomeIcon icon={faEdit} className="mr-2" />Ubah
+                        </Button>
+                      </Link>
+                    </div>
                     </td>
                   </tr>
                 );

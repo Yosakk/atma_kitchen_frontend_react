@@ -32,7 +32,7 @@ const EditBahanBaku = () => {
             <Card>
             <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
                 <Typography variant="h6" color="white">
-                Edit Bahan Baku
+                Ubah Bahan Baku
                 </Typography>
             </CardHeader>
             <CardBody>
@@ -80,7 +80,7 @@ const EditBahanBaku = () => {
                         type="cancel"
                         className="inline-flex items-center px-4 py-2 mr-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                     >
-                    <FontAwesomeIcon icon={faClose} className="mr-2" /> Cancel
+                    <FontAwesomeIcon icon={faClose} className="mr-2" /> Batal
                     </button>
                 </Link>
                     <button

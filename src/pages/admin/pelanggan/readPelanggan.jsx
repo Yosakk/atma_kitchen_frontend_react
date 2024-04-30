@@ -8,7 +8,10 @@ import {
   Tooltip,
   Progress,
 } from "@material-tailwind/react";
+import { Link } from "react-router-dom";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import { pelangganTableData } from "../../../data/pelangganTableData";
 
 const readPelanggan = () => {
@@ -107,13 +110,12 @@ const readPelanggan = () => {
                       </Typography>
                     </td>
                     <td className={className}>
-                      <Typography
-                        as="a"
-                        href="#"
-                        className="text-xs font-semibold text-blue-gray-600"
-                      >
-                        Edit
-                      </Typography>
+                        <Link to="/admin/pelanggan/profile">
+                          <button >
+                            <FontAwesomeIcon icon={faEllipsisV} className="mr-2" />
+                          </button>
+                        </Link>
+                      
                     </td>
                   </tr>
                 );

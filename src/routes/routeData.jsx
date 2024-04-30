@@ -28,38 +28,38 @@ import { faBox } from '@fortawesome/free-solid-svg-icons';
         },
         {
           icon: <CakeIcon {...icon} />,
-          name: "Product",
-          path: "/admin/product/read",
+          name: "Produk",
+          path: "/admin/produk/read",
           pages: [ 
             {
               icon: <RectangleStackIcon {...icon} />,
               name: "addProduk",
-              path: "/admin/product/add",
+              path: "/admin/produk/add",
             },
             {
               icon: <RectangleStackIcon {...icon} />,
               name: "editProduk",
-              path: "/admin/product/edit",
+              path: "/admin/produk/edit",
             },
           ],
         },
-        {
-          icon: <ShoppingBagIcon {...icon} />,
-          name: "Hampers",
-          path: "/admin/hampers/read",
-          pages: [ 
-            {
-              icon: <RectangleStackIcon {...icon} />,
-              name: "addHampers",
-              path: "/admin/hampers/add",
-            },
-            {
-              icon: <RectangleStackIcon {...icon} />,
-              name: "editHampers",
-              path: "/admin/hampers/edit",
-            },
-          ],
-        },
+        // {
+        //   icon: <ShoppingBagIcon {...icon} />,
+        //   name: "Hampers",
+        //   path: "/admin/hampers/read",
+        //   pages: [ 
+        //     {
+        //       icon: <RectangleStackIcon {...icon} />,
+        //       name: "addHampers",
+        //       path: "/admin/hampers/add",
+        //     },
+        //     {
+        //       icon: <RectangleStackIcon {...icon} />,
+        //       name: "editHampers",
+        //       path: "/admin/hampers/edit",
+        //     },
+        //   ],
+        // },
         {
           icon: <BookOpenIcon {...icon} />,
           name: "Resep",

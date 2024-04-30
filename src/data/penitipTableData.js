@@ -1,22 +1,22 @@
 export const penitipTableData = [
 {
-    name: "Nama Penitip 1",
-    phoneNumber: "081234567891",
+    nama: "Nama Penitip 1",
+    NoTelepon: "081234567891",
 },
 {
-    name: "Nama Penitip 2",
-    phoneNumber: "081234567892",
+    nama: "Nama Penitip 2",
+    NoTelepon: "081234567892",
 },
 {
-    name: "Nama Penitip 3",
-    phoneNumber: "081234567893",
+    nama: "Nama Penitip 3",
+    NoTelepon: "081234567893",
 },
 {
-    name: "Nama Penitip 4",
-    phoneNumber: "081234567894",
+    nama: "Nama Penitip 4",
+    NoTelepon: "081234567894",
 },
 {
-    name: "Nama Penitip 5",
-    phoneNumber: "081234567895",
+    nama: "Nama Penitip 5",
+    NoTelepon: "081234567895",
 },
 ];

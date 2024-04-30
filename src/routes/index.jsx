@@ -10,23 +10,54 @@ import HomePage from "../pages/customer/HomePage";
 
 //admin
 import DashboardAdmin from "../layouts/dashboardAdmin";
+import NotFound from "../components/notFound";
 // import DashboardMo from "../layouts/dashboardMo";
 import HomeAdmin from "../pages/admin/home";
 
-import ReadProduct from "../pages/admin/product/readProduct";
-import ReadHampers from "../pages/admin/hampers/readHampers";
+import ReadProduk from "../pages/admin/produk/readProduk";
+import AddProduk from "../pages/admin/produk/addProduk";
+import EditProduk from "../pages/admin/produk/editProduk";
+
+// import ReadHampers from "../pages/admin/product/hampers/readHampers";
+import AddHampers from "../pages/admin/produk/hampers/addHampers";
+import EditHampers from "../pages/admin/produk/hampers/editHampers";
+
 import ReadResep from "../pages/admin/resep/readResep";
+import AddResep from "../pages/admin/resep/addResep";
+import EditResep from "../pages/admin/resep/editResep";
+
 import ReadBahanBaku from "../pages/admin/bahanBaku/readBahanBaku";
 import AddBahanBaku from "../pages/admin/bahanBaku/addBahanBaku";
 import EditBahanBaku from "../pages/admin/bahanBaku/editbahanBaku";
+
 import ReadPelanggan from "../pages/admin/pelanggan/readPelanggan";
+import ProfilePageAdmin from "../pages/admin/pelanggan/ProfilePage";
 //MO
 import ReadPegawai from "../pages/mo/pegawai/readPegawai";
+import AddPegawai from "../pages/mo/pegawai/addPegawai";
+import EditPegawai from "../pages/mo/pegawai/editPegawai";
+
 import ReadPenitip from "../pages/mo/penitip/readPenitip";
+import AddPenitip from "../pages/mo/penitip/addPenitip";
+import EditPenitip from "../pages/mo/penitip/editPenitip";
+
 import ReadPencatatanPembelianBahanBaku from "../pages/mo/pencatatan/readPencatatanPembelianBahanBaku";
+import AddPembelianBahanBaku from "../pages/mo/pencatatan/addPembelianBahanBaku";
+import EditPembelianBahanBaku from "../pages/mo/pencatatan/editPembelianBahanBaku";
+
 import ReadPencatatanPengeluaranLain from "../pages/mo/pencatatan/readPencatatanPengeluaranLain";
+import AddPencatatanPengeluaranLain from "../pages/mo/pencatatan/addPencatatanPengeluaranLain";
+import EditPencatatanPengeluaranLain from "../pages/mo/pencatatan/editPencatatanPengeluaranLain";
 //owner
 import ReadGajiPegawai from "../pages/owner/pegawai/readGajiPegawai";
+import EditGajiPegawai from "../pages/owner/pegawai/editGajiPegawai";
+
+
+
+
+
+
+
 
 
 
@@ -34,7 +65,7 @@ import ReadGajiPegawai from "../pages/owner/pegawai/readGajiPegawai";
 const router = createBrowserRouter([
   {
     path: "*",
-    element: <div>Routes Not Found!</div>,
+    element: <NotFound/>,
   },
   {
     path: "/admin",
@@ -49,16 +80,40 @@ const router = createBrowserRouter([
         element : <HomeAdmin />
       },
       {
-        path : "/admin/product/read",
-        element : <ReadProduct />
+        path : "/admin/produk/read",
+        element : <ReadProduk />
       },
       {
-        path : "/admin/hampers/read",
-        element : <ReadHampers />
+        path : "/admin/produk/add",
+        element : <AddProduk/>
+      },
+      {
+        path : "/admin/produk/edit",
+        element : <EditProduk/>
+      },
+      // {
+      //   path : "/admin/hampers/read",
+      //   element : <ReadHampers />
+      // },
+      {
+        path : "/admin/hampers/add",
+        element : <AddHampers/>
+      },
+      {
+        path : "/admin/hampers/edit",
+        element : <EditHampers/>
       },
       {
         path : "/admin/resep/read",
         element : <ReadResep />
+      },
+      {
+        path : "/admin/resep/add",
+        element : <AddResep />
+      },
+      {
+        path : "/admin/resep/edit",
+        element : <EditResep />
       },
       {
         path : "/admin/bahanBaku/read",
@@ -75,6 +130,10 @@ const router = createBrowserRouter([
       {
         path : "/admin/pelanggan/read",
         element : <ReadPelanggan />
+      },
+      {
+        path : "/admin/pelanggan/profile",
+        element : <ProfilePageAdmin />
       },
       
     ]
@@ -96,17 +155,50 @@ const router = createBrowserRouter([
         element : <ReadPegawai />
       },
       {
+        path : "/mo/pegawai/add",
+        element : <AddPegawai />
+      },
+      {
+        path : "/mo/pegawai/edit",
+        element : <EditPegawai />
+      },
+      {
         path : "/mo/penitip/read",
         element : <ReadPenitip />
+      },
+      {
+        path : "/mo/penitip/add",
+        element : <AddPenitip />
+      },
+      {
+        path : "/mo/penitip/edit",
+        element : <EditPenitip />
       },
       {
         path : "/mo/pencatatanPembelianBahanBaku/read",
         element : <ReadPencatatanPembelianBahanBaku />
       },
       {
+        path : "/mo/pencatatanPembelianBahanBaku/add",
+        element : <AddPembelianBahanBaku />
+      },
+      {
+        path : "/mo/pencatatanPembelianBahanBaku/edit",
+        element : <EditPembelianBahanBaku />
+      },
+      {
         path : "/mo/pencatatanPengeluaranLain/read",
         element : <ReadPencatatanPengeluaranLain />
-      },           
+      },
+      {
+        path : "/mo/pencatatanPengeluaranLain/add",
+        element : <AddPencatatanPengeluaranLain />
+      },
+      {
+        path : "/mo/pencatatanPengeluaranLain/edit",
+        element : <EditPencatatanPengeluaranLain />
+      },                    
+      
     ]
   },
   {
@@ -124,7 +216,11 @@ const router = createBrowserRouter([
       {
         path : "/owner/gajiPegawai/read",
         element : <ReadGajiPegawai />
-      },    
+      },
+      {
+        path : "/owner/gajiPegawai/edit",
+        element : <EditGajiPegawai />
+      },       
     ]
   },
   {
