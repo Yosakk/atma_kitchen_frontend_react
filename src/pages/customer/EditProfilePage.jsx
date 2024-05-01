@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import NavbarLogin from "../../components/NavbarLogin"
 import FooterUser from "../../components/Footer"
 import { useCountries } from "use-react-countries";
@@ -29,26 +29,16 @@ const EditProfilePage = () => {
     const [date, setDate] = React.useState();
     const [errors, setErrors] = useState({});
     const [country, setCountry] = React.useState(0);
-    const [password, setPassword] = useState('');
-    const [passwordStrength, setPasswordStrength] = useState('');
     const [profileImage, setProfileImage] = useState('')
+    const [userData, setUserData] = useState(null);
 
-    const checkPasswordStrength = (password) => {
-        const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
-        if (passwordRegex.test(password)) {
-            setPasswordStrength('strong');
-        } else if (password.length >= 8) {
-            setPasswordStrength('middle');
-        } else {
-            setPasswordStrength('low');
+    useEffect(() => {
+        const userDataFromSession = sessionStorage.getItem('userData');
+        console.log(userDataFromSession);
+        if (userDataFromSession) {
+            setUserData(JSON.parse(userDataFromSession));
         }
-    };
-    const handlePasswordChange = (e) => {
-        const newPassword = e.target.value;
-        setPassword(newPassword);
-        checkPasswordStrength(newPassword);
-    };
-
+    }, []);
 
     // Fungsi handleSubmit untuk menangani submit form
     const handleSubmit = (e) => {
@@ -72,7 +62,7 @@ const EditProfilePage = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen" style={{backgroundColor: "#FFC655"}}>
+        <div className="flex flex-col min-h-screen" style={{ backgroundColor: "#FFC655" }}>
             <NavbarLogin />
             <div className="flex-grow flex justify-center">
                 <div className="border w-full  m-10 p-2 pt-6 pb-6 rounded-lg bg-white shadow-md p-4" >
@@ -100,15 +90,39 @@ const EditProfilePage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <div className="mb-2">
                                 <label htmlFor="username" className=" block mb-2 text-sm font-medium text-gray-900">Username</label>
-                                <Input type='text' size="lg" label="Username" className=' w-sm' placeholder='Joexx01' required />
+                                <Input
+                                    value={userData?.username}
+                                    type='text'
+                                    size="lg"
+                                    label="Username"
+                                    className=' w-sm'
+                                    placeholder='Joexx01'
+                                    required
+                                />
                             </div>
                             <div className="mb-2">
                                 <label htmlFor="fullname" className="block mb-2 text-sm font-medium text-gray-900">Nama Lengkap</label>
-                                <Input type='text' size="lg" label="Nama Lengkap" className='' placeholder='Joe Biden Kece' required />
+                                <Input
+                                    value={userData?.nama_user}
+                                    type='text'
+                                    size="lg"
+                                    label="Nama Lengkap"
+                                    className=''
+                                    placeholder='Joe Biden Kece'
+                                    required
+                                />
                             </div>
                             <div className="mb-2">
                                 <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900">Email address</label>
-                                <Input type='email' size="lg" label="Email" className='' placeholder='Joe.Hoe@gmail.com' required />
+                                <Input
+                                    value={userData?.email}
+                                    type='email'
+                                    size="lg"
+                                    label="Email"
+                                    className=''
+                                    placeholder='Joe.Hoe@gmail.com'
+                                    required
+                                />
                             </div>
                             <div className="mb-2">
                                 <div className="flex flex-col">
@@ -152,6 +166,7 @@ const EditProfilePage = () => {
                                         </Menu>
                                         <Input
                                             type="tel"
+                                            value={userData?.nomor_telepon}
                                             placeholder="Mobile Number"
                                             className="rounded-l-none !border-t-blue-gray-200 focus:!border-t-gray-900"
                                             labelProps={{
@@ -237,7 +252,6 @@ const EditProfilePage = () => {
                             <Button variant="outlined" className='mr-3'>Batal</Button>
                             <Button variant="filled">Simpan</Button>
                         </div>
-
                     </form>
                 </div>
             </div>
