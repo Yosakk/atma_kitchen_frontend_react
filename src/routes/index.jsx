@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-
+import { useRoutes } from "react-router-dom";
 //customer
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
@@ -31,11 +31,12 @@ import AddBahanBaku from "../pages/admin/bahanBaku/addBahanBaku";
 import EditBahanBaku from "../pages/admin/bahanBaku/editbahanBaku";
 
 import ReadPelanggan from "../pages/admin/pelanggan/readPelanggan";
-import ProfilePageAdmin from "../pages/admin/pelanggan/ProfilePage";
+import ProfilePagePelanggan from "../pages/admin/pelanggan/ProfilePage";
 //MO
 import ReadPegawai from "../pages/mo/pegawai/readPegawai";
 import AddPegawai from "../pages/mo/pegawai/addPegawai";
 import EditPegawai from "../pages/mo/pegawai/editPegawai";
+import ProfilePagePegawai from "../pages/mo/pegawai/ProfilePage";
 
 import ReadPenitip from "../pages/mo/penitip/readPenitip";
 import AddPenitip from "../pages/mo/penitip/addPenitip";
@@ -62,11 +63,13 @@ import EditGajiPegawai from "../pages/owner/pegawai/editGajiPegawai";
 
 
 
+
 const router = createBrowserRouter([
   {
     path: "*",
     element: <NotFound/>,
   },
+  
   {
     path: "/admin",
     element: <DashboardAdmin />,
@@ -133,7 +136,10 @@ const router = createBrowserRouter([
       },
       {
         path : "/admin/pelanggan/profile",
-        element : <ProfilePageAdmin />
+        element : <ProfilePagePelanggan />
+      },{
+        path : "/admin/pegawai/profile",
+        element : <ProfilePagePegawai />
       },
       
     ]
@@ -161,6 +167,10 @@ const router = createBrowserRouter([
       {
         path : "/mo/pegawai/edit",
         element : <EditPegawai />
+      },
+      {
+        path : "/mo/pegawai/profile",
+        element : <ProfilePagePegawai />
       },
       {
         path : "/mo/penitip/read",
@@ -220,6 +230,10 @@ const router = createBrowserRouter([
       {
         path : "/owner/gajiPegawai/edit",
         element : <EditGajiPegawai />
+      },
+      {
+        path : "/owner/pegawai/profile",
+        element : <ProfilePagePegawai />
       },       
     ]
   },

@@ -1,19 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 import NavbarLogin from "../../components/NavbarLogin";
 import FooterUser from "../../components/Footer";
 import { Typography, Button } from "@material-tailwind/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenSquare } from "@fortawesome/free-solid-svg-icons";
-import SideNav from "../../components/SideNav";
-import HistoryCard from "../../components/HistoryCard";
+import HistoryCardPage from "../../components/HistoryCard";
 import { Link } from "react-router-dom";
+import SideNav from "../../components/SideNav";
 
 const ProfilePage = () => {
+    const [activeItem, setActiveItem] = useState(null);
+    const [content, setContent] = useState(null);
+
+    const handleItemClick = (item) => {
+        setActiveItem(item);
+        if (item === "Pesanan Saya") {
+            setContent(<HistoryCardPage />);
+        } else {
+            setContent(null);
+        }
+    };
+
     return (
         <div className="flex flex-col min-h-screen">
             <NavbarLogin />
             <div className="flex-grow flex justify-center">
                 <div className="border w-full  m-10 p-2 pt-6 pb-6 rounded-lg bg-white shadow-md " >
+                    {/* Profile content */}
                     <div className="grid grid-cols-1  md:grid-cols-3 lg:grid-cols-5">
                         <div className="flex justify-center items-center md:row-span-2 ">
                             <img
@@ -78,12 +91,14 @@ const ProfilePage = () => {
             </div>
             <div className="m-3 flex">
                 <div className="hidden lg:block">
-                    <SideNav />
+                    <SideNav activeItem={activeItem} handleItemClick={handleItemClick} />
                 </div>
                 <div className="ml-3 w-full rounded-lg bg-transparent ">
-                    <div>
-                        <HistoryCard />
-                    </div>
+                    {content && (
+                        <div className="w-full h-full rounded-lg bg-transparent">
+                            {content}
+                        </div>
+                    )}
                 </div>
             </div>
             <FooterUser />

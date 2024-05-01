@@ -1,3 +1,5 @@
+// SideNav.js
+import React from "react";
 import {
     Card,
     Typography,
@@ -10,16 +12,13 @@ import {
 import {
     PresentationChartBarIcon,
     ShoppingBagIcon,
-    UserCircleIcon,
-    Cog6ToothIcon,
     InboxIcon,
     PowerIcon,
 } from "@heroicons/react/24/solid";
-import imgLogo from "../assets/images/img0.png";
 
-const SideNav = () => {
+const SideNav = ({ activeItem, handleItemClick }) => {
     return (
-        <Card className="h-[calc(100vh-2rem)] w-full max-w-[20rem] p-4 shadow-lg ">
+        <Card className="h-screen w-full max-w-[20rem] p-4 shadow-lg ">
             <div className="mb-2 flex items-center gap-4 p-4">
                 <img src="https://docs.material-tailwind.com/img/logo-ct-dark.png" alt="brand" className="h-8 w-8" />
                 <Typography variant="h5" color="blue-gray">
@@ -27,19 +26,19 @@ const SideNav = () => {
                 </Typography>
             </div>
             <List>
-                <ListItem>
+                <ListItem onClick={() => handleItemClick("Alamat Saya")} active={activeItem === "Alamat Saya"}>
                     <ListItemPrefix>
                         <PresentationChartBarIcon className="h-5 w-5" />
                     </ListItemPrefix>
                     Alamat Saya
                 </ListItem>
-                <ListItem>
+                <ListItem onClick={() => handleItemClick("Pesanan Saya")} active={activeItem === "Pesanan Saya"}>
                     <ListItemPrefix>
                         <ShoppingBagIcon className="h-5 w-5" />
                     </ListItemPrefix>
                     Pesanan Saya
                 </ListItem>
-                <ListItem>
+                <ListItem onClick={() => handleItemClick("Pemberitahuan")} active={activeItem === "Pemberitahuan"}>
                     <ListItemPrefix>
                         <InboxIcon className="h-5 w-5" />
                     </ListItemPrefix>
@@ -48,7 +47,7 @@ const SideNav = () => {
                         <Chip value="14" size="sm" variant="ghost" color="blue-gray" className="rounded-full" />
                     </ListItemSuffix>
                 </ListItem>
-                <ListItem >
+                <ListItem onClick={() => handleItemClick("Log Out")} active={activeItem === "Log Out"}>
                     <ListItemPrefix>
                         <PowerIcon className="h-5 w-5" color="red"/>
                     </ListItemPrefix>

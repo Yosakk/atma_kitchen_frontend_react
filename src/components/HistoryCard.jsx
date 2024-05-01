@@ -1,21 +1,18 @@
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { PencilIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+import React from "react";
 import {
     Card,
     CardHeader,
     Input,
     Typography,
-    Button,
-    CardBody,
     Chip,
+    CardBody,
     CardFooter,
     Tabs,
     TabsHeader,
     Tab,
-    Avatar,
-    IconButton,
-    Tooltip,
+    Button,
 } from "@material-tailwind/react";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 const TABS = [
     {
@@ -34,6 +31,37 @@ const TABS = [
         label: "Selesai",
         value: "selesai",
     },
+];
+
+const DATA = [
+    {
+        tanggal: "21/12/2002",
+        status: "Diproses",
+        namaProduk: "Kue Lapis Legit 1 Loyang",
+        deskripsi: "Kue Lapis Legit dengan kenikmatan tiada tanding",
+        kategori: "Cake",
+        harga: 200000,
+        total: 120000,
+    },
+    {
+        tanggal: "22/12/2002",
+        status: "Dikirim",
+        namaProduk: "Roti Sobek 1 Papan",
+        deskripsi: "Roti Sobek dengan rasa yang menggugah selera",
+        kategori: "Roti",
+        harga: 150000,
+        total: 100000,
+    },
+    {
+        tanggal: "22/12/2002",
+        status: "Dikirim",
+        namaProduk: "Roti Sobek 1 Papan",
+        deskripsi: "Roti Sobek dengan rasa yang menggugah selera",
+        kategori: "Roti",
+        harga: 150000,
+        total: 100000,
+    },
+    // Add more data here...
 ];
 
 const HistoryCard = () => {
@@ -70,83 +98,78 @@ const HistoryCard = () => {
             </CardHeader>
 
             <CardBody className="px-4">
-                <div className="border p-3 rounded-lg">
-                    <div className="flex pb-3">
-                        <Typography variant="h6" color="black">
-                            Tanggal Transaksi : 21/12/2002
-                        </Typography>
-                        <Typography variant="h6" color="black" className="ml-auto">
-                            <Chip
-                                size="sm"
-                                variant="ghost"
-                                value={"Siap di Pickup"}
-                                color={
-                                    status === "Cake"
-                                        ? "green"
-                                        : status === "Roti"
-                                            ? "amber"
-                                            : status === "Minuman"
-                                                ? "blue"
-                                                : status === "Titipan"
-                                                    ? "purple"
-                                                    : "red"
-                                }
-                            />
-                        </Typography>
-                    </div>
-                    <div className="grid grid-cols-6 border-b border-t pt-4 pb-4">
-                        <div className="mx-auto col-span-3 md:col-span-1 flex justify-center items-center">
-                            <img
-                                src="https://docs.material-tailwind.com/img/face-2.jpg"
-                                alt="avatar"
-                                className="inline-block h-[120px] w-[120px] md:w-[90px] md:h-[90px] lg:w-[110px] lg:h-[110px] object-cover object-center"
-                            />
-                        </div>
-                        <div className="col-span-3">
-                            <Typography variant="h5" color="blue-gray" className="mb-2">
-                                Kue Lapis Legit 1 Loyang
+                {DATA.map((item, index) => (
+                    <div key={index} className="border p-3 rounded-lg mb-4">
+                        <div className="flex pb-3">
+                            <Typography variant="h6" color="black">
+                                Tanggal Transaksi : {item.tanggal}
                             </Typography>
-                            <Typography>
-                                Kue Lapis Legit dengan kenikmatan tiada tanding
-                            </Typography>
-                            <div className="w-max mt-2">
+                            <Typography variant="h6" color="black" className="ml-auto">
                                 <Chip
                                     size="sm"
                                     variant="ghost"
-                                    value={"Cake"}
+                                    value={item.status}
                                     color={
-                                        status === "Cake"
+                                        item.status === "Selesai"
                                             ? "green"
-                                            : status === "Roti"
+                                            : item.status === "Dikirim"
                                                 ? "amber"
-                                                : status === "Minuman"
+                                                : item.status === "Diproses"
                                                     ? "blue"
-                                                    : status === "Titipan"
+                                                    : item.status === "Diproses"
                                                         ? "purple"
                                                         : "red"
                                     }
                                 />
-                            </div>
-                        </div>
-                        <div className="flex justify-end col-span-6 md:col-span-2">
-                            <Typography variant="paragraph" color="blue-gray" className="mb-2  flex items-center">
-                                Rp 200.000
                             </Typography>
                         </div>
-
-
+                        <div className="grid grid-cols-6 border-b border-t pt-4 pb-4">
+                            <div className="mx-auto col-span-3 md:col-span-1 flex justify-center items-center">
+                                <img
+                                    src="https://docs.material-tailwind.com/img/face-2.jpg"
+                                    alt="avatar"
+                                    className="inline-block h-[120px] w-[120px] md:w-[90px] md:h-[90px] lg:w-[110px] lg:h-[110px] object-cover object-center"
+                                />
+                            </div>
+                            <div className="col-span-3">
+                                <Typography variant="h5" color="blue-gray" className="mb-2">
+                                    {item.namaProduk}
+                                </Typography>
+                                <Typography>
+                                    {item.deskripsi}
+                                </Typography>
+                                <div className="w-max mt-2">
+                                    <Chip
+                                        size="sm"
+                                        variant="ghost"
+                                        value={item.kategori}
+                                        color={
+                                            item.kategori === "Cake"
+                                                ? "green"
+                                                : item.kategori === "Roti"
+                                                    ? "amber"
+                                                    : item.kategori === "Minuman"
+                                                        ? "blue"
+                                                        : item.kategori === "Titipan"
+                                                            ? "purple"
+                                                            : "red"
+                                        }
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex justify-end col-span-6 md:col-span-2">
+                                <Typography variant="paragraph" color="blue-gray" className="mb-2  flex items-center">
+                                    Rp {item.harga}
+                                </Typography>
+                            </div>
+                        </div>
+                        <div className="flex justify-end">
+                            <Typography variant="paragraph" color="blue-gray" className="mb-2 col-span-2 flex justify-center items-center">
+                                Total : {item.total}
+                            </Typography>
+                        </div>
                     </div>
-                    <div className="flex justify-end">
-                        <Typography variant="paragraph" color="blue-gray" className="mb-2 col-span-2 flex justify-center items-center">
-                            Total :
-                        </Typography>
-                        <Typography variant="lead" color="blue-gray" className="mb-2 col-span-2 flex ml-2">
-                            120.000
-                        </Typography>
-                    </div>
-
-                </div>
-
+                ))}
             </CardBody>
             <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
                 <Typography variant="small" color="blue-gray" className="font-normal">
@@ -165,4 +188,4 @@ const HistoryCard = () => {
     );
 }
 
-export default HistoryCard
+export default HistoryCard;
