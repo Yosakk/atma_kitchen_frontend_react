@@ -29,6 +29,8 @@ const readPegawai = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPegawai, setSelectedPegawai] = useState(null);
   const [searchValue, setSearchValue] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   const openModal = (pegawai) => {
     setSelectedPegawai(pegawai);
@@ -45,6 +47,22 @@ const readPegawai = () => {
     console.log("Delete", selectedPegawai);
     closeModal();
   };
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = pegawaiTableData
+    .filter((item) =>
+      Object.values(item)
+        .join(" ")
+        .toLowerCase()
+        .includes(searchValue.toLowerCase())
+    )
+    .slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(
+    pegawaiTableData.length / itemsPerPage
+  );
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
       <Card>
@@ -81,12 +99,7 @@ const readPegawai = () => {
               </tr>
             </thead>
             <tbody>
-              {pegawaiTableData.filter((item) =>
-              Object.values(item)
-                .join(" ")
-                .toLowerCase()
-                .includes(searchValue.toLowerCase())
-            ).map(({username, nama, email, jenisKelamin, tanggalLahir, NoTelepon, gaji, bonus }, key) => {
+              {currentItems.map(({username, nama, email, jenisKelamin, tanggalLahir, NoTelepon, gaji, bonus }, key) => {
                 const className = `py-3 px-5 ${
                   key === pegawaiTableData.length - 1
                     ? ""
@@ -165,6 +178,37 @@ const readPegawai = () => {
               })}
             </tbody>
           </table>
+          <div className="mt-4 flex justify-end">
+            <nav className="relative z-0 inline-flex">
+              <button
+                onClick={() => paginate(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-3 py-1 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              >
+                Previous
+              </button>
+              {[...Array(totalPages)].map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => paginate(index + 1)}
+                  className={`${
+                    currentPage === index + 1
+                      ? "bg-blue-500 text-white"
+                      : "bg-white text-gray-700"
+                  } px-3 py-1 border border-gray-300 text-sm font-medium`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => paginate(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 mr-4"
+              >
+                Next
+              </button>
+            </nav>
+          </div>
         </CardBody>
       </Card>
       {isModalOpen && (

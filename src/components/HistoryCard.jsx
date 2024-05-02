@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     Card,
     CardHeader,
@@ -17,19 +17,19 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 const TABS = [
     {
         label: "Semua",
-        value: "semua",
+        value: "Semua",
     },
     {
         label: "Diproses",
-        value: "diproses",
+        value: "Diproses",
     },
     {
         label: "Dikirim",
-        value: "dikirim",
+        value: "Dikirim",
     },
     {
         label: "Selesai",
-        value: "selesai",
+        value: "Selesai",
     },
 ];
 
@@ -45,6 +45,15 @@ const DATA = [
     },
     {
         tanggal: "22/12/2002",
+        status: "Selesai",
+        namaProduk: "Roti Sobek 1 Papan",
+        deskripsi: "Roti Sobek dengan rasa yang menggugah selera",
+        kategori: "Roti",
+        harga: 150000,
+        total: 100000,
+    },
+    {
+        tanggal: "26/12/2002",
         status: "Dikirim",
         namaProduk: "Roti Sobek 1 Papan",
         deskripsi: "Roti Sobek dengan rasa yang menggugah selera",
@@ -53,7 +62,7 @@ const DATA = [
         total: 100000,
     },
     {
-        tanggal: "22/12/2002",
+        tanggal: "26/12/2002",
         status: "Dikirim",
         namaProduk: "Roti Sobek 1 Papan",
         deskripsi: "Roti Sobek dengan rasa yang menggugah selera",
@@ -65,6 +74,10 @@ const DATA = [
 ];
 
 const HistoryCard = () => {
+    const [selectedTab, setSelectedTab] = useState("Semua");
+
+    const filteredData = selectedTab === "Semua" ? DATA : DATA.filter(item => item.status === selectedTab);
+
     return (
         <Card className="h-full w-full">
             <CardHeader floated={false} shadow={false} className="rounded-none">
@@ -79,10 +92,15 @@ const HistoryCard = () => {
                     </div>
                 </div>
                 <div className="flex flex-col items-center justify-between gap-4 md:flex-row ">
-                    <Tabs value="all" className="w-full md:w-max overflow-x-auto">
+                    <Tabs value={selectedTab} className="w-full md:w-max overflow-x-auto">
                         <TabsHeader>
                             {TABS.map(({ label, value }) => (
-                                <Tab key={value} value={value}>
+                                <Tab
+                                    key={value}
+                                    value={value}
+                                    active={selectedTab === value}
+                                    onClick={() => setSelectedTab(value)}
+                                >
                                     &nbsp;&nbsp;{label}&nbsp;&nbsp;
                                 </Tab>
                             ))}
@@ -98,7 +116,7 @@ const HistoryCard = () => {
             </CardHeader>
 
             <CardBody className="px-4">
-                {DATA.map((item, index) => (
+                {filteredData.map((item, index) => (
                     <div key={index} className="border p-3 rounded-lg mb-4">
                         <div className="flex pb-3">
                             <Typography variant="h6" color="black">
@@ -116,9 +134,7 @@ const HistoryCard = () => {
                                                 ? "amber"
                                                 : item.status === "Diproses"
                                                     ? "blue"
-                                                    : item.status === "Diproses"
-                                                        ? "purple"
-                                                        : "red"
+                                                    : "red"
                                     }
                                 />
                             </Typography>

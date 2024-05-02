@@ -32,6 +32,8 @@ const readPenitip = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPenitip, setSelectedPenitip] = useState(null);
   const [searchValue, setSearchValue] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   const openModal = (penitip) => {
     setSelectedPenitip(penitip);
@@ -48,6 +50,23 @@ const readPenitip = () => {
     console.log("Delete", selectedPenitip);
     closeModal();
   };
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = penitipTableData
+    .filter((item) =>
+      Object.values(item)
+        .join(" ")
+        .toLowerCase()
+        .includes(searchValue.toLowerCase())
+    )
+    .slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(
+    penitipTableData.length / itemsPerPage
+  );
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
       <Card>
@@ -84,12 +103,7 @@ const readPenitip = () => {
               </tr>
             </thead>
             <tbody>
-              {penitipTableData.filter((item) =>
-              Object.values(item)
-                .join(" ")
-                .toLowerCase()
-                .includes(searchValue.toLowerCase())
-              ).map(({ nama, NoTelepon }, key) => {
+              {currentItems.map(({ nama, NoTelepon }, key) => {
                 const className = `py-3 px-5 ${
                   key === penitipTableData.length - 1
                     ? ""
@@ -130,6 +144,37 @@ const readPenitip = () => {
               })}
             </tbody>
           </table>
+          <div className="mt-4 flex justify-end">
+            <nav className="relative z-0 inline-flex">
+              <button
+                onClick={() => paginate(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-3 py-1 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              >
+                Previous
+              </button>
+              {[...Array(totalPages)].map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => paginate(index + 1)}
+                  className={`${
+                    currentPage === index + 1
+                      ? "bg-blue-500 text-white"
+                      : "bg-white text-gray-700"
+                  } px-3 py-1 border border-gray-300 text-sm font-medium`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => paginate(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 mr-4"
+              >
+                Next
+              </button>
+            </nav>
+          </div>
         </CardBody>
       </Card>
       {isModalOpen && (

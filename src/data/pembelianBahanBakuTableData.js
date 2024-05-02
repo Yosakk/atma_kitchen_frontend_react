@@ -34,4 +34,25 @@ export const pembelianBahanBakuTableData = [
     tanggalBeli: "2024-04-29",
     satuan:"gr",
 },
+{
+    namaBahanBaku: "Bahan Baku 6",
+    jumlahPembelian: 230,
+    hargaBeli: 20000,
+    tanggalBeli: "2024-04-27",
+    satuan:"pcs",
+},
+{
+    namaBahanBaku: "Bahan Baku 7",
+    jumlahPembelian: 60,
+    hargaBeli: 25000,
+    tanggalBeli: "2024-04-28",
+    satuan:"ml",
+},
+{
+    namaBahanBaku: "Bahan Baku 8",
+    jumlahPembelian: 80,
+    hargaBeli: 30000,
+    tanggalBeli: "2024-04-29",
+    satuan:"gr",
+},
 ];

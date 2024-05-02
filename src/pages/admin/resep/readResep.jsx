@@ -3,15 +3,13 @@ import {
   CardHeader,
   CardBody,
   Typography,
-  Avatar,
-  Chip,
-  Button,
   Input,
+  Button,
 } from "@material-tailwind/react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus,faEdit,faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { resepTableData } from "../../../data/resepTableData";
 
 const AddButton = () => {
@@ -26,21 +24,10 @@ const AddButton = () => {
 
 const ReadResep = () => {
   const [searchValue, setSearchValue] = useState("");
-  // Mengelompokkan data berdasarkan nama produk
-  const groupedData = resepTableData.reduce((acc, curr) => {
-    const existing = acc.find((item) => item.namaProduk === curr.namaProduk);
-    if (existing) {
-      existing.bahanBaku.push({ nama: curr.namaBahanBaku, jumlah: curr.jumlahBahan });
-    } else {
-      acc.push({
-        namaProduk: curr.namaProduk,
-        bahanBaku: [{ nama: curr.namaBahanBaku, jumlah: curr.jumlahBahan }],
-      });
-    }
-    return acc;
-  }, []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedResep, setSelectedResep] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   const openModal = (resep) => {
     setSelectedResep(resep);
@@ -58,6 +45,29 @@ const ReadResep = () => {
     closeModal();
   };
 
+  const groupedData = resepTableData.reduce((acc, curr) => {
+    const existing = acc.find((item) => item.namaProduk === curr.namaProduk);
+    if (existing) {
+      existing.bahanBaku.push({ nama: curr.namaBahanBaku, jumlah: curr.jumlahBahan });
+    } else {
+      acc.push({
+        namaProduk: curr.namaProduk,
+        bahanBaku: [{ nama: curr.namaBahanBaku, jumlah: curr.jumlahBahan }],
+      });
+    }
+    return acc;
+  }, []);
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = groupedData.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(
+    groupedData.length / itemsPerPage
+  );
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
       <Card>
@@ -68,13 +78,13 @@ const ReadResep = () => {
           <AddButton/>
         </CardHeader>
         <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
-        <div className="ml-auto mt-1 mb-4 mr-4 w-56 flex justify-end items-center">
-          <Input
-            label="Search"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-        </div>
+          <div className="ml-auto mt-1 mb-4 mr-4 w-56 flex justify-end items-center">
+            <Input
+              label="Search"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+          </div>
 
           <table className="w-full min-w-[640px] table-auto">
             <thead>
@@ -114,43 +124,66 @@ const ReadResep = () => {
               </tr>
             </thead>
             <tbody>
-  {groupedData.filter(({ namaProduk, bahanBaku }) => {
-    const bahanMatch = bahanBaku.some(({ nama }) =>
-      nama.toLowerCase().includes(searchValue.toLowerCase())
-    );
-    const jumlahMatch = bahanBaku.some(({ jumlah }) =>
-      jumlah.toString().toLowerCase().includes(searchValue.toLowerCase())
-    );
-    return namaProduk.toLowerCase().includes(searchValue.toLowerCase()) || bahanMatch || jumlahMatch;
-  }).map(({ namaProduk, bahanBaku }) => (
-    <tr key={namaProduk}>
-      <td className="py-3 px-5 border-b border-blue-gray-50 text-[11px] font-semibold">{namaProduk}</td>
-      <td className="py-3 px-5 border-b border-blue-gray-50 text-[11px] font-semibold">
-        {bahanBaku.map(({ nama }, index) => (
-          <div key={index}>{nama}</div>
-        ))}
-      </td>
-      <td className="py-3 px-5 border-b border-blue-gray-50 text-[11px] font-semibold">
-        {bahanBaku.map(({ jumlah }, index) => (
-          <div key={index}>{jumlah}</div>
-        ))}
-      </td>
-      <td className="py-3 px-5 border-b border-blue-gray-50 text-[11px] font-semibold">
-        <div className="btn-group text-center">
-          <Link to="/admin/resep/edit">
-            <Button className="inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mr-2">
-              <FontAwesomeIcon icon={faEdit} className="mr-2" />Ubah
-            </Button>
-          </Link>
-          <Button to="" className="inline-block bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded" onClick={() => openModal({ namaProduk, bahanBaku })}>
-            <FontAwesomeIcon icon={faTrash} className="mr-2" />Hapus
-          </Button>
-        </div>
-      </td>
-    </tr>
-  ))}
-</tbody>
+              {currentItems.map(({ namaProduk, bahanBaku }) => (
+                <tr key={namaProduk}>
+                  <td className="py-3 px-5 border-b border-blue-gray-50 text-[11px] font-semibold">{namaProduk}</td>
+                  <td className="py-3 px-5 border-b border-blue-gray-50 text-[11px] font-semibold">
+                    {bahanBaku.map(({ nama }, index) => (
+                      <div key={index}>{nama}</div>
+                    ))}
+                  </td>
+                  <td className="py-3 px-5 border-b border-blue-gray-50 text-[11px] font-semibold">
+                    {bahanBaku.map(({ jumlah }, index) => (
+                      <div key={index}>{jumlah}</div>
+                    ))}
+                  </td>
+                  <td className="py-3 px-5 border-b border-blue-gray-50 text-[11px] font-semibold">
+                    <div className="btn-group text-center">
+                      <Link to="/admin/resep/edit">
+                        <Button className="inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mr-2">
+                          <FontAwesomeIcon icon={faEdit} className="mr-2" />Ubah
+                        </Button>
+                      </Link>
+                      <Button to="" className="inline-block bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded" onClick={() => openModal({ namaProduk, bahanBaku })}>
+                        <FontAwesomeIcon icon={faTrash} className="mr-2" />Hapus
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
+          <div className="mt-4 flex justify-end">
+            <nav className="relative z-0 inline-flex">
+              <button
+                onClick={() => paginate(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-3 py-1 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              >
+                Previous
+              </button>
+              {[...Array(totalPages)].map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => paginate(index + 1)}
+                  className={`${
+                    currentPage === index + 1
+                      ? "bg-blue-500 text-white"
+                      : "bg-white text-gray-700"
+                  } px-3 py-1 border border-gray-300 text-sm font-medium`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => paginate(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              >
+                Next
+              </button>
+            </nav>
+          </div>
         </CardBody>
       </Card>
       {isModalOpen && (
