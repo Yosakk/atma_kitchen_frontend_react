@@ -1,4 +1,3 @@
-// SideNav.js
 import React from "react";
 import {
     Card,
@@ -8,17 +7,31 @@ import {
     ListItemPrefix,
     ListItemSuffix,
     Chip,
+    IconButton,
 } from "@material-tailwind/react";
 import {
     PresentationChartBarIcon,
     ShoppingBagIcon,
     InboxIcon,
     PowerIcon,
+    XMarkIcon,
+    Bars3Icon,
 } from "@heroicons/react/24/solid";
 
-const SideNav = ({ activeItem, handleItemClick }) => {
+const SideNav = ({ activeItem, handleItemClick, isMobileMenuOpen, toggleMobileMenu }) => {
     return (
-        <Card className="h-screen w-full max-w-[20rem] p-4 shadow-lg ">
+        <Card className={`w-full max-w-[20rem] p-4 shadow-lg ${isMobileMenuOpen ? 'fixed top-0 left-0 bottom-0 z-50 bg-white' : 'hidden lg:block'}`}>
+            {isMobileMenuOpen && (
+                <div className="flex justify-end p-4">
+                    <IconButton
+                        variant="text"
+                        color="black"
+                        onClick={toggleMobileMenu}
+                    >
+                        <XMarkIcon className="h-6 w-6" strokeWidth={2} />
+                    </IconButton>
+                </div>
+            )}
             <div className="mb-2 flex items-center gap-4 p-4">
                 <img src="https://docs.material-tailwind.com/img/logo-ct-dark.png" alt="brand" className="h-8 w-8" />
                 <Typography variant="h5" color="blue-gray">

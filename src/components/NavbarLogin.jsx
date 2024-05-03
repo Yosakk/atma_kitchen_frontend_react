@@ -26,6 +26,7 @@ import {
   ShoppingCartIcon,
   MapPinIcon,
   PowerIcon,
+  BellIcon,
 } from "@heroicons/react/24/outline";
 
 const navListMenuItems = [
@@ -36,8 +37,13 @@ const navListMenuItems = [
   },
   {
     title: "Pesanan Saya",
-    description: "Ayo lihat pesana Anda!",
+    description: "Ayo lihat pesanan Anda!",
     icon: ShoppingCartIcon,
+  },
+  {
+    title: "Pemberitahuan",
+    description: "Ayo lihat pemberitahuan Anda!",
+    icon: BellIcon,
   },
   {
     title: "Alamat Saya",
@@ -58,7 +64,7 @@ function NavListMenu() {
 
 
   const renderItems = navListMenuItems.map(
-    ({ icon, title, description }, key) => (
+    ({ icon, title, description, path }, key) => (
       <a href="#" key={key}>
         <MenuItem className="flex items-center gap-3 rounded-lg">
           <div className="flex items-center justify-center rounded-lg !bg-blue-gray-50 p-2 ">
@@ -238,9 +244,9 @@ function NavList() {
           </div>
         </ListItem>
       </Typography>
-      <div className="block lg:hidden">
+      {/* <div className="block lg:hidden">
         <NavListMenu />
-      </div>
+      </div> */}
 
     </List>
   );
@@ -385,11 +391,21 @@ const NavbarLogin = () => {
         </IconButton>
       </div>
       <Collapse open={openNav}>
-        {isLoggedInUser ? (<NavList />) : (<NavlistNotLogin />)}
+        {isLoggedInUser ? (<NavList />) : (<NavlistNotLogin />)}         {/* ganti kondisi ini sesudah perbaiki */}
         <div className="flex w-full flex-nowrap items-center gap-2 lg:hidden">
           {isLoggedInUser ?
             (
               <>
+              <Link to="/login" onClick={handleLoginClick} className="w-full">
+                  <Button
+                    variant={loginVariant}
+                    size="sm"
+                    color={"white"}
+                    fullWidth
+                  >
+                    Log Out
+                  </Button>
+                </Link>
               </>
             ) : (
               <>

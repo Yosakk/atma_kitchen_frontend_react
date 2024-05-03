@@ -12,7 +12,7 @@ const currentYear = new Date().getFullYear();
 
 export const FooterUser = () => {
     return (
-        <footer className="w-full bg-white" style={{ backgroundColor: "#232323" }}>
+        <footer className="w-full bg-white " style={{ backgroundColor: "#232323" }}>
             <div className="mx-auto w-full max-w-7xl px-8 pt-10">
                 <div className="grid grid-cols-1 justify-between gap-10 text-center md:grid-cols-3">
                     <div className="order-1 md:order-1">

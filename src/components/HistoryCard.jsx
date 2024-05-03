@@ -55,9 +55,9 @@ const DATA = [
     {
         tanggal: "26/12/2002",
         status: "Dikirim",
-        namaProduk: "Roti Sobek 1 Papan",
-        deskripsi: "Roti Sobek dengan rasa yang menggugah selera",
-        kategori: "Roti",
+        namaProduk: "Macha Creamy Latte",
+        deskripsi: "Macha Creamy Latte dengan rasa yang menggugah selera",
+        kategori: "Minuman",
         harga: 150000,
         total: 100000,
     },
@@ -70,6 +70,34 @@ const DATA = [
         harga: 150000,
         total: 100000,
     },
+    {
+        tanggal: "22/12/2002",
+        status: "Selesai",
+        namaProduk: "Coffe Creamy Latte ",
+        deskripsi: "Coffe Creamy Latte dengan rasa yang menggugah selera",
+        kategori: "Minuman",
+        harga: 150000,
+        total: 100000,
+    },
+    {
+        tanggal: "26/12/2002",
+        status: "Dikirim",
+        namaProduk: "Lapis Surabaya",
+        deskripsi: "Lapis Surabaya dengan rasa yang menggugah selera",
+        kategori: "Cake",
+        harga: 150000,
+        total: 100000,
+    },
+    {
+        tanggal: "26/12/2002",
+        status: "Dikirim",
+        namaProduk: "Brownies 1 Papan",
+        deskripsi: "Brownies dengan rasa yang menggugah selera",
+        kategori: "Roti",
+        harga: 150000,
+        total: 100000,
+    },
+    
     // Add more data here...
 ];
 
@@ -77,7 +105,24 @@ const HistoryCard = () => {
     const [selectedTab, setSelectedTab] = useState("Semua");
 
     const filteredData = selectedTab === "Semua" ? DATA : DATA.filter(item => item.status === selectedTab);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5; // Ubah sesuai dengan jumlah item yang ingin ditampilkan per halaman
 
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+    const handleClickPrevious = () => {
+        setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+    };
+
+    const handleClickNext = () => {
+        setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
+    };
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = currentPage * itemsPerPage;
+
+    // Filtered data based on pagination
+    const paginatedData = filteredData.slice(startIndex, endIndex);
     return (
         <Card className="h-full w-full">
             <CardHeader floated={false} shadow={false} className="rounded-none">
@@ -116,7 +161,7 @@ const HistoryCard = () => {
             </CardHeader>
 
             <CardBody className="px-4">
-                {filteredData.map((item, index) => (
+                {paginatedData.map((item, index) => (
                     <div key={index} className="border p-3 rounded-lg mb-4">
                         <div className="flex pb-3">
                             <Typography variant="h6" color="black">
@@ -188,18 +233,18 @@ const HistoryCard = () => {
                 ))}
             </CardBody>
             <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
-                <Typography variant="small" color="blue-gray" className="font-normal">
-                    Page 1 of 10
-                </Typography>
-                <div className="flex gap-2">
-                    <Button variant="outlined" size="sm">
-                        Previous
-                    </Button>
-                    <Button variant="outlined" size="sm">
-                        Next
-                    </Button>
-                </div>
-            </CardFooter>
+    <Typography variant="small" color="blue-gray" className="font-normal">
+        Page {currentPage} of {totalPages}
+    </Typography>
+    <div className="flex gap-2">
+        <Button variant="outlined" size="sm" onClick={handleClickPrevious} disabled={currentPage === 1}>
+            Previous
+        </Button>
+        <Button variant="outlined" size="sm" onClick={handleClickNext} disabled={currentPage === totalPages}>
+            Next
+        </Button>
+    </div>
+</CardFooter>
         </Card>
     );
 }
