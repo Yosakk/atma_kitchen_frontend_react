@@ -17,6 +17,7 @@ export const showDataCustomer = async () => {
 
 export const editDataCustomer = async (data) => {
     const token = sessionStorage.getItem("token");
+    console.log("masok");
 
     try {
         const response = await urlAxios.put("/edit/profile", data, {

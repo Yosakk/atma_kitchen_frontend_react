@@ -1,4 +1,4 @@
-export const produkTableData = [
+const produkTableData = [
   {
     namaProduk: "Produk 1",
     gambarProduk: "/img/team-2.jpeg",
@@ -30,6 +30,6 @@ export const produkTableData = [
     namaPenitip: "Kang Saun"
   },
   
-];
+];export 
 
 export default produkTableData;
