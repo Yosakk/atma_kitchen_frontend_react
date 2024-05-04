@@ -10,7 +10,6 @@ import {
     MenuList,
     MenuItem,
     Button,
-    Typography,
     Popover,
     PopoverHandler,
     Select,
@@ -20,6 +19,8 @@ import {
 import { format } from "date-fns";
 import { DayPicker } from "react-day-picker";
 import { ChevronRightIcon, ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { editDataCustomer } from '../../api/customer/customerApi';
+import { getImage } from '../../api';
 
 const EditProfilePage = () => {
     const { countries } = useCountries();
@@ -31,22 +32,41 @@ const EditProfilePage = () => {
     const [country, setCountry] = React.useState(0);
     const [profileImage, setProfileImage] = useState('')
     const [userData, setUserData] = useState(null);
+    const [selectedGender, setSelectedGender] = useState("");
+    const [selectedBank, setSelectedBank] = useState("");
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        const userDataFromSession = sessionStorage.getItem('userData');
-        console.log(userDataFromSession);
-        if (userDataFromSession) {
-            setUserData(JSON.parse(userDataFromSession));
+        try {
+            const userDataFromSession = sessionStorage.getItem('userData');
+            if (userDataFromSession) {
+                setUserData(JSON.parse(userDataFromSession));
+                console.log("Masuk2");
+                console.log(userDataFromSession);
+                if (userDataFromSession.image_user) {
+                    console.log(userDataFromSession.image_user);
+                    const imageUrl = getImage(userDataFromSession.image_user);
+                    setProfileImage(imageUrl);
+                }
+            }
+        } catch (error) {
+            console.log(error);
         }
     }, []);
 
     // Fungsi handleSubmit untuk menangani submit form
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (Object.keys(errors).length > 0) {
-            setErrors(errors);
-            return;
+        try {
+            console.log("imagenya urlnya ${}")
+            setLoading(true);
+            const response = await editDataCustomer(userData);
+            console.log(response);
+            const imageUrl = response.data.image_user;
+            console.log('URL gambar:', imageUrl);
+        } catch (error) {
+            console.error(error);
+            setLoading(false);
         }
     };
 
@@ -56,10 +76,26 @@ const EditProfilePage = () => {
             const reader = new FileReader();
             reader.onload = () => {
                 setProfileImage(reader.result);
+                // Menyimpan file gambar ke state userData
+                setUserData(prevUserData => ({
+                    ...prevUserData,
+                    image_user: file
+                }));
             };
+            console.log(file);
             reader.readAsDataURL(file);
         }
     };
+
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setUserData((prevUserData) => ({
+            ...prevUserData,
+            [name]: value
+        }));
+    };
+
 
     return (
         <div className="flex flex-col min-h-screen" style={{ backgroundColor: "#FFC655" }}>
@@ -69,13 +105,14 @@ const EditProfilePage = () => {
                     <div className="flex justify-center items-center md:row-span-2 mb-5">
                         <label htmlFor="profileImage" className="relative cursor-pointer">
                             <motion.img
-                                src={profileImage || "https://docs.material-tailwind.com/img/face-2.jpg"}
+                                src={profileImage}
                                 alt="avatar"
                                 className="relative inline-block p-1 ring-2 ring-indigo-300 dark:ring-indigo-500 h-[210px] w-[210px] md:w-[180px] md:h-[180px] lg:w-[150px] lg:h-[150px] rounded-full object-cover object-center"
                                 whileHover={{ scale: 1.1 }}
                             />
                             <input
                                 type="file"
+                                name='image_user'
                                 id="profileImage"
                                 className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
                                 accept="image/*"
@@ -92,8 +129,10 @@ const EditProfilePage = () => {
                                 <label htmlFor="username" className=" block mb-2 text-sm font-medium text-gray-900">Username</label>
                                 <Input
                                     value={userData?.username}
+                                    onChange={handleInputChange}
                                     type='text'
                                     size="lg"
+                                    name="username"
                                     label="Username"
                                     className=' w-sm'
                                     placeholder='Joexx01'
@@ -106,8 +145,10 @@ const EditProfilePage = () => {
                                     value={userData?.nama_user}
                                     type='text'
                                     size="lg"
+                                    name='nama_user'
                                     label="Nama Lengkap"
                                     className=''
+                                    onChange={handleInputChange}
                                     placeholder='Joe Biden Kece'
                                     required
                                 />
@@ -116,6 +157,8 @@ const EditProfilePage = () => {
                                 <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900">Email address</label>
                                 <Input
                                     value={userData?.email}
+                                    onChange={handleInputChange}
+                                    name='email'
                                     type='email'
                                     size="lg"
                                     label="Email"
@@ -166,6 +209,8 @@ const EditProfilePage = () => {
                                         </Menu>
                                         <Input
                                             type="tel"
+                                            name='nomor_telepon'
+                                            onChange={handleInputChange}
                                             value={userData?.nomor_telepon}
                                             placeholder="Mobile Number"
                                             className="rounded-l-none !border-t-blue-gray-200 focus:!border-t-gray-900"
@@ -187,17 +232,26 @@ const EditProfilePage = () => {
                                     <Popover placement="bottom">
                                         <PopoverHandler>
                                             <Input
+                                                size='lg'
                                                 label="Select a Date"
                                                 onChange={() => null}
-                                                value={date ? format(date, "PPP") : ""}
+                                                value={userData?.tanggal_lahir ? format(userData?.tanggal_lahir, "PPP") : ""}
                                                 required
                                             />
                                         </PopoverHandler>
                                         <PopoverContent>
                                             <DayPicker
                                                 mode="single"
-                                                selected={date}
-                                                onSelect={setDate}
+                                                selected={userData?.tanggal_lahir}
+                                                onSelect={(selectedDate) => {
+                                                    console.log("Tanggal yang dipilih:", selectedDate);
+                                                    const formattedDate = selectedDate ? format(selectedDate, "yyyy-MM-dd") : null;
+                                                    setUserData((prevUserData) => ({
+                                                        ...prevUserData,
+                                                        tanggal_lahir: formattedDate,
+                                                    }));
+                                                    setDate(selectedDate);
+                                                }}
                                                 showOutsideDays
                                                 className="border-0"
                                                 classNames={{
@@ -237,20 +291,45 @@ const EditProfilePage = () => {
                                 </div>
                             </div>
                             <div className="mb-2">
+                                <label htmlFor="gender" className="block mb-2 text-sm font-medium text-gray-900">Gender</label>
+                                <Select
+                                    size='lg'
+                                    label="Pilih Gender"
+                                    name="gender"
+                                    value={userData?.gender}
+                                    onChange={(newValue) => {
+                                        setSelectedGender(newValue);
+                                        handleInputChange({ target: { name: 'gender', value: newValue } });
+                                    }}
+                                >
+                                    <Option value="Laki-Laki">Laki-Laki</Option>
+                                    <Option value="Perempuan">Perempuan</Option>
+                                </Select>
+                            </div>
+                            <div className="mb-2">
                                 <label htmlFor="bank" className="block mb-2 text-sm font-medium text-gray-900">Bank</label>
-                                <Select size="md" label="Bank" required>
-                                    <Option before={<img src="logo-bca.png" alt="BCA Logo" className="h-5 w-5" />}>BCA</Option>
-                                    <Option before={<img src="logo-bni.png" alt="BNI Logo" className="h-5 w-5" />}>BNI</Option>
-                                    <Option before={<img src="logo-bri.png" alt="BRI Logo" className="h-5 w-5" />}>BRI</Option>
-                                    <Option before={<img src="logo-dana.png" alt="DANA Logo" className="h-5 w-5" />}>DANA</Option>
-                                    <Option before={<img src="logo-ovo.png" alt="OVO Logo" className="h-5 w-5" />}>OVO</Option>
+                                <Select
+                                    size="lg"
+                                    value={userData?.pelanggan?.bank}
+                                    name='bank'
+                                    label="Bank"
+                                    onChange={(newValue) => {
+                                        setSelectedBank(newValue);
+                                        handleInputChange({ target: { name: 'bank', value: newValue } });
+                                    }}
+                                >
+                                    <Option value='BCA'>BCA</Option>
+                                    <Option value='BNI'>BNI</Option>
+                                    <Option value='BRI'>BRI</Option>
+                                    <Option value='DANA'>DANA</Option>
+                                    <Option value='OVO'>OVO</Option>
                                 </Select>
                             </div>
 
                         </div>
                         <div className="flex justify-center mt-6">
-                            <Button variant="outlined" className='mr-3'>Batal</Button>
-                            <Button variant="filled">Simpan</Button>
+                            <Button type='submit' variant="outlined" className='mr-3'>Batal</Button>
+                            <Button type='submit' loading={loading} variant="filled">Simpan</Button>
                         </div>
                     </form>
                 </div>

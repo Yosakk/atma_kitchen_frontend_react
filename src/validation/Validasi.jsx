@@ -66,4 +66,5 @@ export const userRegister = z.
             .min(1, {
                 message: "Jenis Kelamin harus dipilih"
             }),
-    })
+    });
+

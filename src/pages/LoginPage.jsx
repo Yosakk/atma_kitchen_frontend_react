@@ -63,7 +63,19 @@ const LoginPage = () => {
                 if (res.user.role === "Pelanggan") {
                     console.log("Masuk Sebagai Pelanggan");
                     navigate("/customer/profile");
-                } else {
+                } else if (res.user.role === "Pegawai"){
+                    if(res.user.pegawai.jabatan === "Manager Operasional"){
+                        navigate("/mo/home");
+                        console.log("Masuk MO");
+                    }else if(res.user.pegawai.jabatan === "Admin"){
+                        navigate("/admin/home");
+                        console.log("Masuk ADMin");
+                    }else if(res.user.pegawai.jabatan === "Owner"){
+                        navigate("/owner/home");
+                        console.log("Masuk Owner");
+                    }
+                    
+                }else {
                     console.log("Tidak Masuk Kemana mana");
                 }
             })

@@ -10,19 +10,30 @@ const AddHampers = () => {
         gambarProduk: "",
         deskripsiProduk: "",
         hargaProduk: "",
-        
+
     });
     const [produkList, setProdukList] = useState([{ namaProduk: '' }]);
+    const [bahanbakuList, setBahanBakuList] = useState([{ namaProduk: '' }]);
 
-const handleAddProduk = () => {
-    setProdukList([...produkList, { namaProduk: '' }]);
-};
+    const handleAddProduk = () => {
+        setProdukList([...produkList, { namaProduk: '' }]);
+    };
 
-const handleRemoveProduk = (index) => {
-    const updatedProdukList = [...produkList];
-    updatedProdukList.splice(index, 1);
-    setProdukList(updatedProdukList);
-};
+    const handleRemoveProduk = (index) => {
+        const updatedProdukList = [...produkList];
+        updatedProdukList.splice(index, 1);
+        setProdukList(updatedProdukList);
+    };
+
+    const handleAddBahanBaku = () => {
+        setBahanBakuList([...bahanbakuList, { namaProduk: '' }]);
+    };
+
+    const handleRemoveBahanBaku = (index) => {
+        const updatedBahanBakuList = [...bahanbakuList];
+        updatedBahanBakuList.splice(index, 1);
+        setBahanBakuList(updatedBahanBakuList);
+    };
 
 
 
@@ -31,6 +42,12 @@ const handleRemoveProduk = (index) => {
         const updatedProdukList = [...produkList];
         updatedProdukList[index] = { ...updatedProdukList[index], [name]: value };
         setProdukList(updatedProdukList);
+    };
+    const handleChangeBahanBaku = (e) => {
+        const { name, value } = e.target;
+        const updatedBahanBakuList = [...bahanbakuList];
+        updatedBahanBakuList[index] = { ...updatedBahanBakuList[index], [name]: value };
+        setBahanBakuList(updatedBahanBakuList);
     };
 
     const handleSubmit = (e) => {
@@ -50,7 +67,7 @@ const handleRemoveProduk = (index) => {
                 <CardBody>
                     <form onSubmit={handleSubmit}>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <div className="mb-4 col-span-1 md:col-span-2  lg:col-span-2 relative w-full min-w-[100px]">
+                            <div className="mb-4 col-span-1 relative w-full min-w-[100px]">
                                 <label htmlFor="namaProduk" className="block mb-2 text-sm font-medium text-gray-900">Nama Paket Hampers</label>
                                 <Input
                                     id="namaProduk"
@@ -91,6 +108,8 @@ const handleRemoveProduk = (index) => {
                                     required
                                 />
                             </div>
+
+
                             {produkList.map((produk, index) => (
                                 <div key={index} className="col-span-1  mb-4">
                                     <label htmlFor={`namaProduk_${index}`} className="block mb-2 text-sm font-medium text-gray-900">Nama Produk {index + 1}</label>
@@ -102,29 +121,78 @@ const handleRemoveProduk = (index) => {
                                         placeholder={`Nama Produk ${index + 1}`}
                                         style={{ width: '100%' }}
                                         onChange={setFormData}
-                                        
+
                                     >
                                         <option value="Produk A" disabled >Pilih Nama Produk {index + 1} </option>
                                         <option value="Produk A">Produk A</option>
                                         <option value="Produk B">Produk B</option>
                                         <option value="Produk C">Produk C</option>
                                     </select>
-                                    
+
                                 </div>
                             ))}
 
+
                         </div>
-                        <div className="mt-10 flex justify-between">
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-16">
+                            {bahanbakuList.map((bahanbaku, index) => (
+                                <div key={index} className="col-span-1  mb-4">
+                                    <label htmlFor={`namaBahanBaku_${index}`} className="block mb-2 text-sm font-medium text-gray-900">Nama BahanBaku {index + 1}</label>
+                                    <select
+                                        required
+                                        name={`namaBahanBaku_${index}`}
+                                        id={`namaBahanBaku_${index}`}
+                                        className="w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2.5"
+                                        placeholder={`Nama BahanBaku ${index + 1}`}
+                                        style={{ width: '100%' }}
+                                        onChange={setFormData}
+
+                                    >
+                                        <option value="">Pilih Nama Bahan Baku {index + 1} </option>
+                                        <option value="BahanBaku A">Bahan Baku A</option>
+                                        <option value="BahanBaku B">Bahan Baku B</option>
+                                        <option value="BahanBaku C">Bahan Baku C</option>
+                                    </select>
+
+                                    <div className="mb-4 mt-4 relative w-full min-w-[100px]">
+                                        <label htmlFor={`jumlahBahan_${index}`} className="block mb-2 text-sm font-medium text-gray-900">Jumlah Bahan {index + 1}</label>
+                                        <Input
+                                            id="jumlahBahanBaku"
+                                            name="jumlahBahanBaku"
+                                            value={formData.jumlahBahanBaku}
+                                            onChange={handleChangeBahanBaku}
+                                            type='number'
+                                            size="md"
+                                            label="Jumlah Bahan Baku"
+                                            placeholder='100'
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                            ))}
+
+                        </div>
+
+                        <div className="mt-10 flex flex-col md:flex-row gap-4 md:justify-between">
                             <div>
-                                <Button type="button" onClick={() => handleRemoveProduk(produkList.length - 1)}  disabled={produkList.length <= 1}className="text-white bg-gradient-to-r from-red-500 via-red-600 to-red-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 focus:ring-0">
+                                <Button type="button" onClick={() => handleRemoveProduk(produkList.length - 1)} disabled={produkList.length <= 1} className="w-full lg:w-auto text-white bg-gradient-to-r from-red-500 via-red-600 to-red-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 focus:ring-0">
                                     <FontAwesomeIcon icon={faTrash} /> Hapus Produk
                                 </Button>
-                                <Button type="button" onClick={handleAddProduk} className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 focus:ring-0">
+                                <Button type="button" onClick={handleAddProduk} className="w-full lg:w-auto text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 focus:ring-0">
                                     <FontAwesomeIcon icon={faPlus} /> Tambah Produk
                                 </Button>
                             </div>
-
                             <div>
+                                <Button type="button" onClick={() => handleRemoveBahanBaku(bahanbakuList.length - 1)} disabled={bahanbakuList.length <= 1} className="w-full lg:w-auto text-white bg-gradient-to-r from-red-500 via-red-600 to-red-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 focus:ring-0">
+                                    <FontAwesomeIcon icon={faTrash} /> Hapus Bahan Baku
+                                </Button>
+                                <Button type="button" onClick={handleAddBahanBaku} className="w-full lg:w-auto text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 focus:ring-0">
+                                    <FontAwesomeIcon icon={faPlus} /> Tambah Bahan Baku
+                                </Button>
+                            </div>
+                            <div className="justify-end">
                                 <Link className="mb-2" to="/admin/produk/read">
                                     <Button
                                         type="cancel"
@@ -133,15 +201,17 @@ const handleRemoveProduk = (index) => {
                                         <FontAwesomeIcon icon={faClose} className="mr-2" /> Batal
                                     </Button>
                                 </Link>
-                                
                                 <Button
                                     type="submit"
                                     className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 focus:ring-0"
                                 >
-                                    <FontAwesomeIcon icon={faSave} className="" /> Simpan
+                                    <FontAwesomeIcon icon={faSave} className="mr-2" /> Simpan
                                 </Button>
                             </div>
+
                         </div>
+
+
 
                     </form>
                 </CardBody>

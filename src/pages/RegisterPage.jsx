@@ -446,7 +446,7 @@ const Register = () => {
                     <div className="mb-2">
                       <label htmlFor="gender" className="block mb-2 text-sm font-medium text-gray-900">Gender</label>
                       <Select
-                        error={!!errors.gender}
+                        error={!!errors.gender} 
                         label="Pilih Gender"
                         name="gender"
                         value={selectedGender}
@@ -455,8 +455,8 @@ const Register = () => {
                           setFormData({ target: { name: 'gender', value: newValue } });
                         }}
                       >
-                        <Option value="laki-laki">Laki-Laki</Option>
-                        <Option value="perempuan">Perempuan</Option>
+                        <Option value="Laki-Laki">Laki-Laki</Option>
+                        <Option value="Perempuan">Perempuan</Option>
                       </Select>
                       {errors.gender && (
                         <motion.span
@@ -469,7 +469,7 @@ const Register = () => {
                           className="font-poppins mt-2 flex items-center text-sm text-red-500"
                         >
                           {errors.gender}
-                        </motion.span>
+                        </motion.span> 
                       )}
                     </div>
                   </div>
