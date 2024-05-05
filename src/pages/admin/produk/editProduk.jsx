@@ -37,6 +37,7 @@ const EditProduk = () => {
     const [dataPenitip, setDataPenitip] = useState([]);
     const [formErrors, setFormErrors] = useState({});
     const [dataStokProduk, setDataStokProduk] = useState([]);
+    const [dataEditPenitip, setDataEditPenitip] = useState([]);
     const [data, setData] = useState({
         id_produk: "",
         nama_produk: "",
@@ -62,16 +63,15 @@ const EditProduk = () => {
             deskripsi_produk: editedProduk.deskripsiProduk || "",
             harga_produk: editedProduk.hargaProduk || "",
             kategori_produk: editedProduk.kategoriProduk || "",
-            quantitas: editedProduk.kuantitas || "",
-            id_penitip: editedProduk.idPenitip || "",
+            quantitas: editedProduk.kuantitas.toString(),
+            id_penitip: editedProduk.idPenitip.toString(),
             stok_produk: editedProduk.stokProduk || "",
             limit_harian: editedProduk.limitHarian || "",
             id_stok_produk: editedProduk.idStokProduk || "",
         });
-
-        setFormData({ type: 'UPDATE_ALL_FIELDS', data: editedProduk });
         console.log("INI bagian Data", data);
     }, []);
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -114,19 +114,6 @@ const EditProduk = () => {
                     [name]: undefined,
                 }));
             }
-            if (name === "id_stok_produk") {
-                setData((prevData) => ({
-                    ...prevData,
-                    [name]: value, // Update id_stok_produk di state data
-                }));
-                setFormData((prevFormData) => ({
-                    ...prevFormData,
-                    id_stok_produk: value, // Update id_stok_produk di formData
-                }));
-                console.log("ini data Formnya berubah: ", formData.id_stok_produk);
-                console.log("ini data berubah: ", data.id_stok_produk);
-            }
-
             if (name) {
                 if (name === "harga_produk" || name === "stok_produk") {
                     const numericValue = name === "harga_produk" ? parseFloat(value) : parseInt(value, 10);
@@ -187,7 +174,7 @@ const EditProduk = () => {
 
     useEffect(() => {
         setFormData({ type: 'UPDATE_ALL_FIELDS', data: data });
-    }, [data]);
+    }, [data], []);
 
     useEffect(() => {
         fetchDataPenitip();
@@ -210,13 +197,6 @@ const EditProduk = () => {
             console.log("Error fetching stok produk:", error);
         }
     }
-
-    const handleRadioChange = (e) => {
-        setData((prevData) => ({
-            ...prevData,
-            isStokTersedia: e.target.value === "Tersedia"
-        }));
-    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -315,10 +295,10 @@ const EditProduk = () => {
                                     className="w-full bg-white"
                                     label="Kategori Produk"
                                 >
-                                    <Option value="">Pilih Kategori Produk</Option>
-                                    <Option value="Cake">Cake</Option>
-                                    <Option value="Roti">Roti</Option>
-                                    <Option value="Minuman">Minuman</Option>
+                                    <Option value="" disabled={data.kategori_produk === "Titipan"}>Pilih Kategori Produk</Option>
+                                    <Option value="Cake" disabled={data.kategori_produk === "Titipan"}>Cake</Option>
+                                    <Option value="Roti" disabled={data.kategori_produk === "Titipan"}>Roti</Option>
+                                    <Option value="Minuman" disabled={data.kategori_produk === "Titipan"}>Minuman</Option>
                                     <Option value="Titipan" disabled={data.kategori_produk !== "Titipan"}>Titipan</Option>
                                 </Select>
 
@@ -342,7 +322,7 @@ const EditProduk = () => {
                                     id="quantitas"
                                     name="quantitas"
                                     label="Kuantitas"
-                                    value={data.quantitas.toString()}
+                                    value={data.quantitas}
                                     // Disesuaikan dengan nilai data.quantitas
                                     onChange={(value) => handleChange({ target: { name: "quantitas", value } })}
                                     className="w-full bg-white"
@@ -389,23 +369,27 @@ const EditProduk = () => {
                                     placeholder='10'
                                 />
                             </div>
+
                             <div className="mb-4 relative w-full min-w-[100px]">
-                                <label htmlFor="namaPenitip" className="block mb-2 text-sm font-medium text-gray-900">Nama Penitip</label>
-                                <select
+                                <label htmlFor="id_penitip" className="block mb-2 text-sm font-medium text-gray-900">Nama Penitip</label>
+                                <Select
                                     id="id_penitip"
                                     name="id_penitip"
+                                    label="Penitip"
                                     value={data.id_penitip}
-                                    onChange={handleChange}
-                                    className="w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2.5"
-                                    disabled={data.kategori_produk !== "Titipan"}
-
+                                    onChange={(value) => handleChange({ target: { name: "id_penitip", value } })}
+                                    className="w-full bg-white"
                                 >
-                                    <option value="">Pilih Nama Penitip</option>
-                                    {/* Data penitip yang diambil dari API */}
+                                    <Option value="">Pilih Penitip</Option>
                                     {dataPenitip.map((penitip) => (
-                                        <option key={penitip.id_penitip} value={penitip.id_penitip}>{penitip.nama_penitip}</option>
+                                        <Option key={penitip.id_penitip} value={String(penitip.id_penitip)}>
+                                            {penitip.id_penitip} - {penitip.nama_penitip}
+                                        </Option>
                                     ))}
-                                </select>
+                                </Select>
+
+
+
                             </div>
                             <div className="mb-4 relative w-full min-w-[100px]">
                                 <label htmlFor="stokProduk" className="block mb-2 text-sm font-medium text-gray-900">Stok Produk</label>
@@ -480,7 +464,7 @@ const EditProduk = () => {
                     </form>
                 </CardBody>
             </Card>
-        </div>
+        </div >
     );
 };
 

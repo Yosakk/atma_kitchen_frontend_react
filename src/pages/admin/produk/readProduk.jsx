@@ -211,7 +211,7 @@ const ReadProduk = () => {
               onChange={(e) => setSearchValue(e.target.value)}
             />
           </div>
-          <table className="w-full min-w-[1250px] table-auto">
+          <table className="w-full min-w-[1400px] table-auto">
             <thead>
               <tr>
                 {["Nama Produk", "Gambar Produk", "Deskripsi Produk", "Harga Produk", contentType === "produk" && "Kategori Produk", contentType === "produk" && "Status Produk", contentType === "produk" && "Kuantitas", contentType === "produk" && "Nama Penitip", " "].map((el) => (

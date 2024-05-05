@@ -10,20 +10,49 @@ import {
   Button,
   Input,
 } from "@material-tailwind/react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus,faEdit,faTrash } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { pegawaiTableData } from "../../../data/pegawaiTableData";
+import { showDataPegawai } from "../../../api/mo/PegawaiApi";
 
-const readPegawai = () => {
+const readGajiPegawai = () => {
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
-
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const [pegawaiData, setPegawaiData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await showDataPegawai();
+      setPegawaiData(response.data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setIsLoading(false);
+    }
+  };
+  const pegawaiTableData = pegawaiData.map((item) => ({
+    id: item.id,
+    username: item.username,
+    nama: item.nama_user,
+    email: item.email,
+    jenisKelamin: item.gender,
+    tanggalLahir: item.tanggal_lahir,
+    NoTelepon: item.nomor_telepon,
+    gaji: item.pegawai ? item.pegawai.gaji : null,
+    bonus: item.pegawai ? item.pegawai.bonus_gaji : null,
+  }));
+
   const currentItems = pegawaiTableData
     .filter((item) =>
       Object.values(item)
@@ -33,9 +62,7 @@ const readPegawai = () => {
     )
     .slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(
-    pegawaiTableData.length / itemsPerPage
-  );
+  const totalPages = Math.ceil(pegawaiTableData.length / itemsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -48,17 +75,27 @@ const readPegawai = () => {
           </Typography>
         </CardHeader>
         <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
-        <div className="ml-auto mt-1 mb-4 mr-4 w-56 flex justify-end items-center">
-          <Input
-            label="Search"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-        </div>
+          <div className="ml-auto mt-1 mb-4 mr-4 w-56 flex justify-end items-center">
+            <Input
+              label="Search"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+          </div>
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
-                {["Username", "Nama Pegawai", "Email", "Jenis Kelamin", "Tanggal Lahir", "Nomor Telepon", "Gaji", "Bonus Gaji", ""].map((el) => (
+                {[
+                  "Username",
+                  "Nama Pegawai",
+                  "Email",
+                  "Jenis Kelamin",
+                  "Tanggal Lahir",
+                  "Nomor Telepon",
+                  "Gaji",
+                  "Bonus Gaji",
+                  "",
+                ].map((el) => (
                   <th
                     key={el}
                     className="border-b border-blue-gray-50 py-3 px-5 text-left"
@@ -74,67 +111,96 @@ const readPegawai = () => {
               </tr>
             </thead>
             <tbody>
-              {currentItems.map(({ img, username, nama, email, jenisKelamin, tanggalLahir, NoTelepon, gaji, bonus }, key) => {
-                const className = `py-3 px-5 ${
-                  key === pegawaiTableData.length - 1
-                    ? ""
-                    : "border-b border-blue-gray-50"
-                }`;
+              {currentItems.length === 0 ? (
+                <tr>
+                  <td
+                    className="p-10 text-center text-xs font-semibold text-blue-gray-600"
+                    colSpan="9"
+                  >
+                    Data Tidak Ditemukan
+                  </td>
+                </tr>
+              ) : (
+                currentItems.map(
+                  (
+                    {
+                      username,
+                      nama,
+                      email,
+                      jenisKelamin,
+                      tanggalLahir,
+                      NoTelepon,
+                      gaji,
+                      bonus,
+                    },
+                    key
+                  ) => {
+                    const className = `py-3 px-5 ${
+                      key === pegawaiTableData.length - 1
+                        ? ""
+                        : "border-b border-blue-gray-50"
+                    }`;
 
-                return (
-                  <tr key={username}>
-                    <td className={className}>
-                      <Typography className="text-xs font-semibold text-blue-gray-600">
-                        {username}
-                      </Typography>
-                    </td>
-                    <td className={className}>
-                      <Typography className="text-xs font-semibold text-blue-gray-600">
-                        {nama}
-                      </Typography>
-                    </td>
-                    <td className={className}>
-                      <Typography className="text-xs font-semibold text-blue-gray-600">
-                        {email}
-                      </Typography>
-                    </td>
-                    <td className={className}>
-                      <Typography className="text-xs font-semibold text-blue-gray-600">
-                        {jenisKelamin}
-                      </Typography>
-                    </td>
-                    <td className={className}>
-                      <Typography className="text-xs font-semibold text-blue-gray-600">
-                        {tanggalLahir}
-                      </Typography>
-                    </td>
-                    <td className={className}>
-                      <Typography className="text-xs font-semibold text-blue-gray-600">
-                        {NoTelepon}
-                      </Typography>
-                    </td>
-                    <td className={className}>
-                      <Typography className="text-xs font-semibold text-blue-gray-600">
-                        {gaji}
-                      </Typography>
-                    </td>
-                    <td className={className}>
-                      <Typography className="text-xs font-semibold text-blue-gray-600">
-                        {bonus}
-                      </Typography>
-                    </td>
-                    <td className={className}>
-                    <div className="btn-group text-center">
-                      <Link to="/owner/gajiPegawai/edit">
-                        <Button className="inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mr-2">
-                          <FontAwesomeIcon icon={faEdit} className="mr-2" />Ubah
-                        </Button>
-                      </Link>
-                    </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                    return (
+                      <tr key={username}>
+                        <td className={className}>
+                          <Typography className="text-xs font-semibold text-blue-gray-600">
+                            {username}
+                          </Typography>
+                        </td>
+                        <td className={className}>
+                          <Typography className="text-xs font-semibold text-blue-gray-600">
+                            {nama}
+                          </Typography>
+                        </td>
+                        <td className={className}>
+                          <Typography className="text-xs font-semibold text-blue-gray-600">
+                            {email}
+                          </Typography>
+                        </td>
+                        <td className={className}>
+                          <Typography className="text-xs font-semibold text-blue-gray-600">
+                            {jenisKelamin}
+                          </Typography>
+                        </td>
+                        <td className={className}>
+                          <Typography className="text-xs font-semibold text-blue-gray-600">
+                            {tanggalLahir}
+                          </Typography>
+                        </td>
+                        <td className={className}>
+                          <Typography className="text-xs font-semibold text-blue-gray-600">
+                            {NoTelepon}
+                          </Typography>
+                        </td>
+                        <td className={className}>
+                          <Typography className="text-xs font-semibold text-blue-gray-600">
+                            {gaji}
+                          </Typography>
+                        </td>
+                        <td className={className}>
+                          <Typography className="text-xs font-semibold text-blue-gray-600">
+                            {bonus}
+                          </Typography>
+                        </td>
+                        <td className={className}>
+                          <div className="btn-group text-center">
+                            <Link to="/owner/gajiPegawai/edit">
+                              <Button className="inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mr-2">
+                                <FontAwesomeIcon
+                                  icon={faEdit}
+                                  className="mr-2"
+                                />
+                                Ubah
+                              </Button>
+                            </Link>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  }
+                )
+              )}
             </tbody>
           </table>
           <div className="mt-4 flex justify-end">
@@ -172,7 +238,6 @@ const readPegawai = () => {
       </Card>
     </div>
   );
-}
+};
 
-export default readPegawai;
-
+export default readGajiPegawai;
