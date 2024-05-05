@@ -16,6 +16,22 @@ export const showDataPenitip = async () => {
     }
 }
 
+export const deletePenitip = async (id) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.delete(`/penitip/${id}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};
+
 export const storeDataPenitip = async (data) => {
     const token = sessionStorage.getItem("token");
     try {

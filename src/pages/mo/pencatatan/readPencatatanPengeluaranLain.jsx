@@ -12,7 +12,7 @@ import {
 // import { pengeluaranLainTableData } from "../../../data/PengeluaranLainTableData";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { showDataPengeluaranLain } from "../../../api/mo/PengeluaranLainApi";
+import { showDataPengeluaranLain, deletePengeluaranLain } from "../../../api/mo/PengeluaranLainApi";
 import { showDataUser } from "../../../api/mo/UserApi";
 
 const AddButton = () => {
@@ -84,10 +84,22 @@ const ReadPencatatanPengeluaranLain = () => {
     setIsModalOpen(false);
   };
 
-  const handleDelete = () => {
-    // Handle delete logic here
-    console.log("Delete", selectedPengeluaranLain);
-    closeModal();
+  const handleDelete = async () => {
+    if (!selectedPengeluaranLain) {
+      console.error("No bahan baku selected");
+      return;
+    }
+
+    console.log("masuk",selectedPengeluaranLain.id);
+
+    try {
+      await deletePengeluaranLain(selectedPengeluaranLain.id); // Panggil deleteBahanBaku
+      fetchData();
+      console.log("Delete", selectedPengeluaranLain);
+      closeModal();
+    } catch (error) {
+      console.error("Error deleting Pengeluaran Lain:", error);
+    }
   };
 
   const handleSearch = (e) => {
@@ -141,7 +153,7 @@ const ReadPencatatanPengeluaranLain = () => {
                   "Username",
                   "Nama Pengeluaran",
                   "Jumlah Pengeluaran",
-                  "Harga Satuan",
+                  // "Harga Satuan",
                   "Total Pengeluaran",
                   "Tanggal Pengeluaran",
                   "",
@@ -178,7 +190,7 @@ const ReadPencatatanPengeluaranLain = () => {
                       username,
                       namaPengeluaran,
                       jumlahPengeluaran,
-                      hargaSatuan,
+                      // hargaSatuan,
                       totalPengeluaran,
                       tanggalPengeluaran,
                     },
@@ -194,9 +206,9 @@ const ReadPencatatanPengeluaranLain = () => {
                       <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
                         {jumlahPengeluaran}
                       </td>
-                      <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
+                      {/* <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
                         {hargaSatuan}
-                      </td>
+                      </td> */}
                       <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
                         {totalPengeluaran}
                       </td>
@@ -216,10 +228,11 @@ const ReadPencatatanPengeluaranLain = () => {
                             className="inline-block bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
                             onClick={() =>
                               openModal({
+                                id,
                                 username,
                                 namaPengeluaran,
                                 jumlahPengeluaran,
-                                hargaSatuan,
+                                // hargaSatuan,
                                 totalPengeluaran,
                                 tanggalPengeluaran,
                               })
@@ -277,7 +290,7 @@ const ReadPencatatanPengeluaranLain = () => {
               Hapus Pencatatan Pengeluaran
             </Typography>
             <Typography className="text-gray-600 mb-4">
-              Apakah anda yakin ingin Menghapus Pengeluaran Lain{" "}
+              Apakah anda yakin ingin Menghapus Pengeluaran{" "}
               {selectedPengeluaranLain?.namaPengeluaran}?
             </Typography>
             <div className="flex justify-end">

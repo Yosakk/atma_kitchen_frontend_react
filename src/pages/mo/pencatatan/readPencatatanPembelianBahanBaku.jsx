@@ -16,7 +16,7 @@ import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { pembelianBahanBakuTableData } from "../../../data/pembelianBahanBakuTableData";
-import { showDataPembelianBahanBaku } from "../../../api/mo/PembelianBahanBakuApi";
+import { showDataPembelianBahanBaku, deletePembelianBahan } from "../../../api/mo/PembelianBahanBakuApi";
 import { showDataBahanBaku } from "../../../api/admin/BahanBakuApi";
 const AddButton = () => {
   return (
@@ -96,11 +96,30 @@ const readPencatatanPembelianBahanBaku = () => {
     setIsModalOpen(false);
   };
 
-  const handleDelete = () => {
-    // Handle delete logic here
-    console.log("Delete", selectedPembelianBahanBaku);
-    closeModal();
+  // const handleDelete = () => {
+  //   // Handle delete logic here
+  //   console.log("Delete", selectedPembelianBahanBaku);
+  //   closeModal();
+  // };
+  const handleDelete = async () => {
+    if (!selectedPembelianBahanBaku) {
+      console.error("No bahan baku selected");
+      return;
+    }
+
+    console.log("masuk",selectedPembelianBahanBaku.id_pembelian_bahan);
+
+    try {
+      await deletePembelianBahan(selectedPembelianBahanBaku.id_pembelian_bahan); // Panggil deleteBahanBaku
+      fetchData();
+      fetchDataBahanBaku();
+      console.log("Delete", selectedPembelianBahanBaku);
+      closeModal();
+    } catch (error) {
+      console.error("Error deleting bahan baku:", error);
+    }
   };
+  
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = pembelianBahanBakuTableData
@@ -245,6 +264,7 @@ const readPencatatanPembelianBahanBaku = () => {
                               className="inline-block bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
                               onClick={() =>
                                 openModal({
+                                  id_pembelian_bahan,
                                   namaBahanBaku,
                                   jumlahPembelian,
                                   hargaBeli,

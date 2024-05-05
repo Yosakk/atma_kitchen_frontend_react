@@ -17,7 +17,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { penitipTableData } from "../../../data/penitipTableData";
-import { showDataPenitip } from "../../../api/mo/PenitipApi";
+import { showDataPenitip, deletePenitip } from "../../../api/mo/PenitipApi";
 
 const AddButton = () => {
   return (
@@ -68,10 +68,22 @@ const readPenitip = () => {
     setIsModalOpen(false);
   };
 
-  const handleDelete = () => {
-    // Handle delete logic here
-    console.log("Delete", selectedPenitip);
-    closeModal();
+  const handleDelete = async () => {
+    if (!selectedPenitip) {
+      console.error("No Penitip selected");
+      return;
+    }
+
+    console.log("masuk",selectedPenitip.id_penitip);
+
+    try {
+      await deletePenitip(selectedPenitip.id_penitip); // Panggil deleteBahanBaku
+      fetchData();
+      console.log("Delete", selectedPenitip);
+      closeModal();
+    } catch (error) {
+      console.error("Error deleting Penitip :", error);
+    }
   };
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -141,6 +153,7 @@ const readPenitip = () => {
                 currentItems.map(
                   (
                     {
+                      id_penitip,
                       nama,
                       NoTelepon,
                     },
@@ -153,7 +166,7 @@ const readPenitip = () => {
                     }`;
 
                     return (
-                      <tr key={nama}>
+                      <tr key={id_penitip}>
                         <td className={className}>
                           <Typography className="text-xs font-semibold text-blue-gray-600">
                             {nama}
@@ -188,6 +201,7 @@ const readPenitip = () => {
                               className="inline-block bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
                               onClick={() =>
                                 openModal({
+                                  id_penitip,
                                   nama,
                                   NoTelepon,
                                 })

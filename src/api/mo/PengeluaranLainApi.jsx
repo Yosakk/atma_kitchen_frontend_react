@@ -15,3 +15,19 @@ export const showDataPengeluaranLain = async () => {
         throw error.response.data;
     }
 }
+
+export const deletePengeluaranLain = async (id) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.delete(`/pengeluaran_lain/${id}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};

@@ -15,3 +15,19 @@ export const showDataPembelianBahanBaku = async () => {
         throw error.response.data;
     }
 }
+
+export const deletePembelianBahan = async (id) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.delete(`/pembelian_bahan/${id}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};
