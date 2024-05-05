@@ -1,4 +1,4 @@
-import React, {useState,useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Card,
@@ -9,9 +9,11 @@ import {
   Button,
   Input,
 } from "@material-tailwind/react";
-import { pengeluaranLainTableData } from "../../../data/PengeluaranLainTableData";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus,faEdit,faTrash } from '@fortawesome/free-solid-svg-icons';
+// import { pengeluaranLainTableData } from "../../../data/PengeluaranLainTableData";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { showDataPengeluaranLain } from "../../../api/mo/PengeluaranLainApi";
+import { showDataUser } from "../../../api/mo/UserApi";
 
 const AddButton = () => {
   return (
@@ -30,7 +32,48 @@ const ReadPencatatanPengeluaranLain = () => {
   const [selectedPengeluaranLain, setSelectedPengeluaranLain] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
+  const [pengeluaranLainData, setPengeluaranLainData] = useState([]);
+  const [userData, setUserData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
+  useEffect(() => {
+    fetchData();
+    fetchDataUser();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await showDataPengeluaranLain();
+      setPengeluaranLainData(response.data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setIsLoading(false);
+    }
+  };
+  const fetchDataUser = async () => {
+    try {
+      const response = await showDataUser();
+      setUserData(response.data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setIsLoading(false);
+    }
+  };
+  const getUserName = (idUser) => {
+    const user = userData.find((user) => user.id === idUser);
+    return user ? user.username : "Unknown Username";
+  };
+  const pengeluaranLainTableData = pengeluaranLainData.map((item) => ({
+    id: item.id_pengeluaran_lain,
+    username: getUserName(item.id_user),
+    namaPengeluaran: item.nama_pengeluaran,
+    jumlahPengeluaran: item.jumlah_pengeluaran,
+    hargaSatuan: item.jumlah_pengeluaran,
+    totalPengeluaran: item.total_pengeluaran,
+    tanggalPengeluaran: item.tanggal_pengeluaran,
+  }));
   const openModal = (pengeluaranLain) => {
     setSelectedPengeluaranLain(pengeluaranLain);
     setIsModalOpen(true);
@@ -54,10 +97,9 @@ const ReadPencatatanPengeluaranLain = () => {
   useEffect(() => {
     setFilteredData(
       pengeluaranLainTableData.filter((item) =>
-        Object.values(item)
-          .some((value) =>
-            value.toString().toLowerCase().includes(searchValue.toLowerCase())
-          )
+        Object.values(item).some((value) =>
+          value.toString().toLowerCase().includes(searchValue.toLowerCase())
+        )
       )
     );
   }, [searchValue]);
@@ -65,41 +107,45 @@ const ReadPencatatanPengeluaranLain = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = pengeluaranLainTableData
     .filter((item) =>
-    Object.values(item)
-      .some((value) =>
+      Object.values(item).some((value) =>
         value.toString().toLowerCase().includes(searchValue.toLowerCase())
       )
-  )
+    )
     .slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(
-    pengeluaranLainTableData.length / itemsPerPage
-  );
+  const totalPages = Math.ceil(pengeluaranLainTableData.length / itemsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
       <Card>
-        <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
+        <CardHeader
+          variant="gradient"
+          color="gray"
+          className="mb-8 p-6 flex justify-between items-center"
+        >
           <Typography variant="h6" color="white">
             Pencatatan Pengeluaran Lain
           </Typography>
           <AddButton />
         </CardHeader>
         <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
-        <div className="ml-auto mt-1 mb-4 mr-4 w-56 flex justify-end items-center">
-            <Input
-              label="Search"
-              value={searchValue}
-              onChange={handleSearch}
-            />
+          <div className="ml-auto mt-1 mb-4 mr-4 w-56 flex justify-end items-center">
+            <Input label="Search" value={searchValue} onChange={handleSearch} />
           </div>
-          <table className="w-full min-w-[640px] table-auto">
+          <table className="w-full min-w-[1100px] table-auto">
             <thead>
               <tr>
-                {["Username", "Nama Pengeluaran", "Jumlah Pengeluaran", "Harga Satuan", "Total Pengeluaran", "Tanggal Pengeluaran", ""].map((el) => (
+                {[
+                  "Username",
+                  "Nama Pengeluaran",
+                  "Jumlah Pengeluaran",
+                  "Harga Satuan",
+                  "Total Pengeluaran",
+                  "Tanggal Pengeluaran",
+                  "",
+                ].map((el) => (
                   <th
                     key={el}
                     className="border-b border-blue-gray-50 py-3 px-5 text-left"
@@ -115,48 +161,79 @@ const ReadPencatatanPengeluaranLain = () => {
               </tr>
             </thead>
             <tbody>
-                {currentItems.map(({
-                  id,
-                  username,
-                  namaPengeluaran,
-                  jumlahPengeluaran,
-                  hargaSatuan,
-                  totalPengeluaran,
-                  tanggalPengeluaran
-                }) => (
-                <tr key={id}>
-                  <td className="border-b border-blue-gray-50 py-3 px-5 text-[11px] font-semibold text-blue-gray-600">
-                    {username}
-                  </td>
-                  <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
-                    {namaPengeluaran}
-                  </td>
-                  <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
-                    {jumlahPengeluaran}
-                  </td>
-                  <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
-                    {hargaSatuan}
-                  </td>
-                  <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
-                    {totalPengeluaran}
-                  </td>
-                  <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
-                    {tanggalPengeluaran}
-                  </td>
-                  <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
-                    <div className="btn-group text-center">
-                      <Link to="/mo/pencatatanPengeluaranLain/edit">
-                        <Button className="inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mr-2">
-                          <FontAwesomeIcon icon={faEdit} className="mr-2" />Ubah
-                        </Button>
-                      </Link>
-                      <Button to="" className="inline-block bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded" onClick={() => openModal({ username, namaPengeluaran, jumlahPengeluaran, hargaSatuan, totalPengeluaran, tanggalPengeluaran })}>
-                        <FontAwesomeIcon icon={faTrash} className="mr-2" />Hapus
-                      </Button>
-                    </div>
+              {currentItems.length === 0 ? (
+                <tr>
+                  <td
+                    className=" p-10 text-center text-xs font-semibold text-blue-gray-600"
+                    colSpan="9"
+                  >
+                    Data Tidak Ditemukan
                   </td>
                 </tr>
-              ))}
+              ) : (
+                currentItems.map(
+                  (
+                    {
+                      id,
+                      username,
+                      namaPengeluaran,
+                      jumlahPengeluaran,
+                      hargaSatuan,
+                      totalPengeluaran,
+                      tanggalPengeluaran,
+                    },
+                    key
+                  ) => (
+                    <tr key={id}>
+                      <td className="border-b border-blue-gray-50 py-3 px-5 text-[11px] font-semibold text-blue-gray-600">
+                        {username}
+                      </td>
+                      <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
+                        {namaPengeluaran}
+                      </td>
+                      <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
+                        {jumlahPengeluaran}
+                      </td>
+                      <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
+                        {hargaSatuan}
+                      </td>
+                      <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
+                        {totalPengeluaran}
+                      </td>
+                      <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
+                        {tanggalPengeluaran}
+                      </td>
+                      <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
+                        <div className="btn-group text-center">
+                          <Link to="/mo/pencatatanPengeluaranLain/edit">
+                            <Button className="inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mr-2">
+                              <FontAwesomeIcon icon={faEdit} className="mr-2" />
+                              Ubah
+                            </Button>
+                          </Link>
+                          <Button
+                            to=""
+                            className="inline-block bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
+                            onClick={() =>
+                              openModal({
+                                username,
+                                namaPengeluaran,
+                                jumlahPengeluaran,
+                                hargaSatuan,
+                                totalPengeluaran,
+                                tanggalPengeluaran,
+                              })
+                            }
+                          >
+                            <FontAwesomeIcon icon={faTrash} className="mr-2" />
+                            Hapus
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                )
+              )}
             </tbody>
           </table>
           <div className="mt-4 flex justify-end">
@@ -196,11 +273,26 @@ const ReadPencatatanPengeluaranLain = () => {
         <div className="fixed inset-0 z-[9999] flex items-center justify-center">
           <div className="absolute inset-0 bg-black opacity-60"></div>
           <div className="relative w-96 bg-white rounded-lg p-4">
-            <Typography variant="h6" className="mb-4">Hapus Pencatatan Pengeluaran</Typography>
-            <Typography className="text-gray-600 mb-4">Apakah anda yakin ingin Menghapus Pengeluaran Lain {selectedPengeluaranLain?.namaPengeluaran}?</Typography>
+            <Typography variant="h6" className="mb-4">
+              Hapus Pencatatan Pengeluaran
+            </Typography>
+            <Typography className="text-gray-600 mb-4">
+              Apakah anda yakin ingin Menghapus Pengeluaran Lain{" "}
+              {selectedPengeluaranLain?.namaPengeluaran}?
+            </Typography>
             <div className="flex justify-end">
-              <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md mr-2" onClick={closeModal}>Batal</button>
-              <button className="px-4 py-2 bg-red-500 text-white rounded-md" onClick={handleDelete}>Yakin</button>
+              <button
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md mr-2"
+                onClick={closeModal}
+              >
+                Batal
+              </button>
+              <button
+                className="px-4 py-2 bg-red-500 text-white rounded-md"
+                onClick={handleDelete}
+              >
+                Yakin
+              </button>
             </div>
           </div>
         </div>
@@ -210,4 +302,3 @@ const ReadPencatatanPengeluaranLain = () => {
 };
 
 export default ReadPencatatanPengeluaranLain;
-
