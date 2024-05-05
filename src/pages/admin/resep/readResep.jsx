@@ -10,7 +10,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { showDataResep } from "../../../api/admin/ResepApi";
+import { showDataResep, deleteResep } from "../../../api/admin/ResepApi";
 import { showDataProduk } from "../../../api/admin/ProdukApi";
 import { showDataBahanBaku } from "../../../api/admin/BahanBakuApi";
 
@@ -27,7 +27,7 @@ const AddButton = () => {
 const ReadResep = () => {
   const [searchValue, setSearchValue] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedResep, setSelectedResep] = useState("");
+  const [selectedResep, setSelectedResep] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
   const [resepData, setResepData] = useState([]);
@@ -81,11 +81,27 @@ const ReadResep = () => {
     setSelectedResep(null);
     setIsModalOpen(false);
   };
+  const getResepIdByProductName = (namaProduk) => {
+    const resep = resepData.find((item) => item.namaProduk === namaProduk);
+    return resep ? resep.id_resep : null;
+  };
+  const id_resep = getResepIdByProductName(selectedResep.namaProduk);
+  const handleDelete = async () => {
+    if (!selectedResep) {
+      console.error("No Resep selected");
+      return;
+    }
+    
+    console.log("masuk", id_resep);
 
-  const handleDelete = () => {
-    // Handle delete logic here
-    console.log("Delete", selectedResep);
-    closeModal();
+    // try {
+    //   await deleteResep(selectedResep.id_resep); // Panggil deleteResep
+    //   fetchData();
+    //   console.log("Delete", selectedResep);
+    //   closeModal();
+    // } catch (error) {
+    //   console.error("Error deleting Resep:", error);
+    // }
   };
 
   const getProductName = (idProduk) => {
@@ -232,7 +248,7 @@ const ReadResep = () => {
                       <Button
                         to=""
                         className="inline-block bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
-                        onClick={() => openModal({ namaProduk, bahanBaku })}
+                        onClick={() => openModal({ id_resep, namaProduk, bahanBaku })}
                       >
                         <FontAwesomeIcon icon={faTrash} className="mr-2" />
                         Hapus

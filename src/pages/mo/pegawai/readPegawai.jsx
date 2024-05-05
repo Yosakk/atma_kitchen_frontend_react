@@ -16,7 +16,7 @@ import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { pegawaiTableData } from "../../../data/pegawaiTableData";
-import { showDataPegawai } from "../../../api/mo/PegawaiApi";
+import { showDataPegawai, deletePegawai } from "../../../api/mo/PegawaiApi";
 const AddButton = () => {
   return (
     <Link to="/mo/pegawai/add">
@@ -71,10 +71,27 @@ const readPegawai = () => {
     setIsModalOpen(false);
   };
 
-  const handleDelete = () => {
-    // Handle delete logic here
-    console.log("Delete", selectedPegawai);
-    closeModal();
+  // const handleDelete = () => {
+  //   // Handle delete logic here
+  //   console.log("Delete", selectedPegawai);
+  //   closeModal();
+  // };
+  const handleDelete = async () => {
+    if (!selectedPegawai) {
+      console.error("No bahan baku selected");
+      return;
+    }
+
+    console.log("masuk",selectedPegawai.id);
+
+    try {
+      await deletePegawai(selectedPegawai.id); // Panggil deletePegawai
+      fetchData();
+      console.log("Delete", selectedPegawai);
+      closeModal();
+    } catch (error) {
+      console.error("Error deleting Pegawai :", error);
+    }
   };
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -237,6 +254,7 @@ const readPegawai = () => {
                               className="inline-block bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
                               onClick={() =>
                                 openModal({
+                                  id,
                                   username,
                                   nama,
                                   email,
