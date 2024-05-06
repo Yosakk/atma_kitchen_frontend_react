@@ -12,7 +12,9 @@ import {
   Input,
 } from "@material-tailwind/react";
 
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
@@ -30,6 +32,8 @@ const AddButton = () => {
 };
 
 const readPenitip = () => {
+  let { id_penitip } = useParams();
+  console.log("masuk edit", id_penitip)
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPenitip, setSelectedPenitip] = useState(null);
   const [searchValue, setSearchValue] = useState("");
@@ -81,8 +85,10 @@ const readPenitip = () => {
       fetchData();
       console.log("Delete", selectedPenitip);
       closeModal();
+      toast.success(`Berhasil menghapus ${selectedPenitip?.nama}`);
     } catch (error) {
       console.error("Error deleting Penitip :", error);
+      toast.error("Gagal Menghapus Penitip");
     }
   };
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -282,6 +288,7 @@ const readPenitip = () => {
           </div>
         </div>
       )}
+      <ToastContainer />
     </div>
   );
 };

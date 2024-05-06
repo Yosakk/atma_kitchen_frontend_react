@@ -9,6 +9,8 @@ import {
   Button,
   Input,
 } from "@material-tailwind/react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 // import { pengeluaranLainTableData } from "../../../data/PengeluaranLainTableData";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -97,8 +99,10 @@ const ReadPencatatanPengeluaranLain = () => {
       fetchData();
       console.log("Delete", selectedPengeluaranLain);
       closeModal();
+      toast.success(`Berhasil menghapus Pengeluaran ${selectedPengeluaranLain?.namaPengeluaran}`);
     } catch (error) {
       console.error("Error deleting Pengeluaran Lain:", error);
+      toast.error("Gagal Menghapus Pengeluaran");
     }
   };
 
@@ -310,6 +314,7 @@ const ReadPencatatanPengeluaranLain = () => {
           </div>
         </div>
       )}
+      <ToastContainer />
     </div>
   );
 };

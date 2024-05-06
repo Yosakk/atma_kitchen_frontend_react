@@ -174,7 +174,10 @@ const AddProduk = () => {
                 sessionStorage.setItem("dataProduk", JSON.stringify(res.data));
                 setOpen(true);
                 setLoading(false);
-                navigate("/admin/produk/read")
+                setTimeout(() => {// Delay selama 2 detik
+                    navigate("/admin/produk/read")
+                }, 2000);
+                
             })
             .catch((err) => {
                 setLoading(false);

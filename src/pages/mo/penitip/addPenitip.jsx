@@ -1,5 +1,7 @@
 import React, { useState, useReducer } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { Card, CardHeader, CardBody, Typography, Input, Select, Textarea } from "@material-tailwind/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faSave, faClose } from "@fortawesome/free-solid-svg-icons";
@@ -13,23 +15,30 @@ const formReducer = (state, event) => {
 };
 
 const AddPenitip = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useReducer(formReducer, {});
     const [data, setData] = useState({
         nama_penitip: "",
         nomor_telepon_penitip: "",
     });
-
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log(formData)
+        console.log(formData);
+        // Menunda eksekusi selama 2 detik (2000 milidetik)
         storeDataPenitip(formData)
             .then((res) => {
                 console.log("sini")
+                toast.success("Data Penitip berhasil ditambahkan"); 
+                setTimeout(() => {// Delay selama 2 detik
+                    navigate("/mo/penitip/read")
+                }, 2000);
             })
             .catch((err) => {
                 console.log("Error", err);
-            })
+                toast.error("Terjadi kesalahan saat menambahkan data penitip");
+            });
     };
+    
 
     return (
         <div className="mt-12 mb-8">
@@ -89,6 +98,7 @@ const AddPenitip = () => {
                     </form>
                 </CardBody>
             </Card>
+            <ToastContainer/>
         </div>
     );
 };

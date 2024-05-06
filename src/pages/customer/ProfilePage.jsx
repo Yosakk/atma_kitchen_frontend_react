@@ -17,7 +17,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenSquare } from "@fortawesome/free-solid-svg-icons";
 import HistoryCardPage from "../../components/HistoryCard";
 import AlamatCardPage from "../../components/AlamatCard";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import SideNav from "../../components/SideNav";
 import { showDataCustomer } from "../../api/customer/customerApi";
 
@@ -40,6 +40,8 @@ const NAVS = [
 ];
 
 const ProfilePage = () => {
+    let { id } = useParams();
+    console.log("masukparams", id)
     const [activeItem, setActiveItem] = useState(null);
     const [content, setContent] = useState(null);
     const [userData, setUserData] = useState(null);
@@ -49,7 +51,8 @@ const ProfilePage = () => {
     useEffect(() => {
         setLoading(true);
         showDataCustomer().then((res) => {
-            console.log("roger1");
+            
+            console.log("roger1", res.data.id);
             setUserData(res.data);
             sessionStorage.setItem('userData', JSON.stringify(res.data));
         }).catch((err) => {

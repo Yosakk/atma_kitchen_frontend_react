@@ -8,6 +8,8 @@ import {
 } from "@material-tailwind/react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { showDataResep, deleteResep } from "../../../api/admin/ResepApi";
@@ -99,8 +101,10 @@ const ReadResep = () => {
       fetchData();
       console.log("Delete", findResepIdByProductName(selectedResep.namaProduk));
       closeModal();
+      toast.success(`Berhasil Menghapus Resep dari ${selectedResep?.namaProduk}`);
     } catch (error) {
       console.error("Error deleting Resep:", error);
+      toast.error("Gagal menghapus Resep");
     }
   };
 
@@ -320,6 +324,7 @@ const ReadResep = () => {
           </div>
         </div>
       )}
+      <ToastContainer/>
     </div>
   );
 };

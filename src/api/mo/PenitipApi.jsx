@@ -44,6 +44,10 @@ export const storeDataPenitip = async (data) => {
         console.log(response.data);
         return response.data;
     } catch (error) {
+        if (error.response && error.response.status === 400) {
+            const errorMessage = error.response.data.message.nomor_telepon[0];
+            throw new Error(errorMessage);
+        }
         throw error.response.data;
     }
 }
