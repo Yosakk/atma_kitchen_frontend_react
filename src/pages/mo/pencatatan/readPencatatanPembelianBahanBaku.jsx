@@ -246,10 +246,7 @@ const readPencatatanPembelianBahanBaku = () => {
                         <td className={className}>
                           <div className="btn-group text-center">
                             <Link
-                              to={{
-                                pathname:
-                                  "/mo/pencatatanPembelianBahanBaku/edit",
-                              }}
+                              to={`/mo/pencatatanPembelianBahanBaku/edit/${id_pembelian_bahan}`} 
                             >
                               <Button
                                 to="edit"

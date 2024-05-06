@@ -183,9 +183,7 @@ const ReadBahanBaku = () => {
                         <td className={className}>
                           <div className="btn-group text-center">
                             <Link
-                              to={{
-                                pathname: "/admin/bahanBaku/edit",
-                              }}
+                              to={`/admin/bahanBaku/edit/${id_bahan_baku}`}
                             >
                               <Button className="inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mr-2">
                                 <FontAwesomeIcon

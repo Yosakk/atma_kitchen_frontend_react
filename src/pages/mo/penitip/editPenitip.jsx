@@ -1,14 +1,45 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useReducer } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardBody, Typography, Input, Select, Textarea } from "@material-tailwind/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faSave, faClose } from "@fortawesome/free-solid-svg-icons";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { showDataPenitipById, UpdatePenitip } from "../../../api/mo/PenitipApi";
+
+
+const formReducer = (state, event) => {
+    if (!event.target.value) {
+        return state; // Jika nilai yang dikirimkan kosong, kembalikan state tanpa perubahan
+    }
+    return {
+        ...state,
+        [event.target.name]: event.target.value,
+    };
+};
+
 
 const EditPenitip = () => {
-    const [formData, setFormData] = useState({
-        nama: "", 
-        NoTelepon: "",
-    });
+    let { id } = useParams(); // Make sure the parameter name matches your route (/mo/penitip/edit/:id_penitip)
+    console.log("masuk edit", id);
+    const [penitipData, setPenitipData] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [formData, setFormData] = useReducer(formReducer, {});
+    const navigate = useNavigate();
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+    try {
+        const response = await showDataPenitipById(id);
+        setPenitipData(response.data);
+        setIsLoading(false);
+    } catch (error) {
+        console.error("Error fetching data:", error);
+        setIsLoading(false);
+    }
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -18,11 +49,36 @@ const EditPenitip = () => {
         }));
         };
     
+        // const handleSubmit = async (e) => {
+        //     e.preventDefault();
+        //     try {
+        //         const response = await UpdatePenitip(id); // Menggunakan id dari useParams dan formData dari state
+        //         console.log("Penitip updated:", response);
+
+        //         // Tambahkan logika penanganan setelah penitip berhasil diperbarui
+        //     } catch (error) {
+        //         console.error("Error updating penitip:", error);
+        //         // Tambahkan logika penanganan jika terjadi kesalahan saat memperbarui penitip
+        //     }
+        // };
         const handleSubmit = (e) => {
-        e.preventDefault();
-        // Add your logic to handle form submission here
-        console.log(formData);
+            e.preventDefault();
+            console.log(formData);
+            // Menunda eksekusi selama 2 detik (2000 milidetik)
+            UpdatePenitip(id, formData)
+                .then((res) => {
+                    console.log("sini")
+                    toast.success("Data Penitip berhasil diubah"); 
+                    setTimeout(() => {// Delay selama 2 detik
+                        navigate("/mo/penitip/read")
+                    }, 2000);
+                })
+                .catch((err) => {
+                    console.log("Error", err);
+                    toast.error("Terjadi kesalahan saat mengubah data penitip");
+                });
         };
+        
 
     return (
         <div className="mt-12 mb-8">
@@ -36,12 +92,12 @@ const EditPenitip = () => {
                     <form onSubmit={handleSubmit}>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <div className="mb-4 col-span-1 md:col-span-2 relative w-full min-w-[100px]">
-                                <label htmlFor="namaPegawai" className="block mb-2 text-sm font-medium text-gray-900">Nama Pegawai</label>
+                                <label htmlFor="nama_penitip" className="block mb-2 text-sm font-medium text-gray-900">Nama Pegawai</label>
                                 <Input
-                                    id="namaPegawai"
-                                    name="namaPegawai"
-                                    value={formData.namaPegawai}
-                                    onChange={handleChange}
+                                    id="nama_penitip"
+                                    name="nama_penitip"
+                                    defaultValue={penitipData.nama_penitip || ''}
+                                    onChange={setFormData}
                                     type='text'
                                     size="md"
                                     label="Nama Pegawai"
@@ -50,12 +106,12 @@ const EditPenitip = () => {
                                 />
                             </div>
                             <div className="mb-4 relative w-full min-w-[100px]">
-                                <label htmlFor="NoTelepon" className="block mb-2 text-sm font-medium text-gray-900">Nomor Telepon</label>
+                                <label htmlFor="nomor_telepon_penitip" className="block mb-2 text-sm font-medium text-gray-900">Nomor Telepon</label>
                                 <Input
-                                    id="NoTelepon"
-                                    name="NoTelepon"
-                                    value={formData.NoTelepon}
-                                    onChange={handleChange}
+                                    id="nomor_telepon_penitip"
+                                    name="nomor_telepon_penitip"
+                                    defaultValue={penitipData.nomor_telepon_penitip}
+                                    onChange={setFormData}
                                     type='number'
                                     size="md"
                                     label="Nomor Telepon"
@@ -84,6 +140,7 @@ const EditPenitip = () => {
                     </form>
                 </CardBody>
             </Card>
+            <ToastContainer/>
         </div>
     );
 };

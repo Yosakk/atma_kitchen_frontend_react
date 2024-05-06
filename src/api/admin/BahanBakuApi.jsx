@@ -16,6 +16,37 @@ export const showDataBahanBaku = async () => {
     }
 }
 
+export const showDataBahanBakubyId = async (id) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.get(`/bahan_baku/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log(response.data)
+        return response.data;
+    } catch (error) {
+        console.log
+        throw error.response.data;
+    }
+}
+
+export const updateBahanBaku = async (id, data) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.put(`/bahan_baku/${id}`, data, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log(response.data)
+        return response.data;
+    } catch (error) {
+        console.log
+        throw error.response.data;
+    }
+}
 export const deleteBahanBaku = async (id) => {
     const token = sessionStorage.getItem("token");
     try {

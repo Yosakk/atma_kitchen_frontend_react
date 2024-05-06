@@ -42,11 +42,8 @@ const HistoryCardPelanggan = () => {
     const [historyData, setHistoryData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
+    const [searchValue, setSearchValue] = useState("");
     const itemsPerPage = 5; // Ubah sesuai dengan jumlah item yang ingin ditampilkan per halaman
-
-    useEffect(() => {
-        fetchData();
-    }, []);
 
     const fetchData = async () => {
         try {
@@ -68,6 +65,11 @@ const HistoryCardPelanggan = () => {
             setIsLoading(false);
         }
     };
+    
+    useEffect(() => {
+        fetchData();
+    }, [searchValue]);
+    
 
     const handleClickPrevious = () => {
         setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
@@ -79,7 +81,10 @@ const HistoryCardPelanggan = () => {
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = currentPage * itemsPerPage;
-    const filteredData = selectedTab === "Semua" ? historyData : historyData.filter(item => item.status === selectedTab);
+    const filteredData = selectedTab === "Semua"
+    ? historyData.filter(item => item.namaProduk.toLowerCase().includes(searchValue.toLowerCase()))
+    : historyData.filter(item => item.status === selectedTab && item.namaProduk.toLowerCase().includes(searchValue.toLowerCase()));
+
     const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
     return (
@@ -111,10 +116,12 @@ const HistoryCardPelanggan = () => {
                         </TabsHeader>
                     </Tabs>
                     <div className="w-full md:w-72">
-                        <Input
-                            label="Search"
-                            icon={<MagnifyingGlassIcon className="h-5 w-5" />}
-                        />
+                    <Input
+                        label="Search"
+                        icon={<MagnifyingGlassIcon className="h-5 w-5" />}
+                        value={searchValue}
+                        onChange={(e) => setSearchValue(e.target.value)}
+                    />
                     </div>
                 </div>
             </CardHeader>

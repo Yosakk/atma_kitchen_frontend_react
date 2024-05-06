@@ -15,6 +15,37 @@ export const showDataPenitip = async () => {
         throw error.response.data;
     }
 }
+export const showDataPenitipById = async (id) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.get(`/penitip/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log(response.data)
+        return response.data;
+    } catch (error) {
+        console.log
+        throw error.response.data;
+    }
+}
+
+export const UpdatePenitip = async (id, data) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.put(`/penitip/${id}`, data, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log(response.data)
+        return response.data;
+    } catch (error) {
+        console.error("Error updating penitip:", error.response.data);
+        throw error.response.data;
+    }
+}
 
 export const deletePenitip = async (id) => {
     const token = sessionStorage.getItem("token");

@@ -15,6 +15,37 @@ export const showDataPengeluaranLain = async () => {
         throw error.response.data;
     }
 }
+export const showDataPengeluaranLainbyId = async (id) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.get(`/pengeluaran_lain/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log(response.data)
+        return response.data;
+    } catch (error) {
+        console.log
+        throw error.response.data;
+    }
+}
+
+export const updatePengeluaranLain = async (id, data) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.put(`/pengeluaran_lain/${id}`,data, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};
 
 export const deletePengeluaranLain = async (id) => {
     const token = sessionStorage.getItem("token");

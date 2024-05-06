@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   Card,
   CardHeader,
@@ -14,6 +14,7 @@ import {
 } from "@material-tailwind/react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -133,7 +134,7 @@ const readPegawai = () => {
               onChange={(e) => setSearchValue(e.target.value)}
             />
           </div>
-          <table className="w-full min-w-[1150px] table-auto">
+          <table className="w-full min-w-[1200px] table-auto">
             <thead>
               <tr>
                 {[
@@ -238,9 +239,8 @@ const readPegawai = () => {
                         <td className={className}>
                           <div className="btn-group text-center">
                             <Link
-                              to={{
-                                pathname: "/mo/pegawai/edit",
-                              }}
+                              to={`/mo/pegawai/edit/${id}`} // Mengirim ID pelanggan sebagai parameter pada URL
+                              // onClick={() => handleSaveId(id)}
                             >
                               <Button
                                 to="edit"

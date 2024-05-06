@@ -127,7 +127,7 @@ const router = createBrowserRouter([
         element : <AddBahanBaku/>
       },
       {
-        path : "/admin/bahanBaku/edit",
+        path : "/admin/bahanBaku/edit/:id",
         element : <EditBahanBaku/>
       },
       {
@@ -166,7 +166,7 @@ const router = createBrowserRouter([
         element : <AddPegawai />
       },
       {
-        path : "/mo/pegawai/edit",
+        path : "/mo/pegawai/edit/:id",
         element : <EditPegawai />
       },
       {
@@ -182,7 +182,7 @@ const router = createBrowserRouter([
         element : <AddPenitip />
       },
       {
-        path : "/mo/penitip/edit",
+        path : "/mo/penitip/edit/:id",
         element : <EditPenitip />
       },
       {
@@ -194,7 +194,7 @@ const router = createBrowserRouter([
         element : <AddPembelianBahanBaku />
       },
       {
-        path : "/mo/pencatatanPembelianBahanBaku/edit",
+        path : "/mo/pencatatanPembelianBahanBaku/edit/:id",
         element : <EditPembelianBahanBaku />
       },
       {
@@ -206,7 +206,7 @@ const router = createBrowserRouter([
         element : <AddPencatatanPengeluaranLain />
       },
       {
-        path : "/mo/pencatatanPengeluaranLain/edit",
+        path : "/mo/pencatatanPengeluaranLain/edit/:id",
         element : <EditPencatatanPengeluaranLain />
       },                    
       
@@ -229,7 +229,7 @@ const router = createBrowserRouter([
         element : <ReadGajiPegawai />
       },
       {
-        path : "/owner/gajiPegawai/edit",
+        path : "/owner/gajiPegawai/edit/:id",
         element : <EditGajiPegawai />
       },
       {

@@ -217,7 +217,7 @@ const ReadPencatatanPengeluaranLain = () => {
                       </td>
                       <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
                         <div className="btn-group text-center">
-                          <Link to="/mo/pencatatanPengeluaranLain/edit">
+                          <Link to={`/mo/pencatatanPengeluaranLain/edit/${id}`}>
                             <Button className="inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mr-2">
                               <FontAwesomeIcon icon={faEdit} className="mr-2" />
                               Ubah
@@ -231,7 +231,7 @@ const ReadPencatatanPengeluaranLain = () => {
                                 id,
                                 username,
                                 namaPengeluaran,
-                                jumlahPengeluaran,
+                                // jumlahPengeluaran,
                                 // hargaSatuan,
                                 totalPengeluaran,
                                 tanggalPengeluaran,

@@ -11,7 +11,9 @@ import {
   Input,
 } from "@material-tailwind/react";
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
@@ -124,6 +126,7 @@ const readGajiPegawai = () => {
                 currentItems.map(
                   (
                     {
+                      id,
                       username,
                       nama,
                       email,
@@ -142,7 +145,7 @@ const readGajiPegawai = () => {
                     }`;
 
                     return (
-                      <tr key={username}>
+                      <tr key={id}>
                         <td className={className}>
                           <Typography className="text-xs font-semibold text-blue-gray-600">
                             {username}
@@ -185,7 +188,7 @@ const readGajiPegawai = () => {
                         </td>
                         <td className={className}>
                           <div className="btn-group text-center">
-                            <Link to="/owner/gajiPegawai/edit">
+                            <Link to={`/owner/gajiPegawai/edit/${id}`}>
                               <Button className="inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mr-2">
                                 <FontAwesomeIcon
                                   icon={faEdit}

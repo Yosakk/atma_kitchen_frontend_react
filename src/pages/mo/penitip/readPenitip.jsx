@@ -32,8 +32,7 @@ const AddButton = () => {
 };
 
 const readPenitip = () => {
-  let { id_penitip } = useParams();
-  console.log("masuk edit", id_penitip)
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPenitip, setSelectedPenitip] = useState(null);
   const [searchValue, setSearchValue] = useState("");
@@ -41,6 +40,7 @@ const readPenitip = () => {
   const [itemsPerPage] = useState(5);
   const [penitipData, setPenitipData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedPenitipId, setSelectedPenitipId] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -55,6 +55,9 @@ const readPenitip = () => {
       console.error("Error fetching data:", error);
       setIsLoading(false);
     }
+  };
+  const handleSaveId = (id_penitip) => {
+    setSelectedPenitipId(id_penitip);
   };
   const penitipTableData = penitipData.map((item) => ({
     id_penitip: item.id_penitip,
@@ -103,7 +106,7 @@ const readPenitip = () => {
     .slice(indexOfFirstItem, indexOfLastItem);
 
   const totalPages = Math.ceil(penitipTableData.length / itemsPerPage);
-
+  
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
@@ -186,12 +189,11 @@ const readPenitip = () => {
                         <td className={className}>
                           <div className="btn-group text-center">
                             <Link
-                              to={{
-                                pathname: "/mo/penitip/edit",
-                              }}
+                              to={`/mo/penitip/edit/${id_penitip}`} // Mengirim ID pelanggan sebagai parameter pada URL
+                              onClick={() => handleSaveId(id_penitip)}
                             >
                               <Button
-                                to="edit"
+                                // to="edit"
                                 className="inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mr-2"
                               >
                                 <FontAwesomeIcon
