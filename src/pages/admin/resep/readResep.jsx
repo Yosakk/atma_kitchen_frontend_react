@@ -81,11 +81,6 @@ const ReadResep = () => {
     setSelectedResep(null);
     setIsModalOpen(false);
   };
-  const getResepIdByProductName = (namaProduk) => {
-    const resep = resepData.find((item) => item.namaProduk === namaProduk);
-    return resep ? resep.id_resep : null;
-  };
-  const id_resep = getResepIdByProductName(selectedResep.namaProduk);
   const handleDelete = async () => {
     if (!selectedResep) {
       console.error("No Resep selected");
