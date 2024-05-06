@@ -91,7 +91,7 @@ const router = createBrowserRouter([
         element : <AddProduk/>
       },
       {
-        path : "/admin/produk/edit",
+        path : "/admin/produk/edit/:id",
         element : <EditProduk/>
       },
       // {
@@ -103,7 +103,7 @@ const router = createBrowserRouter([
         element : <AddHampers/>
       },
       {
-        path : "/admin/hampers/edit",
+        path : "/admin/hampers/edit/:id",
         element : <EditHampers/>
       },
       {

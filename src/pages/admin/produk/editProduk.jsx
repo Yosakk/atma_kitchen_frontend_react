@@ -16,10 +16,16 @@ const formReducer = (state, action) => {
                 ...state,
                 ...action.data
             };
+        case 'UPDATE_ID_PENITIP':
+            return {
+                ...state,
+                id_penitip: action.id_penitip
+            };
         default:
             return state;
     }
 };
+
 
 const EditProduk = () => {
     const [formData, setFormData] = useReducer(formReducer, {
@@ -42,6 +48,7 @@ const EditProduk = () => {
         id_produk: "",
         nama_produk: "",
         deskripsi_produk: "",
+        gambar_produk: "",
         harga_produk: "",
         kategori_produk: "",
         quantitas: "",
@@ -76,7 +83,31 @@ const EditProduk = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
 
+        if (name === "id_penitip") {
+            setFormData({ type: 'UPDATE_ID_PENITIP', id_penitip: value });
+        }
+
+        if (name === "id_penitip") {
+            setData((prevData) => ({
+                ...prevData,
+                id_penitip: value,
+            }));
+        }
+
         if (data[name] !== value) { // Memeriksa apakah ada perubahan nilai
+            if (name === "gambar_produk" && files && files.length > 0) {
+                const file = files[0];
+                const reader = new FileReader();
+
+                reader.onload = () => {
+                    setData((prevData) => ({
+                        ...prevData,
+                        gambar_produk: reader.result, // Set nilai gambar_produk sebagai base64
+                    }));
+                };
+
+                reader.readAsDataURL(file);
+            }
             if (name === "nama_produk" && value.trim() === "") {
                 setFormErrors((prevErrors) => ({
                     ...prevErrors,
@@ -115,26 +146,7 @@ const EditProduk = () => {
                 }));
             }
             if (name) {
-                if (name === "harga_produk" || name === "stok_produk") {
-                    const numericValue = name === "harga_produk" ? parseFloat(value) : parseInt(value, 10);
-                    if (isNaN(numericValue)) {
-                        console.log("Harga Produk")
-                        setData((prevData) => ({
-                            ...prevData,
-                            [name]: numericValue,
-                        }));
-                        setFormErrors((prevErrors) => ({
-                            ...prevErrors,
-                            [name]: name === "harga_produk" ? "Harap masukkan harga yang valid!" : "Harap masukkan stok yang valid!",
-                        }));
-                    } else {
-                        setData((prevData) => ({
-                            ...prevData,
-                            [name]: numericValue,
-                        }));
-                        setFormData({ target: { name, value: numericValue } });
-                    }
-                } else if (name === "kategori_produk" && value !== "Titipan") {
+                if (name === "kategori_produk" && value !== "Titipan") {
                     setData((prevFormData) => ({
                         ...prevFormData,
                         namaPenitip: "",
@@ -344,7 +356,7 @@ const EditProduk = () => {
                                 )}
                             </div>
                             <div className="mb-4 relative w-full min-w-[100px]">
-                                <label htmlFor="gambarProduk" className="block mb-2 text-sm font-medium text-gray-900">Gambar Produk</label>
+                                <label htmlFor="gambar_produk" className="block mb-2 text-sm font-medium text-gray-900">Gambar Produk</label>
                                 <Input
                                     id="gambar_produk"
                                     name="gambar_produk"
@@ -377,12 +389,13 @@ const EditProduk = () => {
                                     name="id_penitip"
                                     label="Penitip"
                                     value={data.id_penitip}
-                                    onChange={(value) => handleChange({ target: { name: "id_penitip", value } })}
+                                    onChange={handleChange}
                                     className="w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2.5"
+                                    disabled={data.kategori_produk !== "Titipan"}
                                 >
                                     <option value="">Pilih Penitip</option>
                                     {dataPenitip.map((penitip) => (
-                                        <option key={penitip.id_penitip} value={String(penitip.id_penitip)}>
+                                        <option key={penitip.id_penitip} value={penitip.id_penitip}>
                                             {penitip.id_penitip} - {penitip.nama_penitip}
                                         </option>
                                     ))}

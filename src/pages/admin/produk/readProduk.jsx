@@ -379,8 +379,8 @@ const ReadProduk = () => {
                           <Link
                             to={
                               contentType === "produk"
-                                ? "/admin/produk/edit"
-                                : "/admin/hampers/edit"
+                                ? `/admin/produk/edit/${idProduk}`
+                                : `/admin/hampers/edit/${idProdukHampers}`
                             }
                             className="inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mr-2"
                             onClick={() =>
