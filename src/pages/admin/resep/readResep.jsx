@@ -81,22 +81,27 @@ const ReadResep = () => {
     setSelectedResep(null);
     setIsModalOpen(false);
   };
+  const findResepIdByProductName = (productName) => {
+    const resep = resepTableData.find((item) => item.namaProduk === productName);
+    return resep ? resep.id_resep : null;
+  };
   const handleDelete = async () => {
     if (!selectedResep) {
       console.error("No Resep selected");
       return;
     }
     
-    console.log("masuk", id_resep);
+    console.log("masuk", selectedResep);
+    console.log("masuk", findResepIdByProductName(selectedResep.namaProduk));
 
-    // try {
-    //   await deleteResep(selectedResep.id_resep); // Panggil deleteResep
-    //   fetchData();
-    //   console.log("Delete", selectedResep);
-    //   closeModal();
-    // } catch (error) {
-    //   console.error("Error deleting Resep:", error);
-    // }
+    try {
+      await deleteResep(findResepIdByProductName(selectedResep.namaProduk)); // Panggil deleteResep
+      fetchData();
+      console.log("Delete", findResepIdByProductName(selectedResep.namaProduk));
+      closeModal();
+    } catch (error) {
+      console.error("Error deleting Resep:", error);
+    }
   };
 
   const getProductName = (idProduk) => {
@@ -217,18 +222,18 @@ const ReadResep = () => {
               </tr>
             </thead>
             <tbody>
-              {currentItems.map(({ id_resep, namaProduk, bahanBaku }) => (
-                <tr key={id_resep}>
+              {currentItems.map((item) => (
+                <tr key={item.id_resep}>
                   <td className="py-3 px-5 border-b border-blue-gray-50 text-[11px] font-semibold">
-                    {namaProduk}
+                    {item.namaProduk}
                   </td>
                   <td className="py-3 px-5 border-b border-blue-gray-50 text-[11px] font-semibold">
-                    {bahanBaku.map(({ nama }, index) => (
+                    {item.bahanBaku.map(({ nama }, index) => (
                       <div key={index}>{nama}</div>
                     ))}
                   </td>
                   <td className="py-3 px-5 border-b border-blue-gray-50 text-[11px] font-semibold">
-                    {bahanBaku.map(({ jumlah, satuan }, index) => (
+                    {item.bahanBaku.map(({ jumlah, satuan }, index) => (
                       <div key={index}>{jumlah} {satuan}</div>
                     ))}
                   </td>
@@ -243,7 +248,7 @@ const ReadResep = () => {
                       <Button
                         to=""
                         className="inline-block bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
-                        onClick={() => openModal({ id_resep, namaProduk, bahanBaku })}
+                        onClick={() => openModal(item)}
                       >
                         <FontAwesomeIcon icon={faTrash} className="mr-2" />
                         Hapus

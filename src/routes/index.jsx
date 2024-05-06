@@ -135,9 +135,10 @@ const router = createBrowserRouter([
         element : <ReadPelanggan />
       },
       {
-        path : "/admin/pelanggan/profile",
+        path : "/admin/pelanggan/profile/:id",
         element : <ProfilePagePelanggan />
-      },{
+      },
+      {
         path : "/admin/pegawai/profile",
         element : <ProfilePagePegawai />
       },

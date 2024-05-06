@@ -10,16 +10,15 @@ import {
 } from "@material-tailwind/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisV } from "@fortawesome/free-solid-svg-icons";
-import { pelangganTableData } from "../../../data/pelangganTableData";
 import { showDataPelanggan } from "../../../api/admin/PelangganApi";
 
 const ReadPelanggan = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchValue, setSearchValue] = useState("");
   const [itemsPerPage] = useState(5);
-  // const totalPage = Math.ceil(pelangganTableData.length / itemsPerPage);
   const [pelangganData, setPelangganData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedPelangganId, setSelectedPelangganId] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -36,6 +35,10 @@ const ReadPelanggan = () => {
     }
   };
 
+  const handleSaveId = (id) => {
+    setSelectedPelangganId(id);
+  };
+
   const pelangganTableData = pelangganData.map((item) => ({
     id: item.id,
     username: item.username,
@@ -44,8 +47,6 @@ const ReadPelanggan = () => {
     jenisKelamin: item.gender,
     tanggalLahir: item.tanggal_lahir,
     nomorTelepon: item.nomor_telepon,
-    // gaji: item.pegawai ? item.pegawai.gaji : null,
-    // bonus: item.pegawai ? item.pegawai.bonus_gaji : null,
     img: "/img/team-2.jpeg",
     poin: item.pelanggan ? item.pelanggan.poin : null,
     atmaWallet: item.pelanggan ? item.pelanggan.atma_wallet : null,
@@ -66,6 +67,7 @@ const ReadPelanggan = () => {
 
   const totalPages = Math.ceil(pelangganTableData.length / itemsPerPage);
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
       <Card>
@@ -127,6 +129,7 @@ const ReadPelanggan = () => {
                 currentItems.map(
                   (
                     {
+                      id,
                       img,
                       username,
                       nama,
@@ -148,7 +151,7 @@ const ReadPelanggan = () => {
                     }`;
 
                     return (
-                      <tr key={username}>
+                      <tr key={id}>
                         <td className={className}>
                           <Avatar
                             src={img}
@@ -207,7 +210,10 @@ const ReadPelanggan = () => {
                           </Typography>
                         </td>
                         <td className={className}>
-                          <Link to="/admin/pelanggan/profile">
+                          <Link
+                            to={`/admin/pelanggan/profile/${id}`} // Mengirim ID pelanggan sebagai parameter pada URL
+                            onClick={() => handleSaveId(id)}
+                          >
                             <FontAwesomeIcon
                               icon={faEllipsisV}
                               className="mr-2"
@@ -219,7 +225,6 @@ const ReadPelanggan = () => {
                   }
                 )
               )}
-              {/* {renderTableData()} */}
             </tbody>
           </table>
           <div className="flex justify-end mt-4">
@@ -245,7 +250,7 @@ const ReadPelanggan = () => {
                 </button>
               ))}
               <button
-                onClick={() => handlePageChange(currentPage + 1)}
+                onClick={() => paginate(currentPage + 1)}
                 disabled={currentPage === totalPages}
                 className="px-3 py-1 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 mr-4"
               >
