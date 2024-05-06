@@ -57,7 +57,7 @@ export const storeDataHampers = async (data) => {
         const response = await urlAxios.post("/produk_hampers", data, {
             headers: {
                 Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
+                "Content-Type": "multipart/form-data",
             },
         });
         console.log(response.data);

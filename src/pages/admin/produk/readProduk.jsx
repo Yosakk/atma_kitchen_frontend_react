@@ -30,6 +30,7 @@ import { hampersTableData } from "../../../data/hampersTableData";
 import { showDataHampers } from "../../../api/admin/ProdukApi";
 import { deleteProduk } from "../../../api/admin/ProdukApi";
 import { deleteProdukHampers } from "../../../api/admin/ProdukApi";
+import { getImage } from "../../../api";
 
 const AddProdukButton = ({ contentType }) => {
   const addButtonLink =
@@ -176,7 +177,7 @@ const ReadProduk = () => {
     idProduk: item.id_produk,
     idProdukHampers: item.id_produk_hampers,
     namaProduk: item.nama_produk,
-    gambarProduk: "/img/team-2.jpeg",
+    gambarProduk: item.gambar_produk,
     deskripsiProduk: item.deskripsi_produk,
     hargaProduk: item.harga_produk,
     kategoriProduk: item.kategori_produk,
@@ -196,7 +197,7 @@ const ReadProduk = () => {
   const hampersTableData = hampersData.map((item) => ({
     idProdukHampers: item.id_produk_hampers,
     namaProduk: item.nama_produk_hampers,
-    gambarProduk: "/img/team-4.jpeg",
+    gambarProduk: item.gambar_produk_hampers,
     deskripsiProduk: item.deskripsi_produk_hampers,
     hargaProduk: item.harga_produk_hampers,
   }));
@@ -323,7 +324,7 @@ const ReadProduk = () => {
                       </td>
                       <td className={className}>
                         <img
-                          src={gambarProduk}
+                          src={getImage(gambarProduk)}
                           alt={namaProduk}
                           className="w-14 h-14 object-cover rounded-md"
                         />

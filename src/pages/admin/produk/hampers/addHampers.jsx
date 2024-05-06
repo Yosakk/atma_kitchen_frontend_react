@@ -24,6 +24,12 @@ const formReducer = (state, event) => {
             ...state,
             [`id_bahan_baku[${index}]`]: updatedBahanBakuId,
         };
+    } else if (event.target.name === 'gambar_produk_hampers') {
+        // Penanganan untuk input file
+        return {
+            ...state,
+            gambar_produk_hampers: event.target.files[0], // Menggunakan FormData
+        };
     } else {
         return {
             ...state,
@@ -112,7 +118,7 @@ const AddHampers = () => {
         } else {
             console.error("Event or event.target is undefined.");
         }
-    };    
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -123,7 +129,7 @@ const AddHampers = () => {
             harga_produk_hampers: formData.harga_produk_hampers,
             gambar_produk_hampers: formData.gambar_produk_hampers,
             produk_id: produkList.map(item => item.produk_id),
-            id_bahan_baku: bahanbakuList.map(item=>item.id_bahan_baku)
+            id_bahan_baku: bahanbakuList.map(item => item.id_bahan_baku)
         };
         storeDataHampers(submitData)
             .then((res) => {
@@ -179,9 +185,11 @@ const AddHampers = () => {
                                 <Input
                                     id="gambar_produk_hampers"
                                     name="gambar_produk_hampers"
-                                    onChange={setFormData}
+                                    onChange={(event) => setFormData({ target: event.target })}
                                     type='file'
                                     size="md"
+                                    multiple
+                                    className="form-control"
                                     label="Gambar Produk"
                                 />
                             </div>
