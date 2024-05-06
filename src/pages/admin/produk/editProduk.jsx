@@ -64,7 +64,7 @@ const EditProduk = () => {
             harga_produk: editedProduk.hargaProduk || "",
             kategori_produk: editedProduk.kategoriProduk || "",
             quantitas: editedProduk.kuantitas.toString(),
-            id_penitip: editedProduk.idPenitip.toString(),
+            id_penitip: editedProduk.idPenitip,
             stok_produk: editedProduk.stokProduk || "",
             limit_harian: editedProduk.limitHarian || "",
             id_stok_produk: editedProduk.idStokProduk || "",
@@ -372,24 +372,21 @@ const EditProduk = () => {
 
                             <div className="mb-4 relative w-full min-w-[100px]">
                                 <label htmlFor="id_penitip" className="block mb-2 text-sm font-medium text-gray-900">Nama Penitip</label>
-                                <Select
+                                <select
                                     id="id_penitip"
                                     name="id_penitip"
                                     label="Penitip"
                                     value={data.id_penitip}
                                     onChange={(value) => handleChange({ target: { name: "id_penitip", value } })}
-                                    className="w-full bg-white"
+                                    className="w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2.5"
                                 >
-                                    <Option value="">Pilih Penitip</Option>
+                                    <option value="">Pilih Penitip</option>
                                     {dataPenitip.map((penitip) => (
-                                        <Option key={penitip.id_penitip} value={String(penitip.id_penitip)}>
+                                        <option key={penitip.id_penitip} value={String(penitip.id_penitip)}>
                                             {penitip.id_penitip} - {penitip.nama_penitip}
-                                        </Option>
+                                        </option>
                                     ))}
-                                </Select>
-
-
-
+                                </select>
                             </div>
                             <div className="mb-4 relative w-full min-w-[100px]">
                                 <label htmlFor="stokProduk" className="block mb-2 text-sm font-medium text-gray-900">Stok Produk</label>

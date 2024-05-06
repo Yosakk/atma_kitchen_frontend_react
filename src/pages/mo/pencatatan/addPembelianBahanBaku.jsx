@@ -1,43 +1,81 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useReducer, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardBody, Typography, Input, Select, Textarea, Button } from "@material-tailwind/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faSave, faClose, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { storePembelianBahan } from "../../../api/mo/PembelianBahanBakuApi";
+import { showDataBahanBaku } from "../../../api/admin/BahanBakuApi";
+
+const formReducer = (state, event) => {
+    return {
+        ...state,
+        [event.target.name]: event.target.value,
+    };
+};
 
 const AddPembelianBahanBaku = () => {
-    const [formData, setFormData] = useState({
+    const today = new Date().toISOString().split('T')[0];
+    const [formData, setFormData] = useReducer(formReducer, {});
+    const [dataBahanBaku, setDataBahanBaku] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+    const [data, setData] = useState({
         namaBahanBaku: "",
         jumlahPembelian: "",
         hargaBeli: "",
         tanggalBeli: "",
-        satuan:"",
-        
+        satuan: "",
     });
-    const [bahanbakuList, setBahanBakuList] = useState([{ tanggalBeli: '' }]);
 
-const handleAddBahanBaku = () => {
-    setBahanBakuList([...bahanbakuList, { tanggalBeli: '' }]);
-};
+    useEffect(() => {
+        fetchDataBahanBaku();
+    }, []);
 
-const handleRemoveBahanBaku = (index) => {
-    const updatedBahanBakuList = [...bahanbakuList];
-    updatedBahanBakuList.splice(index, 1);
-    setBahanBakuList(updatedBahanBakuList);
-};
+    const fetchDataBahanBaku = async () => {
+        try {
+            const response = await showDataBahanBaku();
+            setDataBahanBaku(response.data);
 
+        } catch (error) {
+            console.error("Error fetching data:", error);
 
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        const updatedBahanBakuList = [...bahanbakuList];
-        updatedBahanBakuList[index] = { ...updatedBahanBakuList[index], [name]: value };
-        setBahanBakuList(updatedBahanBakuList);
+        }
     };
+
+
+    // const [bahanbakuList, setBahanBakuList] = useState([{ tanggalBeli: '' }]);
+
+    // const handleAddBahanBaku = () => {
+    //     setBahanBakuList([...bahanbakuList, { tanggalBeli: '' }]);
+    // };
+
+    // const handleRemoveBahanBaku = (index) => {
+    //     const updatedBahanBakuList = [...bahanbakuList];
+    //     updatedBahanBakuList.splice(index, 1);
+    //     setBahanBakuList(updatedBahanBakuList);
+    // };
+
+
+
+    // const handleChange = (e) => {
+    //     const { name, value } = e.target;
+    //     const updatedBahanBakuList = [...bahanbakuList];
+    //     updatedBahanBakuList[index] = { ...updatedBahanBakuList[index], [name]: value };
+    //     setBahanBakuList(updatedBahanBakuList);
+    // };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Add your logic to handle form submission here
-        console.log(formData);
+        storePembelianBahan(formData)
+            .then((res) => {
+                sessionStorage.setItem("dataPembelianBahan", JSON.stringify(res.data));
+                setLoading(false);
+                navigate("/mo/pencatatanPembelianBahanBaku/read")
+            })
+            .catch((err) => {
+                setLoading(false);
+                console.log("Error", err);
+            })
     };
 
     return (
@@ -51,7 +89,7 @@ const handleRemoveBahanBaku = (index) => {
                 <CardBody>
                     <form onSubmit={handleSubmit}>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <div className="mb-4 col-span-1 md:col-span-2  lg:col-span-3 relative w-full min-w-[100px]">
+                            {/* <div className="mb-4 col-span-1 md:col-span-2  lg:col-span-3 relative w-full min-w-[100px]">
                                 <label htmlFor="tanggalBeli" className="block mb-2 text-sm font-medium text-gray-900">Tanggal Pembelian</label>
                                 <Input
                                     id="tanggalBeli"
@@ -64,9 +102,67 @@ const handleRemoveBahanBaku = (index) => {
                                     placeholder='Lapis Legit'
                                     required
                                 />
+                            </div> */}
+                            <div className="mb-4 mt-4 relative w-full min-w-[100px]">
+                                <label htmlFor="id_bahan_baku" className="block mb-2 text-sm font-medium text-gray-900">Nama Bahan Baku</label>
+                                <select
+                                    required
+                                    id="id_bahan_baku"
+                                    name="id_bahan_baku"
+                                    className="w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2.5"
+                                    placeholder="Nama Bahan Baku"
+                                    onChange={setFormData}
+                                >
+                                    <option value="">Pilih Nama Bahan Baku</option>
+                                    {dataBahanBaku.map((BahanBaku) => (
+                                        <option key={BahanBaku.id_bahan_baku} value={BahanBaku.id_bahan_baku}>{BahanBaku.nama_bahan_baku} - {BahanBaku.satuan_bahan_baku}</option>
+                                    ))}
+                                </select>
                             </div>
-                            
-                            {bahanbakuList.map((bahanbaku, index) => (
+
+                            <div className="mb-4 mt-4 relative w-full min-w-[100px]">
+                                <label htmlFor="jumlah_pembelian" className="block mb-2 text-sm font-medium text-gray-900">Jumlah Pembelian Bahan Baku</label>
+                                <Input
+                                    id="jumlah_pembelian"
+                                    name="jumlah_pembelian"
+                                    onChange={setFormData}
+                                    type='number'
+                                    size="md"
+                                    label="Jumlah Bahan Baku "
+                                    placeholder='100'
+                                    required
+                                />
+                            </div>
+                            <div className="mb-4 mt-4 relative w-full min-w-[100px]">
+                                <label htmlFor="tanggal_bahan_baku" className="block mb-2 text-sm font-medium text-gray-900">Tanggal Pengeluaran</label>
+                                <Input
+                                    id="tanggal_bahan_baku"
+                                    name="tanggal_bahan_baku"
+                                    onChange={setFormData}
+                                    type='date'
+                                    size="md"
+                                    placeholder='Listrik'
+                                    max={today}
+                                    required
+                                />
+                            </div>
+                            <div className="mb-4 mt-4 relative w-full min-w-[100px]">
+                                <label htmlFor="harga_beli" className="block mb-2 text-sm font-medium text-gray-900">Harga Beli Bahan Baku</label>
+                                <Input
+                                    id="harga_beli"
+                                    name="harga_beli"
+                                    onChange={setFormData}
+                                    type='number'
+                                    size="md"
+                                    label="Harga Beli Bahan Baku"
+                                    placeholder='100'
+                                    required
+                                />
+                            </div>
+
+
+
+                            {/* {bahanbakuList.map((bahanbaku, index) => (
                                 <div key={index} className="col-span-1  mb-4">
                                     <label htmlFor={`namaBahanBaku_${index}`} className="block mb-2 text-sm font-medium text-gray-900">Nama Bahan Baku {index + 1}</label>
                                     <select
@@ -77,14 +173,14 @@ const handleRemoveBahanBaku = (index) => {
                                         placeholder={`Nama Bahan Baku ${index + 1}`}
                                         style={{ width: '100%' }}
                                         onChange={setFormData}
-                                        
+
                                     >
                                         <option value="">Pilih Nama Bahan Baku {index + 1} </option>
                                         <option value="BahanBaku A">Bahan Baku A</option>
                                         <option value="BahanBaku B">Bahan Baku B</option>
                                         <option value="BahanBaku C">Bahan Baku C</option>
                                     </select>
-                                    
+
                                     <div className="mb-4 mt-4 relative w-full min-w-[100px]">
                                         <label htmlFor={`jumlahPembelian_${index}`} className="block mb-2 text-sm font-medium text-gray-900">Jumlah Pembelian Bahan Baku {index + 1}</label>
                                         <Input
@@ -108,7 +204,7 @@ const handleRemoveBahanBaku = (index) => {
                                         placeholder={`Satuan Bahan Baku ${index + 1}`}
                                         style={{ width: '100%' }}
                                         onChange={setFormData}
-                                        
+
                                     >
                                         <option value="">Satuan Bahan Baku {index + 1} </option>
                                         <option value="gram">gram</option>
@@ -130,19 +226,19 @@ const handleRemoveBahanBaku = (index) => {
                                         />
                                     </div>
                                 </div>
-                                
-                            ))}
+
+                            ))} */}
 
                         </div>
-                        <div className="mt-10 flex justify-between">
-                            <div>
-                                <Button type="button" onClick={() => handleRemoveBahanBaku(bahanbakuList.length - 1)}  disabled={bahanbakuList.length <= 1}className="text-white bg-gradient-to-r from-red-500 via-red-600 to-red-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 focus:ring-0">
+                        <div className="mt-10 flex justify-end">
+                            {/* <div>
+                                <Button type="button" onClick={() => handleRemoveBahanBaku(bahanbakuList.length - 1)} disabled={bahanbakuList.length <= 1} className="text-white bg-gradient-to-r from-red-500 via-red-600 to-red-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 focus:ring-0">
                                     <FontAwesomeIcon icon={faTrash} /> Hapus Bahan Baku
                                 </Button>
                                 <Button type="button" onClick={handleAddBahanBaku} className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 focus:ring-0">
                                     <FontAwesomeIcon icon={faPlus} /> Tambah Bahan Baku
                                 </Button>
-                            </div>
+                            </div> */}
 
                             <div>
                                 <Link className="mb-2" to="/mo/pencatatanPembelianBahanBaku/read">
@@ -153,9 +249,10 @@ const handleRemoveBahanBaku = (index) => {
                                         <FontAwesomeIcon icon={faClose} className="mr-2" /> Batal
                                     </Button>
                                 </Link>
-                                
+
                                 <Button
                                     type="submit"
+                                    loading={loading}
                                     className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 focus:ring-0"
                                 >
                                     <FontAwesomeIcon icon={faSave} className="" /> Simpan

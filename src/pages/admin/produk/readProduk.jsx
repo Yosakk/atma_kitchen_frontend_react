@@ -324,7 +324,7 @@ const ReadProduk = () => {
                             kategoriProduk,
                             statusProduk,
                             kuantitas,
-                            namaPenitip
+                            namaPenitip,
                           })}>
                             <FontAwesomeIcon icon={faTrash} className="mr-2" />Hapus
                           </Button>

@@ -31,3 +31,19 @@ export const deletePegawai = async (id) => {
         throw error.response.data;
     }
 };
+
+export const storePegawai = async (data) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.post("/registerPegawai", data, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+}

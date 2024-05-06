@@ -1,11 +1,21 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useReducer } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardBody, Typography, Input, Select, Textarea } from "@material-tailwind/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faSave, faClose } from "@fortawesome/free-solid-svg-icons";
+import { storePegawai } from "../../../api/mo/PegawaiApi";
+
+const formReducer = (state, event) => {
+    return {
+        ...state,
+        [event.target.name]: event.target.value,
+    };
+};
 
 const AddPegawai = () => {
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useReducer(formReducer, {});
+    const [loading, setLoading] = useState(false);
+    const [data, setData] = useState({
         username: "",
         nama: "",
         email: "",
@@ -16,19 +26,28 @@ const AddPegawai = () => {
         bonus: 0,
     });
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prevFormData) => ({
-            ...prevFormData,
-            [name]: value,
-        }));
-        };
-    
-        const handleSubmit = (e) => {
+    // const handleChange = (e) => {
+    //     const { name, value } = e.target;
+    //     setFormData((prevFormData) => ({
+    //         ...prevFormData,
+    //         [name]: value,
+    //     }));
+    // };
+
+    const handleSubmit = (e) => {
         e.preventDefault();
         // Add your logic to handle form submission here
-        console.log(formData);
-        };
+        storePegawai(formData)
+            .then((res) => {
+                sessionStorage.setItem("dataPegawai", JSON.stringify(res.data));
+                setLoading(false);
+                navigate("/mo/pegawai/read")
+            })
+            .catch((err) => {
+                setLoading(false);
+                console.log("Error", err);
+            })
+    };
 
     return (
         <div className="mt-12 mb-8">
@@ -46,8 +65,7 @@ const AddPegawai = () => {
                                 <Input
                                     id="username"
                                     name="username"
-                                    value={formData.username}
-                                    onChange={handleChange}
+                                    onChange={setFormData}
                                     type='text'
                                     size="md"
                                     label="Username"
@@ -55,13 +73,25 @@ const AddPegawai = () => {
                                     required
                                 />
                             </div>
-                            <div className="mb-4 col-span-1  relative w-full min-w-[100px]">
-                                <label htmlFor="namaPegawai" className="block mb-2 text-sm font-medium text-gray-900">Nama Pegawai</label>
+                            <div className="mb-4 col-span-1 relative w-full min-w-[100px]">
+                                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900">Password</label>
                                 <Input
-                                    id="namaPegawai"
-                                    name="namaPegawai"
-                                    value={formData.namaPegawai}
-                                    onChange={handleChange}
+                                    id="password"
+                                    name="password"
+                                    onChange={setFormData}
+                                    type='password'
+                                    size="md"
+                                    label="Password"
+                                    placeholder='Pakde Raihan'
+                                    required
+                                />
+                            </div>
+                            <div className="mb-4 col-span-1  relative w-full min-w-[100px]">
+                                <label htmlFor="nama_user" className="block mb-2 text-sm font-medium text-gray-900">Nama Pegawai</label>
+                                <Input
+                                    id="nama_user"
+                                    name="nama_user"
+                                    onChange={setFormData}
                                     type='text'
                                     size="md"
                                     label="Nama Pegawai"
@@ -74,8 +104,7 @@ const AddPegawai = () => {
                                 <Input
                                     id="email"
                                     name="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
+                                    onChange={setFormData}
                                     type='email'
                                     size="md"
                                     label="Email"
@@ -84,12 +113,11 @@ const AddPegawai = () => {
                                 />
                             </div>
                             <div className="mb-4 relative w-full min-w-[100px]">
-                                <label htmlFor="tanggalLahir" className="block mb-2 text-sm font-medium text-gray-900">Tanggal Lahir</label>
+                                <label htmlFor="tanggal_lahir" className="block mb-2 text-sm font-medium text-gray-900">Tanggal Lahir</label>
                                 <Input
-                                    id="tanggalLahir"
-                                    name="tanggalLahir"
-                                    value={formData.tanggalLahir}
-                                    onChange={handleChange}
+                                    id="tanggal_lahir"
+                                    name="tanggal_lahir"
+                                    onChange={setFormData}
                                     type='date'
                                     size="md"
                                     label="Tanggal Lahir"
@@ -98,33 +126,30 @@ const AddPegawai = () => {
                                 />
                             </div>
                             <div className="mb-4 relative w-full min-w-[100px]">
-                                <label htmlFor="jenisKelamin" className="block mb-2 text-sm font-medium text-gray-900">Jenis Kelamin</label>
+                                <label htmlFor="gender" className="block mb-2 text-sm font-medium text-gray-900">Jenis Kelamin</label>
                                 <select
-                                    id="jenisKelamin"
-                                    name="jenisKelamin"
-                                    value={formData.jenisKelamin}
-                                    onChange={handleChange}
+                                    id="gender"
+                                    name="gender"
+                                    onChange={setFormData}
                                     className="w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2.5"
                                     required
                                 >
                                     <option value="">Pilih Jenis Kelamin</option>
                                     <option value="Laki-Laki">Laki-Laki</option>
                                     <option value="Perempuan">Perempuan</option>
-                                    
+
                                 </select>
                             </div>
-                            
+
                             <div className="mb-4 relative w-full min-w-[100px]">
-                                <label htmlFor="NoTelepon" className="block mb-2 text-sm font-medium text-gray-900">Nomor Telepon</label>
+                                <label htmlFor="nomor_telepon" className="block mb-2 text-sm font-medium text-gray-900">Nomor Telepon</label>
                                 <Input
-                                    id="NoTelepon"
-                                    name="NoTelepon"
-                                    value={formData.NoTelepon}
-                                    onChange={handleChange}
+                                    id="nomor_telepon"
+                                    name="nomor_telepon"
+                                    onChange={setFormData}
                                     type='number'
                                     size="md"
                                     label="Nomor Telepon"
-                                    // disabled={formData.kategoriProduk === "Titipan"}
                                     placeholder='082635272536'
                                     required
                                 />

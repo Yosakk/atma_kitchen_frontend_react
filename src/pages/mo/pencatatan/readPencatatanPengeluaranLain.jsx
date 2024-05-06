@@ -189,7 +189,6 @@ const ReadPencatatanPengeluaranLain = () => {
                       id,
                       username,
                       namaPengeluaran,
-                      jumlahPengeluaran,
                       // hargaSatuan,
                       totalPengeluaran,
                       tanggalPengeluaran,
@@ -202,9 +201,6 @@ const ReadPencatatanPengeluaranLain = () => {
                       </td>
                       <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
                         {namaPengeluaran}
-                      </td>
-                      <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
-                        {jumlahPengeluaran}
                       </td>
                       {/* <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
                         {hargaSatuan}

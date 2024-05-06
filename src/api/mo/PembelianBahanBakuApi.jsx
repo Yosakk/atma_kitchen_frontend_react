@@ -31,3 +31,19 @@ export const deletePembelianBahan = async (id) => {
         throw error.response.data;
     }
 };
+
+export const storePembelianBahan = async (data) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.post("/pembelian_bahan", data, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+}
