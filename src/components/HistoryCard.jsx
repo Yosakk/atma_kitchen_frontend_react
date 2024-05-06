@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Card,
     CardHeader,
@@ -13,6 +13,8 @@ import {
     Button,
 } from "@material-tailwind/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { useParams } from "react-router-dom";
+import { showTransaksiHistoryCustomer } from "../api/customer/TransaksiApi";
 
 const TABS = [
     {
@@ -32,83 +34,40 @@ const TABS = [
         value: "Selesai",
     },
 ];
-
-const DATA = [
-    {
-        tanggal: "21/12/2002",
-        status: "Diproses",
-        namaProduk: "Kue Lapis Legit 1 Loyang",
-        deskripsi: "Kue Lapis Legit dengan kenikmatan tiada tanding",
-        kategori: "Cake",
-        harga: 200000,
-        total: 120000,
-    },
-    {
-        tanggal: "22/12/2002",
-        status: "Selesai",
-        namaProduk: "Roti Sobek 1 Papan",
-        deskripsi: "Roti Sobek dengan rasa yang menggugah selera",
-        kategori: "Roti",
-        harga: 150000,
-        total: 100000,
-    },
-    {
-        tanggal: "26/12/2002",
-        status: "Dikirim",
-        namaProduk: "Macha Creamy Latte",
-        deskripsi: "Macha Creamy Latte dengan rasa yang menggugah selera",
-        kategori: "Minuman",
-        harga: 150000,
-        total: 100000,
-    },
-    {
-        tanggal: "26/12/2002",
-        status: "Dikirim",
-        namaProduk: "Roti Sobek 1 Papan",
-        deskripsi: "Roti Sobek dengan rasa yang menggugah selera",
-        kategori: "Roti",
-        harga: 150000,
-        total: 100000,
-    },
-    {
-        tanggal: "22/12/2002",
-        status: "Selesai",
-        namaProduk: "Coffe Creamy Latte ",
-        deskripsi: "Coffe Creamy Latte dengan rasa yang menggugah selera",
-        kategori: "Minuman",
-        harga: 150000,
-        total: 100000,
-    },
-    {
-        tanggal: "26/12/2002",
-        status: "Dikirim",
-        namaProduk: "Lapis Surabaya",
-        deskripsi: "Lapis Surabaya dengan rasa yang menggugah selera",
-        kategori: "Cake",
-        harga: 150000,
-        total: 100000,
-    },
-    {
-        tanggal: "26/12/2002",
-        status: "Dikirim",
-        namaProduk: "Brownies 1 Papan",
-        deskripsi: "Brownies dengan rasa yang menggugah selera",
-        kategori: "Roti",
-        harga: 150000,
-        total: 100000,
-    },
-    
-    // Add more data here...
-];
-
 const HistoryCard = () => {
-    const [selectedTab, setSelectedTab] = useState("Semua");
+    let { id } = useParams();
+    console.log("masuk history", id)
 
-    const filteredData = selectedTab === "Semua" ? DATA : DATA.filter(item => item.status === selectedTab);
+    const [selectedTab, setSelectedTab] = useState("Semua");
+    const [historyData, setHistoryData] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5; // Ubah sesuai dengan jumlah item yang ingin ditampilkan per halaman
 
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            const response = await showTransaksiHistoryCustomer(id);
+            const mappedData = response.data.map((item) => ({
+                id: item.id_transaksi,
+                tanggal: item.tanggal_transaksi,
+                status: item.status_pengiriman,
+                namaProduk: item.nama_produk,
+                deskripsi: item.deskripsi_produk,
+                kategori: item.kategori_produk,
+                harga: item.total_harga_transaksi,
+                total: item.total_pembayaran,
+            }));
+            setHistoryData(mappedData);
+            setIsLoading(false);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            setIsLoading(false);
+        }
+    };
 
     const handleClickPrevious = () => {
         setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
@@ -120,9 +79,9 @@ const HistoryCard = () => {
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = currentPage * itemsPerPage;
+    const filteredData = selectedTab === "Semua" ? historyData : historyData.filter(item => item.status === selectedTab);
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
-    // Filtered data based on pagination
-    const paginatedData = filteredData.slice(startIndex, endIndex);
     return (
         <Card className="h-full w-full">
             <CardHeader floated={false} shadow={false} className="rounded-none">
@@ -160,91 +119,93 @@ const HistoryCard = () => {
                 </div>
             </CardHeader>
 
-            <CardBody className="px-4">
-                {paginatedData.map((item, index) => (
-                    <div key={index} className="border p-3 rounded-lg mb-4">
-                        <div className="flex pb-3">
-                            <Typography variant="h6" color="black">
-                                Tanggal Transaksi : {item.tanggal}
-                            </Typography>
-                            <Typography variant="h6" color="black" className="ml-auto">
-                                <Chip
-                                    size="sm"
-                                    variant="ghost"
-                                    value={item.status}
-                                    color={
-                                        item.status === "Selesai"
-                                            ? "green"
-                                            : item.status === "Dikirim"
-                                                ? "amber"
-                                                : item.status === "Diproses"
-                                                    ? "blue"
-                                                    : "red"
-                                    }
-                                />
-                            </Typography>
-                        </div>
-                        <div className="grid grid-cols-6 border-b border-t pt-4 pb-4">
-                            <div className="mx-auto col-span-3 md:col-span-1 flex justify-center items-center">
-                                <img
-                                    src="https://docs.material-tailwind.com/img/face-2.jpg"
-                                    alt="avatar"
-                                    className="inline-block h-[120px] w-[120px] md:w-[90px] md:h-[90px] lg:w-[110px] lg:h-[110px] object-cover object-center"
-                                />
-                            </div>
-                            <div className="col-span-3">
-                                <Typography variant="h5" color="blue-gray" className="mb-2">
-                                    {item.namaProduk}
+            {!isLoading && (
+                <CardBody className="px-4">
+                    {filteredData.slice(startIndex, endIndex).map((item, index) => (
+                        <div key={index} className="border p-3 rounded-lg mb-4">
+                            <div className="flex pb-3">
+                                <Typography variant="h6" color="black">
+                                    Tanggal Transaksi : {item.tanggal}
                                 </Typography>
-                                <Typography>
-                                    {item.deskripsi}
-                                </Typography>
-                                <div className="w-max mt-2">
+                                <Typography variant="h6" color="black" className="ml-auto">
                                     <Chip
                                         size="sm"
                                         variant="ghost"
-                                        value={item.kategori}
+                                        value={item.status}
                                         color={
-                                            item.kategori === "Cake"
+                                            item.status === "Selesai"
                                                 ? "green"
-                                                : item.kategori === "Roti"
+                                                : item.status === "Dikirim"
                                                     ? "amber"
-                                                    : item.kategori === "Minuman"
+                                                    : item.status === "Diproses"
                                                         ? "blue"
-                                                        : item.kategori === "Titipan"
-                                                            ? "purple"
-                                                            : "red"
-                                        }
+                                                        : "red"
+                                    }
+                                    />
+                                </Typography>
+                            </div>
+                            <div className="grid grid-cols-6 border-b border-t pt-4 pb-4">
+                                <div className="mx-auto col-span-3 md:col-span-1 flex justify-center items-center">
+                                    <img
+                                        src="https://docs.material-tailwind.com/img/face-2.jpg"
+                                        alt="avatar"
+                                        className="inline-block h-[120px] w-[120px] md:w-[90px] md:h-[90px] lg:w-[110px] lg:h-[110px] object-cover object-center"
                                     />
                                 </div>
+                                <div className="col-span-3">
+                                    <Typography variant="h5" color="blue-gray" className="mb-2">
+                                        {item.namaProduk}
+                                    </Typography>
+                                    <Typography>
+                                        {item.deskripsi}
+                                    </Typography>
+                                    <div className="w-max mt-2">
+                                        <Chip
+                                            size="sm"
+                                            variant="ghost"
+                                            value={item.kategori}
+                                            color={
+                                                item.kategori === "Cake"
+                                                    ? "green"
+                                                    : item.kategori === "Roti"
+                                                        ? "amber"
+                                                        : item.kategori === "Minuman"
+                                                            ? "blue"
+                                                            : item.kategori === "Titipan"
+                                                                ? "purple"
+                                                                : "red"
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex justify-end col-span-6 md:col-span-2">
+                                    <Typography variant="paragraph" color="blue-gray" className="mb-2  flex items-center">
+                                        Rp {item.harga}
+                                    </Typography>
+                                </div>
                             </div>
-                            <div className="flex justify-end col-span-6 md:col-span-2">
-                                <Typography variant="paragraph" color="blue-gray" className="mb-2  flex items-center">
-                                    Rp {item.harga}
+                            <div className="flex justify-end">
+                                <Typography variant="paragraph" color="blue-gray" className="mb-2 col-span-2 flex justify-center items-center">
+                                    Total : {item.total}
                                 </Typography>
                             </div>
                         </div>
-                        <div className="flex justify-end">
-                            <Typography variant="paragraph" color="blue-gray" className="mb-2 col-span-2 flex justify-center items-center">
-                                Total : {item.total}
-                            </Typography>
-                        </div>
-                    </div>
-                ))}
-            </CardBody>
+                    ))}
+                </CardBody>
+            )}
             <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
-    <Typography variant="small" color="blue-gray" className="font-normal">
-        Page {currentPage} of {totalPages}
-    </Typography>
-    <div className="flex gap-2">
-        <Button variant="outlined" size="sm" onClick={handleClickPrevious} disabled={currentPage === 1}>
-            Previous
-        </Button>
-        <Button variant="outlined" size="sm" onClick={handleClickNext} disabled={currentPage === totalPages}>
-            Next
-        </Button>
-    </div>
-</CardFooter>
+                <Typography variant="small" color="blue-gray" className="font-normal">
+                    Page {currentPage} of {totalPages}
+                </Typography>
+                <div className="flex gap-2">
+                    <Button variant="outlined" size="sm" onClick={handleClickPrevious} disabled={currentPage === 1}>
+                        Previous
+                    </Button>
+                    <Button variant="outlined" size="sm" onClick={handleClickNext} disabled={currentPage === totalPages}>
+                        Next
+                    </Button>
+                </div>
+            </CardFooter>
         </Card>
     );
 }

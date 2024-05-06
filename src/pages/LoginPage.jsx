@@ -62,7 +62,7 @@ const LoginPage = () => {
                 setIsLoggedIn(true);
                 if (res.user.role === "Pelanggan") {
                     console.log("Masuk Sebagai Pelanggan");
-                    navigate("/customer/profile");
+                    navigate(`/customer/profile/${res.user.id}`);
                 } else if (res.user.role === "Pegawai"){
                     if(res.user.pegawai.jabatan === "Manager Operasional"){
                         navigate("/mo/home");

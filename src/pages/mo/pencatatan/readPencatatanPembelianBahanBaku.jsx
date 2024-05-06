@@ -12,6 +12,8 @@ import {
   Button,
   Input,
 } from "@material-tailwind/react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -114,9 +116,11 @@ const readPencatatanPembelianBahanBaku = () => {
       fetchData();
       fetchDataBahanBaku();
       console.log("Delete", selectedPembelianBahanBaku);
+      toast.success(`Berhasil menghapus ${selectedPembelianBahanBaku?.namaBahanBaku}`);
       closeModal();
     } catch (error) {
       console.error("Error deleting bahan baku:", error);
+      toast.error("Gagal Menghapus Pembelian Bahan Baku");
     }
   };
   
@@ -349,6 +353,7 @@ const readPencatatanPembelianBahanBaku = () => {
           </div>
         </div>
       )}
+      <ToastContainer />
     </div>
   );
 };

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
 import {
   Card,
@@ -72,8 +74,10 @@ const ReadBahanBaku = () => {
       fetchData();
       console.log("Delete", selectedBahanBaku);
       closeModal();
+      toast.success(`Berhasil menghapus ${selectedBahanBaku?.nama}`);
     } catch (error) {
       console.error("Error deleting bahan baku:", error);
+      toast.error("Gagal Menghapus Bahan Baku");
     }
   };
 
@@ -273,6 +277,7 @@ const ReadBahanBaku = () => {
           </div>
         </div>
       )}
+      <ToastContainer />
     </div>
   );
 };

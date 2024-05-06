@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
 import {
   Card,
@@ -13,8 +15,8 @@ import {
   Button,
   Input,
 } from "@material-tailwind/react";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import {
   HomeIcon,
   ChatBubbleLeftEllipsisIcon,
@@ -30,7 +32,8 @@ import { deleteProduk } from "../../../api/admin/ProdukApi";
 import { deleteProdukHampers } from "../../../api/admin/ProdukApi";
 
 const AddProdukButton = ({ contentType }) => {
-  const addButtonLink = contentType === "produk" ? "/admin/produk/add" : "/admin/hampers/add";
+  const addButtonLink =
+    contentType === "produk" ? "/admin/produk/add" : "/admin/hampers/add";
 
   return (
     <Link to={addButtonLink}>
@@ -41,12 +44,17 @@ const AddProdukButton = ({ contentType }) => {
   );
 };
 const EditProdukButton = ({ contentType, selectedProduk, handleEditClick }) => {
-
-  const editButtonLink = contentType === "produk" ? "/admin/produk/edit" : "/admin/hampers/edit";
+  const editButtonLink =
+    contentType === "produk" ? "/admin/produk/edit" : "/admin/hampers/edit";
   console.log("Hello");
   return (
-    <Button to={editButtonLink} className="inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mr-2" onClick={() => handleEditClick(selectedProduk)}>
-      <FontAwesomeIcon icon={faEdit} className="mr-2" />Ubah
+    <Button
+      to={editButtonLink}
+      className="inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mr-2"
+      onClick={() => handleEditClick(selectedProduk)}
+    >
+      <FontAwesomeIcon icon={faEdit} className="mr-2" />
+      Ubah
     </Button>
   );
 };
@@ -88,8 +96,8 @@ const ReadProduk = () => {
     }
   };
 
-  const openModal = (produk) => {
-    setSelectedProduk(produk);
+  const openModal = (contentType) => {
+    setSelectedProduk(contentType);
     setIsModalOpen(true);
   };
 
@@ -98,32 +106,60 @@ const ReadProduk = () => {
     setIsModalOpen(false);
   };
 
+  // const handleDelete = async () => {
+  //   // Pastikan ada produk yang dipilih dan memiliki ID
+  //   if (!selectedProduk || !selectedProduk.idProduk) {
+  //     console.error("No product selected or no ID found");
+  //     return;
+  //   }
+
+  //   console.log(selectedProduk.idProduk);
+
+  //   try {
+  //     // Panggil fungsi deleteProduk dengan ID produk yang dipilih
+  //     await deleteProduk(selectedProduk.idProduk);
+  //     // Refetch data untuk memperbarui UI setelah penghapusan
+  //     fetchData();
+  //     console.log("Delete", selectedProduk);
+  //     closeModal();
+  //   } catch (error) {
+  //     console.error("Error deleting product:", error);
+  //   }
+  // };
   const handleDelete = async () => {
     // Pastikan ada produk yang dipilih dan memiliki ID
-    if (!selectedProduk || !selectedProduk.idProduk) {
-      console.error("No product selected or no ID found");
+    if (!selectedProduk) {
+      console.error("No product selected");
       return;
     }
-
-    console.log(selectedProduk.idProduk)
-
+  
+    const idToDelete = contentType === "produk" ? selectedProduk.idProduk : selectedProduk.idProdukHampers;
+    
     try {
-      // Panggil fungsi deleteProduk dengan ID produk yang dipilih
-      await deleteProduk(selectedProduk.idProduk);
+      if (contentType === "produk") {
+        console.log("hapus produk", selectedProduk)
+        await deleteProduk(idToDelete);
+      } else {
+        console.log("hapus hampers", selectedProduk)
+        await deleteProdukHampers(idToDelete);
+      }
+      
       // Refetch data untuk memperbarui UI setelah penghapusan
       fetchData();
       console.log("Delete", selectedProduk);
       closeModal();
+      toast.success(`Berhasil menghapus ${contentTypeLabel} ${selectedProduk?.namaProduk}`);
     } catch (error) {
       console.error("Error deleting product:", error);
+      toast.error("Gagal menghapus produk");
     }
   };
 
   const handleEditClick = (produk) => {
     console.log("Session");
     console.log(selectedProduk);
-    sessionStorage.setItem('selectedProduk', JSON.stringify(produk));
-    console.log("Gak Masuk")
+    sessionStorage.setItem("selectedProduk", JSON.stringify(produk));
+    console.log("Gak Masuk");
     console.log(produk);
     setSelectedProduk(produk);
   };
@@ -136,8 +172,9 @@ const ReadProduk = () => {
     setContentType("hampers");
   };
 
-  const produkTableData = produkData.map(item => ({
+  const produkTableData = produkData.map((item) => ({
     idProduk: item.id_produk,
+    idProdukHampers: item.id_produk_hampers,
     namaProduk: item.nama_produk,
     gambarProduk: "/img/team-2.jpeg",
     deskripsiProduk: item.deskripsi_produk,
@@ -145,22 +182,27 @@ const ReadProduk = () => {
     kategoriProduk: item.kategori_produk,
     statusProduk: item.status_produk,
     kuantitas: item.quantitas,
-    namaPenitip: item.detail_produk_titipan ? item.detail_produk_titipan.penitip.nama_penitip : null,
+    namaPenitip: item.detail_produk_titipan
+      ? item.detail_produk_titipan.penitip.nama_penitip
+      : null,
     limitHarian: item.limit_harian ? item.limit_harian.jumlah_limit : null,
     stokProduk: item.stok_produk ? item.stok_produk.stok_produk : null,
     idStokProduk: item.stok_produk ? item.stok_produk.id_stok_produk : null,
-    idPenitip: item.detail_produk_titipan ? item.detail_produk_titipan.penitip.id_penitip : null,
+    idPenitip: item.detail_produk_titipan
+      ? item.detail_produk_titipan.penitip.id_penitip
+      : null,
   }));
 
-  const hampersTableData = hampersData.map(item => ({
+  const hampersTableData = hampersData.map((item) => ({
     idProdukHampers: item.id_produk_hampers,
     namaProduk: item.nama_produk_hampers,
     gambarProduk: "/img/team-4.jpeg",
     deskripsiProduk: item.deskripsi_produk_hampers,
     hargaProduk: item.harga_produk_hampers,
   }));
-
-  const contentData = contentType === "produk" ? produkTableData : hampersTableData;
+  
+  const contentData =
+    contentType === "produk" ? produkTableData : hampersTableData;
   const contentTypeLabel = contentType === "produk" ? "Produk" : "Hampers";
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -173,13 +215,11 @@ const ReadProduk = () => {
     )
     .slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(
-    contentData.length / itemsPerPage
-  );
+  const totalPages = Math.ceil(contentData.length / itemsPerPage);
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
-
       <div className="w-full md:w-96 overflow-x-auto">
         <Tabs value={contentType} indicatorColor="primary">
           <TabsHeader>
@@ -193,10 +233,13 @@ const ReadProduk = () => {
             </Tab>
           </TabsHeader>
         </Tabs>
-
       </div>
       <Card>
-        <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
+        <CardHeader
+          variant="gradient"
+          color="gray"
+          className="mb-8 p-6 flex justify-between items-center"
+        >
           <Typography variant="h6" color="white">
             {contentTypeLabel}
           </Typography>
@@ -214,32 +257,62 @@ const ReadProduk = () => {
           <table className="w-full min-w-[1400px] table-auto">
             <thead>
               <tr>
-                {["Nama Produk", "Gambar Produk", "Deskripsi Produk", "Harga Produk", contentType === "produk" && "Kategori Produk", contentType === "produk" && "Status Produk", contentType === "produk" && "Kuantitas", contentType === "produk" && "Nama Penitip", " "].map((el) => (
-                  el && (
-                    <th
-                      key={el}
-                      className="border-b border-blue-gray-50 py-3 px-5 text-left"
-                    >
-                      <Typography
-                        variant="small"
-                        className="text-[11px] font-bold uppercase text-blue-gray-400"
+                {[
+                  "Nama Produk",
+                  "Gambar Produk",
+                  "Deskripsi Produk",
+                  "Harga Produk",
+                  contentType === "produk" && "Kategori Produk",
+                  contentType === "produk" && "Status Produk",
+                  contentType === "produk" && "Kuantitas",
+                  contentType === "produk" && "Nama Penitip",
+                  " ",
+                ].map(
+                  (el) =>
+                    el && (
+                      <th
+                        key={el}
+                        className="border-b border-blue-gray-50 py-3 px-5 text-left"
                       >
-                        {el}
-                      </Typography>
-                    </th>
-                  )
-                ))}
+                        <Typography
+                          variant="small"
+                          className="text-[11px] font-bold uppercase text-blue-gray-400"
+                        >
+                          {el}
+                        </Typography>
+                      </th>
+                    )
+                )}
               </tr>
             </thead>
             <tbody>
-              {currentItems
-                .map(({ idProduk, namaProduk, gambarProduk, deskripsiProduk, hargaProduk, kategoriProduk, statusProduk, kuantitas, namaPenitip, limitHarian, stokProduk, idStokProduk, idPenitip }, key) => {
-                  const className = `py-3 px-5 ${key === contentData.length - 1
-                    ? ""
-                    : "border-b border-blue-gray-50"
-                    }`;
+              {currentItems.map(
+                (
+                  {
+                    idProduk,
+                    idProdukHampers,
+                    namaProduk,
+                    gambarProduk,
+                    deskripsiProduk,
+                    hargaProduk,
+                    kategoriProduk,
+                    statusProduk,
+                    kuantitas,
+                    namaPenitip,
+                    limitHarian,
+                    stokProduk,
+                    idStokProduk,
+                    idPenitip,
+                  },
+                  key
+                ) => {
+                  const className = `py-3 px-5 ${
+                    key === contentData.length - 1
+                      ? ""
+                      : "border-b border-blue-gray-50"
+                  }`;
                   return (
-                    <tr key={namaProduk}>
+                    <tr key={contentType === "produk" ? idProduk : idProdukHampers}>
                       <td className={className}>
                         <Typography
                           variant="small"
@@ -276,7 +349,11 @@ const ReadProduk = () => {
                             {statusProduk ? (
                               <Chip
                                 variant="gradient"
-                                color={statusProduk === "Ready Stock" ? "green" : "blue-gray"}
+                                color={
+                                  statusProduk === "Ready Stock"
+                                    ? "green"
+                                    : "blue-gray"
+                                }
                                 value={statusProduk}
                                 className="py-0.5 px-2 text-[11px] font-medium w-fit"
                               />
@@ -298,41 +375,70 @@ const ReadProduk = () => {
                       )}
                       <td className={className}>
                         <div className="btn-group text-center">
-                          <Link to={contentType === "produk" ? "/admin/produk/edit" : "/admin/hampers/edit"} className="inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mr-2" onClick={() => handleEditClick({
-                            idProduk,
-                            namaProduk,
-                            gambarProduk,
-                            deskripsiProduk,
-                            hargaProduk,
-                            kategoriProduk,
-                            statusProduk,
-                            kuantitas,
-                            namaPenitip,
-                            limitHarian,
-                            stokProduk,
-                            idStokProduk,
-                            idPenitip
-                          })}>
-                            <FontAwesomeIcon icon={faTrash} className="mr-2" />Ubah
+                          <Link
+                            to={
+                              contentType === "produk"
+                                ? "/admin/produk/edit"
+                                : "/admin/hampers/edit"
+                            }
+                            className="inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded mr-2"
+                            onClick={() =>
+                              handleEditClick({
+                                idProduk,
+                                idProdukHampers,
+                                namaProduk,
+                                gambarProduk,
+                                deskripsiProduk,
+                                hargaProduk,
+                                kategoriProduk,
+                                statusProduk,
+                                kuantitas,
+                                namaPenitip,
+                                limitHarian,
+                                stokProduk,
+                                idStokProduk,
+                                idPenitip,
+                              })
+                            }
+                          >
+                            <FontAwesomeIcon icon={faTrash} className="mr-2" />
+                            Ubah
                           </Link>
-                          <Button to="" className="inline-block bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded" onClick={() => openModal({
-                            idProduk,
-                            namaProduk,
-                            gambarProduk,
-                            deskripsiProduk,
-                            hargaProduk,
-                            kategoriProduk,
-                            statusProduk,
-                            kuantitas,
-                            namaPenitip,
-                          })}>
-                            <FontAwesomeIcon icon={faTrash} className="mr-2" />Hapus
+                          <Button
+                            to=""
+                            className="inline-block bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
+                            onClick={() =>
+                              openModal({
+                                idProduk,
+                                idProdukHampers,
+                                namaProduk,
+                                gambarProduk,
+                                deskripsiProduk,
+                                hargaProduk,
+                                kategoriProduk,
+                                statusProduk,
+                                kuantitas,
+                                namaPenitip,
+                                limitHarian,
+                                stokProduk,
+                                idStokProduk,
+                                idPenitip,
+                                
+                              })
+                              
+                            }
+                          >
+                            <FontAwesomeIcon icon={faTrash} className="mr-2" />
+                            Hapus
                           </Button>
+                          
                         </div>
                       </td>
                     </tr>
                   );
-                })}
+                }
+              )}
+              
             </tbody>
           </table>
           <div className="mt-4 flex justify-end">
@@ -348,10 +454,11 @@ const ReadProduk = () => {
                 <button
                   key={index}
                   onClick={() => paginate(index + 1)}
-                  className={`${currentPage === index + 1
-                    ? "bg-blue-500 text-white"
-                    : "bg-white text-gray-700"
-                    } px-3 py-1 border border-gray-300 text-sm font-medium`}
+                  className={`${
+                    currentPage === index + 1
+                      ? "bg-blue-500 text-white"
+                      : "bg-white text-gray-700"
+                  } px-3 py-1 border border-gray-300 text-sm font-medium`}
                 >
                   {index + 1}
                 </button>
@@ -368,18 +475,37 @@ const ReadProduk = () => {
         </CardBody>
       </Card>
       {isModalOpen && (
+        
         <div className="fixed inset-0 z-[9999] flex items-center justify-center">
           <div className="absolute inset-0 bg-black opacity-60"></div>
           <div className="relative w-96 bg-white rounded-lg p-4">
-            <Typography variant="h6" className="mb-4">Hapus {contentType === "produk" ? "Produk" : "Hampers"}</Typography>
-            <Typography className="text-gray-600 mb-4">Apakah Anda Yakin ingin Menghapus {contentTypeLabel} {selectedProduk?.namaProduk}?</Typography>
+          
+            <Typography variant="h6" className="mb-4">
+              Hapus {contentType === "produk" ? "Produk" : "Hampers"}
+            </Typography>
+            <Typography className="text-gray-600 mb-4">
+              
+              Apakah Anda Yakin ingin Menghapus {contentTypeLabel}{" "}
+              {selectedProduk?.namaProduk}?
+            </Typography>
             <div className="flex justify-end">
-              <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md mr-2" onClick={closeModal}>Batal</button>
-              <button className="px-4 py-2 bg-red-500 text-white rounded-md" onClick={handleDelete}>Yakin</button>
+              <button
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md mr-2"
+                onClick={closeModal}
+              >
+                Batal
+              </button>
+              <button
+                className="px-4 py-2 bg-red-500 text-white rounded-md"
+                onClick={handleDelete}
+              >
+                Yakin
+              </button>
             </div>
           </div>
         </div>
       )}
+      <ToastContainer />
     </div>
   );
 };
