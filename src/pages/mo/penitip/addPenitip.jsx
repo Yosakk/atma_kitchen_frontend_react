@@ -1,29 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useReducer } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardHeader, CardBody, Typography, Input, Select, Textarea } from "@material-tailwind/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faSave, faClose } from "@fortawesome/free-solid-svg-icons";
+import { storeDataPenitip } from "../../../api/mo/PenitipApi";
+
+const formReducer = (state, event) => {
+    return {
+        ...state,
+        [event.target.name]: event.target.value,
+    };
+};
 
 const AddPenitip = () => {
-    const [formData, setFormData] = useState({
-        nama: "", 
-        NoTelepon: "",
-        
+    const [formData, setFormData] = useReducer(formReducer, {});
+    const [data, setData] = useState({
+        nama_penitip: "",
+        nomor_telepon_penitip: "",
     });
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prevFormData) => ({
-            ...prevFormData,
-            [name]: value,
-        }));
-        };
-    
-        const handleSubmit = (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        // Add your logic to handle form submission here
-        console.log(formData);
-        };
+        console.log(formData)
+        storeDataPenitip(formData)
+            .then((res) => {
+                console.log("sini")
+            })
+            .catch((err) => {
+                console.log("Error", err);
+            })
+    };
 
     return (
         <div className="mt-12 mb-8">
@@ -37,26 +43,24 @@ const AddPenitip = () => {
                     <form onSubmit={handleSubmit}>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <div className="mb-4 col-span-1 md:col-span-2 relative w-full min-w-[100px]">
-                                <label htmlFor="namaPegawai" className="block mb-2 text-sm font-medium text-gray-900">Nama Pegawai</label>
+                                <label htmlFor="nama_penitip" className="block mb-2 text-sm font-medium text-gray-900">Nama Penitip</label>
                                 <Input
-                                    id="namaPegawai"
-                                    name="namaPegawai"
-                                    value={formData.namaPegawai}
-                                    onChange={handleChange}
+                                    id="nama_penitip"
+                                    name="nama_penitip"
+                                    onChange={setFormData}
                                     type='text'
                                     size="md"
-                                    label="Nama Pegawai"
+                                    label="Nama Penitip"
                                     placeholder='Kang Saun'
                                     required
                                 />
                             </div>
                             <div className="mb-4 relative w-full min-w-[100px]">
-                                <label htmlFor="NoTelepon" className="block mb-2 text-sm font-medium text-gray-900">Nomor Telepon</label>
+                                <label htmlFor="nomor_telepon_penitip" className="block mb-2 text-sm font-medium text-gray-900">Nomor Telepon</label>
                                 <Input
-                                    id="NoTelepon"
-                                    name="NoTelepon"
-                                    value={formData.NoTelepon}
-                                    onChange={handleChange}
+                                    id="nomor_telepon_penitip"
+                                    name="nomor_telepon_penitip"
+                                    onChange={setFormData}
                                     type='number'
                                     size="md"
                                     label="Nomor Telepon"

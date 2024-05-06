@@ -31,3 +31,19 @@ export const deletePenitip = async (id) => {
         throw error.response.data;
     }
 };
+
+export const storeDataPenitip = async (data) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.post("/penitip", data, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+}

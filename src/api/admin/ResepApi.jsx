@@ -30,4 +30,5 @@ export const deleteResep = async (id) => {
     } catch (error) {
         throw error.response.data;
     }
+    
 };

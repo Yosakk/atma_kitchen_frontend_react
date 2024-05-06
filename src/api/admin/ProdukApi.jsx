@@ -51,6 +51,22 @@ export const storeDataProduk = async (data) => {
     }
 }
 
+export const storeDataHampers = async (data) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.post("/produk_hampers", data, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        });
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        throw error.response.data.message;
+    }
+}
+
 export const showDataPenitip = async () => {
     const token = sessionStorage.getItem("token");
     try {

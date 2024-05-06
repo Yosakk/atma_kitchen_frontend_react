@@ -171,7 +171,7 @@ const AddProduk = () => {
         setLoading(true);
         storeDataProduk(formData)
             .then((res) => {
-                sessionStorage.setItem("user", JSON.stringify(res.data));
+                sessionStorage.setItem("dataProduk", JSON.stringify(res.data));
                 setOpen(true);
                 setLoading(false);
                 navigate("/admin/produk/read")

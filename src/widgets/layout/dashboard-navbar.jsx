@@ -9,6 +9,11 @@ export function DashboardNavbar() {
   const { pathname } = useLocation();
   const [, role, page] = pathname.split("/");
 
+  const handleLogout = () => {
+    // Hapus session storage di sini
+    sessionStorage.removeItem('token');
+  };
+
   return (
     <Navbar
       color={fixedNavbar ? "white" : "transparent"}
@@ -62,7 +67,7 @@ export function DashboardNavbar() {
               <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
             </IconButton>
           </Link>
-          <Link to="/login">
+          <Link to="/login" onClick={handleLogout}>
             <Button
               variant="text"
               color="blue-gray"
