@@ -89,7 +89,7 @@ const ProfilePage = () => {
                             <Typography variant="h5" className="text-center md:text-center lg:text-left">{userData?.nama_user}</Typography>
                             <Typography variant="paragraph" className="mb-3 text-center md:text-center lg:text-left">{userData?.username}</Typography>
                             <div className="flex justify-center lg:justify-start">
-                                <Link to="/customer/profile/edit">
+                                <Link to={`/customer/profile/edit/${id}`}>
                                     <Button color="black" ripple="light">
                                         <div className="flex justify-center items-center">
                                             <FontAwesomeIcon icon={faPenSquare} className="h-5 w-5 " />

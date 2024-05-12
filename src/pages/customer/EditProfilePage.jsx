@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import NavbarLogin from "../../components/NavbarLogin"
 import FooterUser from "../../components/Footer"
 import { useCountries } from "use-react-countries";
 import { motion } from 'framer-motion';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
     Input,
     Menu,
@@ -23,6 +26,8 @@ import { editDataCustomer } from '../../api/customer/customerApi';
 import { getImage } from '../../api';
 
 const EditProfilePage = () => {
+    let { id } = useParams();
+    console.log("masukparams", id)
     const { countries } = useCountries();
     const [selectedCountryIndex, setSelectedCountryIndex] = useState(0);
     const sortedCountries = [...countries].sort((a, b) => a.name.localeCompare(b.name));
@@ -35,6 +40,7 @@ const EditProfilePage = () => {
     const [selectedGender, setSelectedGender] = useState("");
     const [selectedBank, setSelectedBank] = useState("");
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         try {
@@ -43,11 +49,11 @@ const EditProfilePage = () => {
                 setUserData(JSON.parse(userDataFromSession));
                 console.log("Masuk2");
                 console.log(userDataFromSession);
-                if (userDataFromSession.image_user) {
-                    console.log(userDataFromSession.image_user);
-                    const imageUrl = getImage(userDataFromSession.image_user);
-                    setProfileImage(imageUrl);
-                }
+                // if (userDataFromSession.image_user) {
+                //     console.log(userDataFromSession.image_user);
+                //     const imageUrl = getImage(userDataFromSession.image_user);
+                //     setProfileImage(imageUrl);
+                // }
             }
         } catch (error) {
             console.log(error);
@@ -59,13 +65,17 @@ const EditProfilePage = () => {
         e.preventDefault();
         try {
             console.log("imagenya urlnya ${}")
-            setLoading(true);
+
+            // setLoading(true);
             const response = await editDataCustomer(userData);
             console.log(response);
-            const imageUrl = response.data.image_user;
-            console.log('URL gambar:', imageUrl);
+            toast.success("Data Diri berhasil diubah"); 
+                    
+            // const imageUrl = response.data.image_user;
+            // console.log('URL gambar:', imageUrl);
         } catch (error) {
             console.error(error);
+            toast.error("Terjadi kesalahan saat mengubah data penitip");
             setLoading(false);
         }
     };
@@ -103,7 +113,7 @@ const EditProfilePage = () => {
             <div className="flex-grow flex justify-center">
                 <div className="border w-full  m-10 p-2 pt-6 pb-6 rounded-lg bg-white shadow-md p-4" >
                     <div className="flex justify-center items-center md:row-span-2 mb-5">
-                        <label htmlFor="profileImage" className="relative cursor-pointer">
+                        {/* <label htmlFor="profileImage" className="relative cursor-pointer">
                             <motion.img
                                 src={profileImage}
                                 alt="avatar"
@@ -121,7 +131,7 @@ const EditProfilePage = () => {
                             <span className="absolute inset-0 flex justify-center items-center w-full h-full text-white text-opacity-0 hover:text-opacity-100 transition-opacity duration-300">
                                 Ubah Foto Profile
                             </span>
-                        </label>
+                        </label> */}
                     </div>
                     <form onSubmit={handleSubmit}>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -328,7 +338,12 @@ const EditProfilePage = () => {
 
                         </div>
                         <div className="flex justify-center mt-6">
-                            <Button type='submit' variant="outlined" className='mr-3'>Batal</Button>
+                        <Link
+                              to={`/customer/profile/${id}`} // Mengirim ID pelanggan sebagai parameter pada URL
+                            >
+                              <Button type='submit' variant="outlined" className='mr-3'>Batal</Button>
+                            </Link>
+                            
                             <Button type='submit' loading={loading} variant="filled">Simpan</Button>
                         </div>
                     </form>

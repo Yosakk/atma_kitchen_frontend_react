@@ -1,9 +1,11 @@
 import React, { useReducer, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardBody, Typography, Input, Select } from "@material-tailwind/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faSave, faClose } from "@fortawesome/free-solid-svg-icons";
 import { storeBahanBaku } from "../../../api/admin/BahanBakuApi";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const formReducer = (state, event) => {
     return {
@@ -15,6 +17,7 @@ const formReducer = (state, event) => {
 const AddBahanBaku = () => {
     const [formData, setFormData] = useReducer(formReducer, {});
     const [formErrors, setFormErrors] = useState({});
+    const navigate = useNavigate();
     const [data, setData] = useState({
         nama_bahan_baku: "",
         satuan_bahan_baku: "",
@@ -31,33 +34,19 @@ const AddBahanBaku = () => {
     const handleSubmit = (e) => {
 
         e.preventDefault();
-        // const formData = new formData(e.target);
-        // const formDataObject = Object.fromEntries(formData.entries());
-        // console.log(formDataObject);
-        // const parsedBahanBaku = BahanBakuSchema.safeParse(formDataObject);
-        // if (!parsedBahanBaku.success) {
-
-        //     const error = parsedBahanBaku.error;
-        //     let newErrors = {};
-        //     for (const issue of error.issues) {
-        //         newErrors = {
-        //             ...newErrors,
-        //             [issue.path[0]]: issue.message,
-        //         };
-        //     }
-        //     setFormErrors(newErrors);
-        //     return;
-        // }
-        // console.log("formData", formData);
-        // setFormErrors({});
 
         storeBahanBaku(formData)
-            .then((res) => {
-
-            })
-            .catch((err) => {
-                console.log("Error", err);
-            })
+        .then((res) => {
+            console.log("sini")
+            toast.success("Data Bahan Baku berhasil diubah"); 
+            setTimeout(() => {// Delay selama 2 detik
+                navigate("/admin/bahanBaku/read")
+            }, 2000);
+        })
+        .catch((err) => {
+            console.log("Error", err);
+            toast.error("Terjadi kesalahan saat mengubah data Bahan Baku");
+        });
         // TODO: Kirim data ke server
     };
 
@@ -140,6 +129,7 @@ const AddBahanBaku = () => {
                     </form>
                 </CardBody>
             </Card>
+            <ToastContainer/>
         </div>
     );
 };

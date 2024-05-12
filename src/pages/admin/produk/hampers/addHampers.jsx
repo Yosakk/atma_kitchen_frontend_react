@@ -6,6 +6,8 @@ import { faPlus, faSave, faClose, faTrash } from "@fortawesome/free-solid-svg-ic
 import { storeDataHampers } from "../../../../api/admin/ProdukApi";
 import { showDataProduk } from "../../../../api/admin/ProdukApi";
 import { showDataBahanBaku } from "../../../../api/admin/BahanBakuApi";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const formReducer = (state, event) => {
     if (event.target.name.startsWith('produk_id[')) {
@@ -135,7 +137,10 @@ const AddHampers = () => {
             .then((res) => {
                 sessionStorage.setItem("dataProdukHampers", JSON.stringify(res.data));
                 setLoading(false);
-                navigate("/admin/produk/read")
+                toast.success(`Berhasil menambah Data ${submitData.nama_produk_hampers}`);
+                setTimeout(() => {// Delay selama 2 detik
+                    navigate("/admin/produk/read")
+                }, 2000);
             })
             .catch((err) => {
                 setLoading(false);
@@ -289,12 +294,10 @@ const AddHampers = () => {
                             </div>
 
                         </div>
-
-
-
                     </form>
                 </CardBody>
             </Card>
+            <ToastContainer />
         </div>
     );
 };

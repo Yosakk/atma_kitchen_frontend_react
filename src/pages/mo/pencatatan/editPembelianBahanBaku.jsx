@@ -131,10 +131,10 @@ const EditPembelianBahanBaku = () => {
                                     required
                                     id="id_bahan_baku"
                                     name="id_bahan_baku"
-                                    
+                                    disabled
                                     className="w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2.5"
                                     placeholder="Nama Bahan Baku"
-                                    onChange={setFormData}
+                                    // onChange={setFormData}
                                 >
                                     <option defaultValue={dataPembelianBahanBaku.id_bahan_baku || ''}>{dataBahanBaku.find(bahan => bahan.id_bahan_baku === dataPembelianBahanBaku.id_bahan_baku)?.nama_bahan_baku}</option>
                                     {dataBahanBaku.map((BahanBaku) => (

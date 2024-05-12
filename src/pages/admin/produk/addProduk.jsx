@@ -10,13 +10,22 @@ import { addProduk } from "../../../validation/ValidationProduk/validationProduk
 import { motion } from 'framer-motion';
 
 const formReducer = (state, event) => {
-    return {
-        ...state,
-        [event.target.name]: event.target.value,
-    };
+    if (event.target.name === 'gambar_produk') {
+        // Penanganan untuk input file
+        return {
+            ...state,
+            gambar_produk: event.target.files[0], // Menggunakan FormData
+        };
+    } else {
+        return {
+            ...state,
+            [event.target.name]: event.target.value,
+        };
+    }
 };
 
 const AddProduk = () => {
+    const [gambarFile, setGambarFile] = useState(null);
     const [formData, setFormData] = useReducer(formReducer, {});
     const [dataPenitip, setDataPenitip] = useState([]);
     const [dataStokProduk, setDataStokProduk] = useState([]);
@@ -24,8 +33,10 @@ const AddProduk = () => {
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = React.useState(false);
     const navigate = useNavigate();
+    const [isIdPenitipDisabled, setIsIdPenitipDisabled] = useState(true);
     const [data, setData] = useState({
         nama_produk: "",
+        gambar_produk: "",
         deskripsi_produk: "",
         harga_produk: "",
         kategori_produk: "",
@@ -36,97 +47,6 @@ const AddProduk = () => {
         id_stok_produk: "",
         isStokTersedia: false // Menyimpan apakah stok tersedia atau tidak
     });
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-
-        // Tambahkan pengecekan apakah inputan nama_produk kosong
-        if (name === "nama_produk" && value.trim() === "") {
-            setFormErrors((prevErrors) => ({
-                ...prevErrors,
-                [name]: "Nama produk wajib diisi!",
-            }));
-        } else {
-            // Jika inputan nama_produk tidak kosong, hapus pesan kesalahan yang terkait
-            setFormErrors((prevErrors) => ({
-                ...prevErrors,
-                [name]: undefined,
-            }));
-        }
-        if (name === "kategori_produk" && value === "") {
-            setFormErrors((prevErrors) => ({
-                ...prevErrors,
-                [name]: "Kategori produk wajib dipilih!",
-            }));
-        } else {
-            // Jika inputan kategori_produk tidak kosong, hapus pesan kesalahan yang terkait
-            setFormErrors((prevErrors) => ({
-                ...prevErrors,
-                [name]: undefined,
-            }));
-        }
-
-        if (name === "quantitas" && value === "") {
-            setFormErrors((prevErrors) => ({
-                ...prevErrors,
-                [name]: "Kuantitas wajib dipilih!",
-            }));
-        } else {
-            // Jika inputan kuantitas tidak kosong, hapus pesan kesalahan yang terkait
-            setFormErrors((prevErrors) => ({
-                ...prevErrors,
-                [name]: undefined,
-            }));
-        }
-
-        // Lanjutkan penanganan input lainnya
-        if (name) {
-            if (name === "harga_produk" || name === "stok_produk") {
-                const numericValue = name === "harga_produk" ? parseFloat(value) : parseInt(value, 10);
-                if (isNaN(numericValue)) {
-                    setData((prevData) => ({
-                        ...prevData,
-                        [name]: numericValue,
-                    }));
-                    setFormErrors((prevErrors) => ({
-                        ...prevErrors,
-                        [name]: name === "harga_produk" ? "Harap masukkan harga yang valid!" : "Harap masukkan stok yang valid!",
-                    }));
-                } else {
-                    setData((prevData) => ({
-                        ...prevData,
-                        [name]: numericValue,
-                    }));
-                    setFormData({ target: { name, value: numericValue } });
-                }
-            } else if (name === "kategori_produk" && value === "Titipan") {
-                setData((prevData) => ({
-                    ...prevData,
-                    id_penitip: "",
-                    stok_produk: "",
-                    [name]: value,
-                }));
-                setFormData({ target: { name, value } });
-            } else {
-                setData((prevData) => ({
-                    ...prevData,
-                    [name]: value,
-                }));
-                setFormData({ target: { name, value } });
-            }
-            if (name === "stokTersedia") {
-                // Jika memilih Stok Tersedia, reset id_stok_produk
-                if (value === "Tersedia") {
-                    setData((prevData) => ({
-                        ...prevData,
-                        id_stok_produk: "",
-                    }));
-                    setFormData({ target: { name: "id_stok_produk", value: "" } });
-                }
-            }
-        } else {
-            console.error("Name is not defined in event target:", e.target);
-        }
-    };
 
     useEffect(() => {
         fetchDataPenitip();
@@ -142,6 +62,16 @@ const AddProduk = () => {
         }
     }
 
+    const handleKategoriChange = (e) => {
+        const { value } = e.target;
+        setData((prevData) => ({
+            ...prevData,
+            kategori_produk: value,
+        }));
+        setIsIdPenitipDisabled(value !== "Titipan");
+    };
+    
+
     const fetchDataStokProduk = async () => {
         try {
             const response = await showDataProduk();
@@ -153,21 +83,19 @@ const AddProduk = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
-        // Lakukan validasi menggunakan skema Zod
-        const validationResult = addProduk.safeParse(formData);
-        if (!validationResult.success) {
-            const newErrors = {};
-            for (const error of validationResult.error.errors) {
-                newErrors[error.path.join(".")] = error.message;
-                console.log(error.message);
+        const parsedUser = addProduk.safeParse(formData);
+        if (!parsedUser.success) {
+            console.log("hello");
+            const error = parsedUser.error;
+            let newErrors = {};
+            for (const issue of error.issues) {
+                newErrors = {
+                    ...newErrors,
+                    [issue.path[0]]: issue.message,
+                };
             }
-            console.log("Hellow");
             return setFormErrors(newErrors);
         }
-        console.log("Hellow");
-        // Jika validasi berhasil atau tidak perlu dilakukan, lanjutkan dengan menyimpan data produk
-        setFormErrors({});
         setLoading(true);
         storeDataProduk(formData)
             .then((res) => {
@@ -226,11 +154,10 @@ const AddProduk = () => {
                                 <div className="mb-4 col-span-1 md:col-span-2  lg:col-span-2 relative w-full min-w-[100px]">
                                     <label htmlFor="namaProduk" className="block mb-2 text-sm font-medium text-gray-900">Nama Produk</label>
                                     <Input
-                                        error={!!formErrors.nama_produk}
+                                        // error={!!formErrors.nama_produk}
                                         id="nama_produk"
                                         name="nama_produk"
-                                        value={data.nama_produk}
-                                        onChange={handleChange}
+                                        onChange={setFormData}
                                         type='text'
                                         size="md"
                                         label="Nama Produk"
@@ -251,11 +178,10 @@ const AddProduk = () => {
                                 <div className="mb-4 relative w-full min-w-[100px]">
                                     <label htmlFor="hargaProduk" className="block mb-2 text-sm font-medium text-gray-900">Harga Produk</label>
                                     <Input
-                                        error={!!formErrors.harga_produk}
+                                        // error={!!formErrors.harga_produk}
                                         id="harga_produk"
                                         name="harga_produk"
-                                        value={data.harga_produk}
-                                        onChange={handleChange}
+                                        onChange={setFormData}
                                         type='number'
                                         size="md"
                                         label="Harga Produk"
@@ -276,21 +202,20 @@ const AddProduk = () => {
                                 </div>
                                 <div className="mb-4 relative w-full min-w-[100px]">
                                     <label htmlFor="kategoriProduk" className="block mb-2 text-sm font-medium text-gray-900">Kategori Produk</label>
-                                    <Select
-                                        error={!!formErrors.kategori_produk}
+                                    <select
+                                        // error={!!formErrors.kategori_produk}
                                         id="kategori_produk"
                                         name="kategori_produk"
-                                        value={data.kategori_produk}
-                                        onChange={(value) => handleChange({ target: { name: "kategori_produk", value } })}
-                                        className="w-full bg-white"
+                                        onChange={(e) => { setFormData(e); handleKategoriChange(e); }}
+                                        className="w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2.5"
                                         label="Kategori Produk"
                                     >
-                                        <Option value="">Pilih Kategori Produk</Option>
-                                        <Option value="Cake">Cake</Option>
-                                        <Option value="Roti">Roti</Option>
-                                        <Option value="Minuman">Minuman</Option>
-                                        <Option value="Titipan">Titipan</Option>
-                                    </Select>
+                                        <option value="">Pilih Kategori Produk</option>
+                                        <option value="Cake">Cake</option>
+                                        <option value="Roti">Roti</option>
+                                        <option value="Minuman">Minuman</option>
+                                        <option value="Titipan">Titipan</option>
+                                    </select>
 
 
                                     {formErrors.kategori_produk && (
@@ -307,20 +232,19 @@ const AddProduk = () => {
                                 </div>
                                 <div className="mb-4 relative w-full min-w-[100px]">
                                     <label htmlFor="quantitas" className="block mb-2 text-sm font-medium text-gray-900">Kuantitas</label>
-                                    <Select
-                                        error={!!formErrors.quantitas}
+                                    <select
+                                        // error={!!formErrors.quantitas}
                                         id="quantitas"
                                         name="quantitas"
                                         label="Kuantitas"
-                                        value={data.quantitas}
-                                        onChange={(value) => handleChange({ target: { name: "quantitas", value } })}
-                                        className="w-full bg-white"
+                                        onChange={setFormData}
+                                        className="w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2.5"
 
                                     >
-                                        <Option value="">Pilih Kuantitas</Option>
-                                        <Option value="1">1</Option>
-                                        <Option value="0.5">0.5</Option>
-                                    </Select>
+                                        <option value="">Pilih Kuantitas</option>
+                                        <option value="1">1</option>
+                                        <option value="0.5">0.5</option>
+                                    </select>
                                     {formErrors.quantitas && (
                                         <motion.span
                                             initial={{ y: 20 }}
@@ -335,23 +259,34 @@ const AddProduk = () => {
                                 </div>
                                 <div className="mb-4 relative w-full min-w-[100px]">
                                     <label htmlFor="gambarProduk" className="block mb-2 text-sm font-medium text-gray-900">Gambar Produk</label>
+
                                     <Input
                                         id="gambar_produk"
                                         name="gambar_produk"
-                                        value={data.gambar_produk}
-                                        onChange={handleChange}
+                                        onChange={(event) => setFormData({ target: event.target })}
                                         type='file'
                                         size="md"
                                         label="Gambar Produk"
+                                        required
                                     />
+                                    {/* {formErrors.gambar_produk && (
+                                        <motion.span
+                                            initial={{ y: 20 }}
+                                            animate={{ y: 0 }}
+                                            exit={{ y: -20, opacity: 0 }}
+                                            transition={{ duration: 0.3 }}
+                                            className="font-poppins mt-2 flex items-center text-red-500 text-sm"
+                                        >
+                                            {formErrors.gambar_produk}
+                                        </motion.span>
+                                    )} */}
                                 </div>
                                 <div className="mb-4 relative w-full min-w-[100px]">
                                     <label htmlFor="limitHarianProduk" className="block mb-2 text-sm font-medium text-gray-900">Limit Harian Produk</label>
                                     <Input
                                         id="limit_harian"
                                         name="limit_harian"
-                                        value={data.limit_harian}
-                                        onChange={handleChange}
+                                        onChange={setFormData}
                                         type='number'
                                         size="md"
                                         label="Limit Harian Produk"
@@ -364,10 +299,9 @@ const AddProduk = () => {
                                     <select
                                         id="id_penitip"
                                         name="id_penitip"
-                                        value={data.nama_penitip}
-                                        onChange={handleChange}
+                                        onChange={setFormData}
                                         className="w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2.5"
-                                        disabled={data.kategori_produk !== "Titipan"}
+                                        disabled={isIdPenitipDisabled}
 
                                     >
                                         <option value="">Pilih Nama Penitip</option>
@@ -405,10 +339,9 @@ const AddProduk = () => {
                                         <div className="mb-4 relative w-full min-w-[100px]">
                                             <select
                                                 id="id_stok_produk"
-                                                error={!!formErrors.id_stok_produk}
+                                                // error={!!formErrors.id_stok_produk}
                                                 name="id_stok_produk"
-                                                value={data.id_stok_produk}
-                                                onChange={handleChange}
+                                                onChange={setFormData}
                                                 label="ID Stok Produk"
                                                 className="w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2.5"
                                             >
@@ -434,17 +367,16 @@ const AddProduk = () => {
                                         <div className="mb-4 relative w-full min-w-[100px]">
                                             <Input
                                                 id="stok_produk"
-                                                error={!!formErrors.stok_produk}
+                                                // error={!!formErrors.stok_produk}
                                                 name="stok_produk"
-                                                value={data.stok_produk}
-                                                onChange={handleChange}
+                                                onChange={setFormData}
                                                 type='number'
                                                 size="md"
                                                 label="Stok Produk"
                                                 placeholder='10'
                                                 className='w-full'
                                             />
-                                            {formErrors.stok_produk && (
+                                            {/* {formErrors.stok_produk && (
                                                 <motion.span
                                                     initial={{ y: 20 }}
                                                     animate={{ y: 0 }}
@@ -454,7 +386,7 @@ const AddProduk = () => {
                                                 >
                                                     {formErrors.stok_produk}
                                                 </motion.span>
-                                            )}
+                                            )} */}
                                         </div>
                                     </div>
                                 ) : (
@@ -463,10 +395,9 @@ const AddProduk = () => {
                                         <div className="mb-4 relative w-full min-w-[100px]">
                                             <Input
                                                 id="stok_produk"
-                                                error={!!formErrors.stok_produk}
+                                                // error={!!formErrors.stok_produk}
                                                 name="stok_produk"
-                                                value={data.stok_produk}
-                                                onChange={handleChange}
+                                                onChange={setFormData}
                                                 type='number'
                                                 size="md"
                                                 label="Stok Produk"
@@ -491,10 +422,9 @@ const AddProduk = () => {
                                     <label htmlFor="deskripsiProduk" className="block mb-2 text-sm font-medium text-gray-900">Deskripsi Produk</label>
                                     <Textarea
                                         id="deskripsiProduk"
-                                        error={!!formErrors.deskripsi_produk}
+                                        // error={!!formErrors.deskripsi_produk}
                                         name="deskripsi_produk"
-                                        value={data.deskripsi_produk}
-                                        onChange={handleChange}
+                                        onChange={setFormData}
                                         type='text'
                                         size="md"
                                         // placeholder='Kue Lapis Legit merupakan makanan khas'

@@ -103,7 +103,7 @@ const router = createBrowserRouter([
         element : <AddHampers/>
       },
       {
-        path : "/admin/hampers/edit",
+        path : "/admin/hampers/edit/:id",
         element : <EditHampers/>
       },
       {
@@ -242,7 +242,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <LoginPage />,
+        element: <HomePage />,
       },
       {
         path: "/login",
@@ -257,7 +257,7 @@ const router = createBrowserRouter([
         element: <ProfilePage />
       },
       {
-        path: "/customer/profile/edit",
+        path: "/customer/profile/edit/:id",
         element: <EditProfilePage />
       },
       {

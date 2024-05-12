@@ -1,14 +1,29 @@
 import React, { useState } from "react";
+import { Navbar } from "../../widgets/layout";
+import NavbarLogin from "../../components/NavbarLogin";
+import FooterUser from "../../components/Footer";
+import { CarouselWithContent } from "../../components/home/Carousel";
+import Important from "../../components/home/Important";
+import WhyOrderHere from "../../components/home/WhyOrderHere";
+import AboutUs from "../../components/home/AboutUs";
+import HowToOrder from "../../components/home/HowToOrder";
+import OurProduct from "../../components/home/OurProduct";
 
 const HomePage = () => {
-    const [selectedVideo, setSelectedVideo] = useState(null);
-
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     return (
-        <div>
-            <h1>Hello</h1>
-            <img src="http://127.0.0.1:8000/storage/hampers/t5gAuXdLQWsIokrXbfhrcygwWTBzEg6JcaEq1oHa.png" alt="Gambar" />
-        </div>
+        <>
+        <NavbarLogin/>
+        <CarouselWithContent/>
+        <Important/>
+        <WhyOrderHere/>
+        <AboutUs/>
+        <HowToOrder/>
+        <OurProduct/>
+        <FooterUser/>
+
+        </>
     );
 }
 

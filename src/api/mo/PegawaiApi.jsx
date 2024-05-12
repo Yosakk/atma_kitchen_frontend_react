@@ -45,6 +45,21 @@ export const updateGajiPegawai = async (id, data) => {
         throw error.response.data;
     }
 };
+export const updateDataPegawai = async (id, data) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.put(`/user/${id}`, data, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};
 export const deletePegawai = async (id) => {
     const token = sessionStorage.getItem("token");
     try {

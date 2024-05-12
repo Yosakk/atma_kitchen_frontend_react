@@ -1,0 +1,90 @@
+#app {
+    height: 100%;
+  }
+  html,
+  body {
+    position: relative;
+    height: 100%;
+  }
+  
+  body {
+    background: #eee;
+    font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    color: #000;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .swiper {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .swiper-slide {
+    text-align: center;
+    font-size: 18px;
+    background: #fff;
+  
+    /* Center slide text vertically */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .swiper-slide img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .swiper-container {
+    width: 100%;
+    height: 600px; /* Atur tinggi carousel di sini */
+  }
+  
+  .swiper-image {
+    width: 100%;
+    height: 100%; /* Ukuran gambar diatur sesuai tinggi dan lebar container */
+    object-fit: cover; /* Gambar akan dipotong atau diperbesar untuk mengisi area yang ditentukan */
+  }
+
+  .carousel-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .carousel-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #fff;
+  }
+  
+  .carousel-overlay h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  .carousel-overlay p {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .carousel-overlay button {
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #007bff;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+  }
+  
+  .carousel-overlay button:hover {
+    background-color: #0056b3;
+  }
+  

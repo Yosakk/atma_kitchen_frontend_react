@@ -4,6 +4,8 @@ import { Card, CardHeader, CardBody, Typography, Input, Select, Textarea } from 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faSave, faClose } from "@fortawesome/free-solid-svg-icons";
 import { storePegawai } from "../../../api/mo/PegawaiApi";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const formReducer = (state, event) => {
     return {
@@ -15,6 +17,7 @@ const formReducer = (state, event) => {
 const AddPegawai = () => {
     const [formData, setFormData] = useReducer(formReducer, {});
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
     const [data, setData] = useState({
         username: "",
         nama: "",
@@ -40,11 +43,13 @@ const AddPegawai = () => {
         storePegawai(formData)
             .then((res) => {
                 sessionStorage.setItem("dataPegawai", JSON.stringify(res.data));
-                setLoading(false);
-                navigate("/mo/pegawai/read")
+                toast.success("Data Pegawai berhasil ditambah"); 
+                setTimeout(() => {// Delay selama 2 detik
+                    navigate("/mo/pegawai/read")
+                }, 2000);
             })
             .catch((err) => {
-                setLoading(false);
+                toast.error("Terjadi kesalahan saat mengubah data penitip");
                 console.log("Error", err);
             })
     };
@@ -175,6 +180,7 @@ const AddPegawai = () => {
                     </form>
                 </CardBody>
             </Card>
+            <ToastContainer/>
         </div>
     );
 };

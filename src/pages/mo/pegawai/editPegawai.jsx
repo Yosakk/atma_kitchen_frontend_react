@@ -1,9 +1,11 @@
 import React, { useState, useReducer, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Card, CardHeader, CardBody, Typography, Input, Select, Textarea } from "@material-tailwind/react";
+import { Card, CardHeader, CardBody, Typography, Input } from "@material-tailwind/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faSave, faClose } from "@fortawesome/free-solid-svg-icons";
-import { showDataPegawaibyId} from "../../../api/mo/PegawaiApi";
+import { faSave, faClose } from "@fortawesome/free-solid-svg-icons";
+import { showDataPegawaibyId, updateDataPegawai } from "../../../api/mo/PegawaiApi";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const formReducer = (state, action) => {
     switch (action.type) {
@@ -18,48 +20,45 @@ const formReducer = (state, action) => {
 };
 
 const EditPegawai = () => {
-    let { id } = useParams(); // Make sure the parameter name matches your route (/mo/penitip/edit/:id_penitip)
-    console.log("masuk edit", id);
+    let { id } = useParams(); 
     const [pegawaiData, setPegawaiData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [formData, setFormData] = useReducer(formReducer, {});
     const navigate = useNavigate();
+
     useEffect(() => {
         fetchData();
     }, []);
 
     const fetchData = async () => {
-    try {
-        const response = await showDataPegawaibyId(id);
-        setPegawaiData(response.data);
-        setIsLoading(false);
-    } catch (error) {
-        console.error("Error fetching data:", error);
-        setIsLoading(false);
-    }
+        try {
+            const response = await showDataPegawaibyId(id);
+            setPegawaiData(response.data);
+            setIsLoading(false);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            setIsLoading(false);
+        }
     };
 
-    // const handleChange = (e) => {
-    //     const { name, value } = e.target;
-    //     setFormData((prevFormData) => ({
-    //         ...prevFormData,
-    //         [name]: value,
-    //     }));
-    // };
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ type: "CHANGE_FIELD", field: name, value });
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Add your logic to handle form submission here
-        // storePegawai(formData)
-        //     .then((res) => {
-        //         sessionStorage.setItem("dataPegawai", JSON.stringify(res.data));
-        //         setLoading(false);
-        //         navigate("/mo/pegawai/read")
-        //     })
-        //     .catch((err) => {
-        //         setLoading(false);
-        //         console.log("Error", err);
-        //     })
+        updateDataPegawai(id, formData)
+            .then((res) => {
+                toast.success("Data pegawai berhasil diubah"); 
+                setTimeout(() => {
+                    navigate("/mo/pegawai/read")
+                }, 2000);
+            })
+            .catch((err) => {
+                console.log("Error", err);
+                toast.error("Terjadi kesalahan saat mengubah data pegawai");
+            });
     };
 
     return (
@@ -78,8 +77,8 @@ const EditPegawai = () => {
                                 <Input
                                     id="username"
                                     name="username"
-                                    defaultValue={pegawaiData.username || ''}
-                                    onChange={setFormData}
+                                    value={formData.username || ''}
+                                    onChange={handleChange}
                                     type='text'
                                     size="md"
                                     label="Username"
@@ -92,8 +91,8 @@ const EditPegawai = () => {
                                 <Input
                                     id="password"
                                     name="password"
-                                    defaultValue={pegawaiData.password || ''}
-                                    onChange={setFormData}
+                                    value={formData.password || ''}
+                                    onChange={handleChange}
                                     type='password'
                                     size="md"
                                     label="Password"
@@ -101,13 +100,13 @@ const EditPegawai = () => {
                                     required
                                 />
                             </div>
-                            <div className="mb-4 col-span-1  relative w-full min-w-[100px]">
+                            <div className="mb-4 col-span-1 relative w-full min-w-[100px]">
                                 <label htmlFor="nama_user" className="block mb-2 text-sm font-medium text-gray-900">Nama Pegawai</label>
                                 <Input
                                     id="nama_user"
                                     name="nama_user"
-                                    defaultValue={pegawaiData.nama_user || ''}
-                                    onChange={setFormData}
+                                    value={formData.nama_user || ''}
+                                    onChange={handleChange}
                                     type='text'
                                     size="md"
                                     label="Nama Pegawai"
@@ -120,7 +119,8 @@ const EditPegawai = () => {
                                 <Input
                                     id="email"
                                     name="email"
-                                    onChange={setFormData}
+                                    value={formData.email || ''}
+                                    onChange={handleChange}
                                     type='email'
                                     size="md"
                                     label="Email"
@@ -133,7 +133,8 @@ const EditPegawai = () => {
                                 <Input
                                     id="tanggal_lahir"
                                     name="tanggal_lahir"
-                                    onChange={setFormData}
+                                    value={formData.tanggal_lahir || ''}
+                                    onChange={handleChange}
                                     type='date'
                                     size="md"
                                     label="Tanggal Lahir"
@@ -146,24 +147,23 @@ const EditPegawai = () => {
                                 <select
                                     id="gender"
                                     name="gender"
-                                    onChange={setFormData}
+                                    value={formData.gender || ''}
+                                    onChange={handleChange}
                                     className="w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2.5"
                                     required
                                 >
                                     <option value="">Pilih Jenis Kelamin</option>
                                     <option value="Laki-Laki">Laki-Laki</option>
                                     <option value="Perempuan">Perempuan</option>
-
                                 </select>
                             </div>
-
                             <div className="mb-4 relative w-full min-w-[100px]">
                                 <label htmlFor="nomor_telepon" className="block mb-2 text-sm font-medium text-gray-900">Nomor Telepon</label>
                                 <Input
                                     id="nomor_telepon"
                                     name="nomor_telepon"
-                                    defaultValue={pegawaiData.nomor_telepon || ''}
-                                    onChange={setFormData}
+                                    value={formData.nomor_telepon || ''}
+                                    onChange={handleChange}
                                     type='number'
                                     size="md"
                                     label="Nomor Telepon"
@@ -171,7 +171,6 @@ const EditPegawai = () => {
                                     required
                                 />
                             </div>
-
                         </div>
                         <div className="mt-10 flex justify-end">
                             <Link to="/mo/pegawai/read">
@@ -192,6 +191,7 @@ const EditPegawai = () => {
                     </form>
                 </CardBody>
             </Card>
+            <ToastContainer />
         </div>
     );
 };

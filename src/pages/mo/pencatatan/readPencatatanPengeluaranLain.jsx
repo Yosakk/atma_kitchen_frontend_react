@@ -5,13 +5,11 @@ import {
   CardHeader,
   CardBody,
   Typography,
-  Avatar,
   Button,
   Input,
 } from "@material-tailwind/react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-// import { pengeluaranLainTableData } from "../../../data/PengeluaranLainTableData";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { showDataPengeluaranLain, deletePengeluaranLain } from "../../../api/mo/PengeluaranLainApi";
@@ -29,7 +27,6 @@ const AddButton = () => {
 
 const ReadPencatatanPengeluaranLain = () => {
   const [searchValue, setSearchValue] = useState("");
-  const [filteredData, setFilteredData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPengeluaranLain, setSelectedPengeluaranLain] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -88,16 +85,13 @@ const ReadPencatatanPengeluaranLain = () => {
 
   const handleDelete = async () => {
     if (!selectedPengeluaranLain) {
-      console.error("No bahan baku selected");
+      console.error("No pengeluaran selected");
       return;
     }
 
-    console.log("masuk",selectedPengeluaranLain.id);
-
     try {
-      await deletePengeluaranLain(selectedPengeluaranLain.id); // Panggil deleteBahanBaku
+      await deletePengeluaranLain(selectedPengeluaranLain.id);
       fetchData();
-      console.log("Delete", selectedPengeluaranLain);
       closeModal();
       toast.success(`Berhasil menghapus Pengeluaran ${selectedPengeluaranLain?.namaPengeluaran}`);
     } catch (error) {
@@ -110,26 +104,17 @@ const ReadPencatatanPengeluaranLain = () => {
     setSearchValue(e.target.value);
   };
 
-  useEffect(() => {
-    setFilteredData(
-      pengeluaranLainTableData.filter((item) =>
-        Object.values(item).some((value) =>
-          value.toString().toLowerCase().includes(searchValue.toLowerCase())
-        )
-      )
-    );
-  }, [searchValue]);
+  const filteredData = pengeluaranLainTableData.filter((item) =>
+    Object.values(item).some((value) =>
+      value && value.toString().toLowerCase().includes(searchValue.toLowerCase())
+    )
+  );
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = pengeluaranLainTableData
-    .filter((item) =>
-      Object.values(item).some((value) =>
-        value.toString().toLowerCase().includes(searchValue.toLowerCase())
-      )
-    )
-    .slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(pengeluaranLainTableData.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -206,9 +191,6 @@ const ReadPencatatanPengeluaranLain = () => {
                       <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
                         {namaPengeluaran}
                       </td>
-                      {/* <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
-                        {hargaSatuan}
-                      </td> */}
                       <td className="border-b border-blue-gray-50 py-3 px-5 text-xs font-semibold text-blue-gray-600">
                         {totalPengeluaran}
                       </td>
