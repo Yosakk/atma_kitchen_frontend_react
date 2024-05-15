@@ -32,7 +32,6 @@ import {
   MapPinIcon,
   PowerIcon,
   BellIcon,
-  ShoppingBagIcon,
 } from "@heroicons/react/24/outline";
 
 const navListMenuItems = [
@@ -201,8 +200,7 @@ function NavList() {
       <Typography as="a" variant="small" color="white" className="font-medium">
         <ListItem className="flex items-center gap-2 py-2 pr-4">
           <div className="flex">
-            <ShoppingBagIcon className="pr-2" />
-            {/* {cartCount} */}
+            <FontAwesomeIcon icon={faShoppingCart} className="pr-2" />
             <Link to="/keranjang" className="flex items-center">
               Keranjang
             </Link>
