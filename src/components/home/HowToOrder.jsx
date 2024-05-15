@@ -18,14 +18,14 @@ const HowToOrder = () => {
       <div className="w-full md:w-1/2 pl-5 md:pl-12 relative">
         <h2 className="text-3xl md:text-6xl font-bold mb-3">How To Order?</h2>
         <p className="mb-5 md:mb-8 text-base md:text-xl">
-          Atma Kitchen are hot and baked for you. Preorders available at our
-          locations until they sell out!
+        Atma Kitchen panas dan dipanggang untuk Anda. Preorder tersedia di lokasi kami sampai terjual habis!
         </p>
         <ol className="list-decimal pl-5 md:pl-8">
-          <li className="text-base md:text-lg mb-2">Step one description</li>
-          <li className="text-base md:text-lg mb-2">Step two description</li>
-          <li className="text-base md:text-lg">Step three description</li>
+          <li className="text-base md:text-lg mb-2">Pilih Produk yang ingin anda beli</li>
+          <li className="text-base md:text-lg mb-2">Buat Pesanan dan Menentukan Metode pengiriman dan tanggal pengambilan maksimal H-2(pre-order) dari tanggal pesanan</li>
+          <li className="text-base md:text-lg">Setelah itu lakukan pembayaran, dan pesanan anda akan kami proses</li>
         </ol>
+        <p className="w-2/3 text-base md:text-lg mt-2">note : jika didalam pesanan terdapat produk preorder dan readystock, maka akan dikirim bersamaan dengan produk preorder</p>
       </div>
       <div className="absolute right-0 bottom-0 w-full h-full overflow-hidden">
         <img

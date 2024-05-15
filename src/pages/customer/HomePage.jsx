@@ -8,6 +8,7 @@ import WhyOrderHere from "../../components/home/WhyOrderHere";
 import AboutUs from "../../components/home/AboutUs";
 import HowToOrder from "../../components/home/HowToOrder";
 import OurProduct from "../../components/home/OurProduct";
+import OurRandom from "../../components/home/OurProductCatalogue";
 
 const HomePage = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -21,6 +22,7 @@ const HomePage = () => {
         <AboutUs/>
         <HowToOrder/>
         <OurProduct/>
+        {/* <OurRandom/> */}
         <FooterUser/>
 
         </>

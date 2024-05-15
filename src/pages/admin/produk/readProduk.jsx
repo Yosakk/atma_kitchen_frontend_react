@@ -140,13 +140,15 @@ const ReadProduk = () => {
       if (contentType === "produk") {
         console.log("hapus produk", selectedProduk)
         await deleteProduk(idToDelete);
+        fetchData();
       } else {
         console.log("hapus hampers", selectedProduk)
         await deleteProdukHampers(idToDelete);
+        fetchHampersData();
       }
       
       // Refetch data untuk memperbarui UI setelah penghapusan
-      fetchData();
+      
       console.log("Delete", selectedProduk);
       closeModal();
       toast.success(`Berhasil menghapus ${contentTypeLabel} ${selectedProduk?.namaProduk}`);

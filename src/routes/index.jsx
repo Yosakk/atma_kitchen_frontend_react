@@ -7,6 +7,8 @@ import ProfilePage from "../pages/customer/ProfilePage";
 import EditProfilePage from "../pages/customer/EditProfilePage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import HomePage from "../pages/customer/HomePage";
+import KatalogPage from "../pages/customer/KatalogPage";
+import KeranjangPage from "../pages/customer/KeranjangPage";
 
 //admin
 import DashboardAdmin from "../layouts/dashboardAdmin";
@@ -52,15 +54,6 @@ import EditPencatatanPengeluaranLain from "../pages/mo/pencatatan/editPencatatan
 //owner
 import ReadGajiPegawai from "../pages/owner/pegawai/readGajiPegawai";
 import EditGajiPegawai from "../pages/owner/pegawai/editGajiPegawai";
-
-
-
-
-
-
-
-
-
 
 
 
@@ -253,7 +246,7 @@ const router = createBrowserRouter([
         element: <RegisterPage />,
       },
       {
-        path: "/customer/profile/:id",
+        path: "/customer/profile",
         element: <ProfilePage />
       },
       {
@@ -267,7 +260,19 @@ const router = createBrowserRouter([
       {
         path: "/home",
         element: <HomePage />
-      }
+      },
+      {
+        path: "/catalogue",
+        element: <KatalogPage />
+      },
+      {
+        path: "/keranjang",
+        element: <KeranjangPage />
+      },
+      // {
+      //   path: "/catalogue/produk",
+      //   element: <ProdukPage />
+      // },
     ],
   },
 ]);
