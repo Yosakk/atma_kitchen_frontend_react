@@ -11,7 +11,7 @@ const KeranjangPage = () => {
     <>
       <NavbarLogin />
       <LabelKeranjang />
-      <div className="mr-5 ml-5">
+      <div className="mx-5 min-h-screen">
         <KeranjangComponents />
       </div>
       <FooterUser />

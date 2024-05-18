@@ -33,6 +33,7 @@ import {
   PowerIcon,
   BellIcon,
 } from "@heroicons/react/24/outline";
+import useRefresh from "../services/useRefresh";
 
 const navListMenuItems = [
   {
@@ -71,7 +72,6 @@ function NavListMenu() {
       <a key={key}>
         <MenuItem className="flex items-center gap-3 rounded-lg">
           <div className="flex items-center justify-center rounded-lg !bg-blue-gray-50 p-2 ">
-            {" "}
             {React.createElement(icon, {
               strokeWidth: 2,
               className: "h-6 text-gray-900 w-6",
@@ -146,14 +146,14 @@ function NavlistNotLogin() {
   return (
     <List className="mt-4 mb-6 p-0 lg:mt-0 lg:mb-0 lg:flex-row lg:p-1">
       <Typography as="a" variant="small" color="white" className="font-medium">
-        <ListItem className="flex items-center gap-2 py-2 pr-4">
-          <div className="flex">
-            <FontAwesomeIcon icon={faHouse} className="pr-2" />
-            <Link to="/home" className="flex items-center">
+        <Link to="/home" className="flex items-center">
+          <ListItem className="flex items-center gap-2 py-2 pr-4">
+            <div className="flex">
+              <FontAwesomeIcon icon={faHouse} className="pr-2" />
               Beranda
-            </Link>
-          </div>
-        </ListItem>
+            </div>
+          </ListItem>
+        </Link>
       </Typography>
       <Typography as="a" variant="small" color="white" className="font-medium">
         <ListItem className="flex items-center gap-2 py-2 pr-4">
@@ -170,53 +170,69 @@ function NavlistNotLogin() {
 }
 
 function NavList() {
+  const [cartTotal, setCartTotal] = useState(0);
+  const refresh = useRefresh("cartUpdated");
+
+  useEffect(() => {
+    const updateCartTotal = () => {
+      const cartItems = JSON.parse(localStorage.getItem("cart"));
+      if (cartItems) {
+        const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+        setCartTotal(totalItems);
+      } else {
+        setCartTotal(0);
+      }
+    };
+
+    // Panggil updateCartTotal saat komponen pertama kali di-mount dan setiap kali terjadi perubahan pada keranjang
+    updateCartTotal();
+  }, [refresh]);
   return (
     <List className="mt-4 mb-6 p-0 lg:mt-0 lg:mb-0 lg:flex-row lg:p-1">
       <Typography as="a" variant="small" color="white" className="font-medium">
-        <ListItem className="flex items-center gap-2 py-2 pr-4">
-          <div className="flex">
-            <FontAwesomeIcon icon={faHouse} className="pr-2" />
-            <Link to="/home" className="flex items-center">
+        <Link to="/home" className="flex items-center">
+          <ListItem className="flex items-center gap-2 py-2 pr-4">
+            <div className="flex">
+              <FontAwesomeIcon icon={faHouse} className="pr-2" />
               Beranda
-            </Link>
-          </div>
-        </ListItem>
+            </div>
+          </ListItem>
+        </Link>
       </Typography>
-      <Typography
-        as="a"
-        variant="small"
-        color="white"
-        className="font-medium"
-      >
+      <Typography as="a" variant="small" color="white" className="font-medium">
+        <Link to="/catalogue" className="flex items-center">
+          <ListItem className="flex items-center gap-2 py-2 pr-4">
+            <div className="flex">
+              <FontAwesomeIcon icon={faBagShopping} className="pr-2" />
+              Catalogue
+            </div>
+          </ListItem>
+        </Link>
+      </Typography>
+      <Typography as="a" variant="small" color="white" className="font-medium">
         <ListItem className="flex items-center gap-2 py-2 pr-4">
           <div className="flex">
             <FontAwesomeIcon icon={faBell} className="pr-2" />
-            <a className="flex items-center">
-              Notifikasi
-            </a>
+            <a className="flex items-center">Notifikasi</a>
           </div>
         </ListItem>
       </Typography>
       <Typography as="a" variant="small" color="white" className="font-medium">
-        <ListItem className="flex items-center gap-2 py-2 pr-4">
-          <div className="flex">
-            <FontAwesomeIcon icon={faShoppingCart} className="pr-2" />
-            <Link to="/keranjang" className="flex items-center">
+        <Link to="/keranjang" className="flex items-center">
+          <ListItem className="flex items-center gap-2 py-2 pr-4">
+            <div className="flex">
+              <FontAwesomeIcon icon={faShoppingCart} className="pr-2" />
               Keranjang
-            </Link>
-          </div>
-        </ListItem>
+            </div>
+            {cartTotal > 0 && (
+              <span className="bg-blue-500 text-white text-xs rounded-full px-1">
+                {cartTotal}
+              </span>
+            )}
+          </ListItem>
+        </Link>
       </Typography>
-      <Typography as="a" variant="small" color="white" className="font-medium">
-        <ListItem className="flex items-center gap-2 py-2 pr-4">
-          <div className="flex">
-            <FontAwesomeIcon icon={faBagShopping} className="pr-2" />
-            <Link to="/catalogue" className="flex items-center">
-              Catalogue
-            </Link>
-          </div>
-        </ListItem>
-      </Typography>
+      
       {/* <div className="block lg:hidden">
         <NavListMenu />
       </div> */}
@@ -230,6 +246,7 @@ const NavbarLogin = () => {
   const [loginVariant, setLoginVariant] = React.useState("text");
   const [signupVariant, setSignupVariant] = React.useState("text");
   const [userData, setUserData] = useState(null);
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -246,7 +263,13 @@ const NavbarLogin = () => {
 
   const handleSignOut = () => {
     console.log("logout");
-    sessionStorage.removeItem("isLogin"); // Menghapus data dari sessionStorage
+    localStorage.removeItem("cart"); // Menghapus data dari sessionStorage
+    // const cart = localStorage.getItem("cart"); // Menghapus data dari sessionStorage
+    // console.log(cart)
+    sessionStorage.removeItem("isLogin");
+
+    // Emit event untuk memberi tahu perubahan pada keranjang
+    window.dispatchEvent(new Event("cartUpdated"));
   };
 
   React.useEffect(() => {
@@ -256,6 +279,8 @@ const NavbarLogin = () => {
       () => window.innerWidth >= 960 && setOpenNav(false)
     );
   }, []);
+
+  
 
   const handleLoginClick = () => {
     setLoginVariant("gradient");
@@ -306,11 +331,11 @@ const NavbarLogin = () => {
               </MenuHandler>
               <MenuList>
                 <MenuItem className="flex items-center gap-2">
-                  <Link to="/customer/profile" >
+                  <Link to="/customer/profile">
                     <div className="flex ">
                       <svg
                         width="16"
-                        height="16"   
+                        height="16"
                         viewBox="0 0 16 16"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -380,7 +405,7 @@ const NavbarLogin = () => {
         <div className="flex w-full flex-nowrap items-center gap-2 lg:hidden">
           {isLoggedInUser ? (
             <>
-              <Link to="/login" onClick={handleLoginClick} className="w-full">
+              <Link to="/login" onClick={handleSignOut} className="w-full">
                 <Button
                   variant={loginVariant}
                   size="sm"

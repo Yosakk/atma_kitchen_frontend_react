@@ -20,7 +20,7 @@ export function CarouselWithContent() {
   return (
     <div className="relative">
       <Carousel
-        className=" w-full h-[80vh] md:h-[90vh] lg:h-[100vh] xl:h-[80vh] 2xl:h-[90vh]"
+        className=" w-full h-[80vh] md:h-[90vh] lg:h-[100vh] xl:h-[80vh] 2xl:h-[90vh] mt-10"
         infinite={true}
         loop={true}
         autoplay={{ delay: 500 }}

@@ -19,10 +19,10 @@ const KatalogPage = () => {
         <Important />
       </div>
       <OurProductCatalogue />
-      <LabelKeranjang />
+      {/* <LabelKeranjang />
       <div className="mr-5 ml-5">
         <KeranjangComponents />
-      </div>
+      </div> */}
       <FooterUser />
     </>
   );

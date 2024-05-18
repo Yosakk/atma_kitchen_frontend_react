@@ -16,7 +16,7 @@ const HomePage = () => {
     return (
         <>
         <NavbarLogin/>
-        <CarouselWithContent/>
+        <CarouselWithContent />
         <Important/>
         <WhyOrderHere/>
         <AboutUs/>

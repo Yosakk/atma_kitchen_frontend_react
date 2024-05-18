@@ -1,0 +1,15 @@
+@keyframes flyToNavbar {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(0.8) translateY(-100vh);
+    }
+}
+/* CSS untuk tombol */
+.add-to-cart-button-animation {
+    animation: flyToNavbar 0.5s ease forwards;
+}

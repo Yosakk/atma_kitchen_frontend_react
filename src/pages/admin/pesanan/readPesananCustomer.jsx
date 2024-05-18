@@ -7,65 +7,29 @@ import {
   Chip,
   CardBody,
   CardFooter,
-  Tabs,
-  Tab,
   Button,
 } from "@material-tailwind/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useParams } from "react-router-dom";
-import { showTransaksiHistory, showTransaksiHistoryCustomer } from "../../../api/customer/TransaksiApi";
+import { showAllTransaksiHistoryCustomer } from "../../../api/customer/TransaksiApi";
 import { getImage } from "../../../api";
 
-const TABS = [
-  {
-    label: "Semua",
-    value: "Semua",
-  },
-  {
-    label: "Belum Bayar",
-    value: "-",
-  },
-  {
-    label: "Menunggu",
-    value: "Menunggu",
-  },
-  {
-    label: "Terbayar",
-    value: "Sudah Dibayar",
-  },
-  {
-    label: "Diproses",
-    value: "Diproses",
-  },
-  {
-    label: "Dikirim",
-    value: "Dikirim",
-  },
-  {
-    label: "Selesai",
-    value: "Selesai",
-  },
-];
-
-const HistoryCardPelanggan = () => {
+const ReadPesananCustomer = () => {
   let { id } = useParams();
   console.log("masuk history", id);
 
-  const [selectedTab, setSelectedTab] = useState("Semua");
   const [historyData, setHistoryData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchValue, setSearchValue] = useState("");
   const itemsPerPage = 5; // Ubah sesuai dengan jumlah item yang ingin ditampilkan per halaman
 
-  useEffect(() => {
-    fetchData();
-  }, [selectedTab, searchValue]);
-
   const fetchData = async () => {
     try {
-      const response = await showTransaksiHistoryCustomer(id);
-      const mappedData = response.data.map((item) => ({
+      console.log("masuk fetch", id);
+      const response = await showAllTransaksiHistoryCustomer();
+      const filteredData = response.data.filter(item => item.status_transaksi === "-");
+      const mappedData = filteredData.map((item) => ({
         id: item.id_transaksi,
         tanggal: item.tanggal_transaksi,
         status: item.status_transaksi,
@@ -86,6 +50,10 @@ const HistoryCardPelanggan = () => {
     }
   };
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const handleClickPrevious = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
   };
@@ -97,16 +65,9 @@ const HistoryCardPelanggan = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = currentPage * itemsPerPage;
 
-  const filteredData =
-    selectedTab === "Semua"
-      ? historyData.filter((item) =>
-          item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
-        )
-      : historyData.filter(
-          (item) =>
-            item.status === selectedTab &&
-            item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
-        );
+  const filteredData = historyData.filter((item) =>
+    item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
+  );
 
   const groupedData = groupBy(filteredData, "id");
   const totalPages = Math.ceil(Object.keys(groupedData).length / itemsPerPage);
@@ -117,26 +78,17 @@ const HistoryCardPelanggan = () => {
         <div className="mb-8 flex items-center justify-between gap-8">
           <div>
             <Typography variant="h5" color="blue-gray">
-              Riwayat Pemesanan
-            </Typography>
-            <Typography color="gray" className="mt-1 font-normal">
-              Lihat semua pemesanan Anda
+              Pesanan Yang Perlu Di Input Jarak
             </Typography>
           </div>
         </div>
-        <div className="flex flex-col items-center justify-between gap-4 md:flex-row ">
-          <CustomTabs
-            selectedTab={selectedTab}
-            setSelectedTab={setSelectedTab}
+        <div className="w-full md:w-72">
+          <Input
+            label="Search"
+            icon={<MagnifyingGlassIcon className="h-5 w-5" />}
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
           />
-          <div className="w-full md:w-72">
-            <Input
-              label="Search"
-              icon={<MagnifyingGlassIcon className="h-5 w-5" />}
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-            />
-          </div>
         </div>
       </CardHeader>
 
@@ -180,32 +132,15 @@ const HistoryCardPelanggan = () => {
   );
 };
 
-const CustomTabs = ({ selectedTab, setSelectedTab }) => {
-  return (
-    <Tabs value={selectedTab} className="w-full md:w-max overflow-x-auto">
-      {TABS.map(({ label, value }) => (
-        <Tab
-          key={value}
-          value={value}
-          active={selectedTab === value}
-          onClick={() => setSelectedTab(value)}
-        >
-          &nbsp;&nbsp;{label}&nbsp;&nbsp;
-        </Tab>
-      ))}
-    </Tabs>
-  );
-};
-
 const TransactionCard = ({ groupKey, items }) => {
   const [expanded, setExpanded] = useState(false);
   const firstItem = items[0];
 
   return (
     <div className="border p-3 rounded-lg mb-4">
-      <Typography variant="h6" color="black" className="mb-4">
+      {/* <Typography variant="h6" color="black" className="mb-4">
         ID Transaksi: {groupKey}
-      </Typography>
+      </Typography> */}
       <Typography variant="h6" color="black">
         Tanggal Transaksi : {firstItem.tanggal}
       </Typography>
@@ -275,13 +210,6 @@ const TransactionCard = ({ groupKey, items }) => {
           </div>
         </div>
       ))}
-      {firstItem.status === "-" && (
-        <div className="flex justify-end">
-          <Button variant="filled" color="lightBlue">
-            Bayar
-          </Button>
-        </div>
-      )}
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-4">
           <Button
@@ -304,9 +232,8 @@ const TransactionCard = ({ groupKey, items }) => {
   );
 };
 
-export default HistoryCardPelanggan;
+export default ReadPesananCustomer;
 
-// Fungsi untuk mengelompokkan data berdasarkan kunci tertentu
 function groupBy(array, key) {
   return array.reduce((result, currentValue) => {
     (result[currentValue[key]] = result[currentValue[key]] || []).push(

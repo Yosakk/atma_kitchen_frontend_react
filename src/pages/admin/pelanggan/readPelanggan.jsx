@@ -219,6 +219,7 @@ const ReadPelanggan = () => {
                               className="mr-2"
                             />
                           </Link>
+                          
                         </td>
                       </tr>
                     );

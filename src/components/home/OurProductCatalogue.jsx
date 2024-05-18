@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@material-tailwind/react";
 import { Link } from "react-router-dom";
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { showDataHampers, showDataProduk } from "../../api/admin/ProdukApi";
 import { getImage } from "../../api";
+import useRefresh from "../../services/useRefresh";
 
+import "../home/animation.css";
 
 const groupProductsByCategory = (productList) => {
   // Group products by kategoriProduk
@@ -20,10 +23,6 @@ const groupProductsByCategory = (productList) => {
 
 const shuffleArray = (array) => {
   // Using Fisher-Yates shuffle algorithm
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
   return array;
 };
 
@@ -31,6 +30,7 @@ const OurProductCatalogue = () => {
   const [produkData, setProdukData] = useState([]);
   const [hampersData, setHampersData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [cartAnimationProductId, setCartAnimationProductId] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -104,10 +104,60 @@ const OurProductCatalogue = () => {
       groupedHampers[kategoriProduk]
     );
   });
+  const refresh = useRefresh("cartUpdated");
   const handleAddToCart = (product) => {
-    // Implement logic to add product to cart
-    console.log("Added to cart:", product);
+    
+    // Mengambil keranjang dari localStorage
+    let cart = localStorage.getItem('cart');
+    if (!cart) {
+      cart = [];
+    } else {
+      cart = JSON.parse(cart);
+    }
+  
+    // Mengecek apakah produk sudah ada di keranjang
+    const existingProductIndex = cart.findIndex((item) => item.idProduk === product.idProduk);
+  
+    if (existingProductIndex !== -1) {
+      // Jika produk sudah ada di keranjang, tambahkan jumlahnya
+      cart[existingProductIndex].quantity += 1;
+    } else {
+      // Jika produk belum ada di keranjang, tambahkan produk baru
+      cart.push({ ...product, quantity: 1 });
+    }
+  
+    // Menyimpan kembali keranjang ke localStorage
+    localStorage.setItem('cart', JSON.stringify(cart));
+  
+    // Emit event untuk memberi tahu perubahan pada keranjang
+    window.dispatchEvent(new Event("cartUpdated"));
+    setCartAnimationProductId(product.idProduk);
+    setTimeout(() => {
+      setCartAnimationProductId(null);
+    }, 500);
+    // Menampilkan toast bahwa produk berhasil ditambahkan ke keranjang
+    toast.success('Produk berhasil ditambahkan ke keranjang');
   };
+  const flyToNavbar = (buttonId) => {
+    const button = document.getElementById(buttonId);
+    const navbar = document.getElementById('navbar');
+    const buttonRect = button.getBoundingClientRect();
+    const navbarRect = navbar.getBoundingClientRect();
+
+    const deltaX = navbarRect.left - buttonRect.left;
+    const deltaY = navbarRect.top - buttonRect.top;
+
+    button.style.transition = 'transform 0.5s ease-out';
+    button.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+
+    setTimeout(() => {
+        button.style.transition = 'none';
+        button.style.transform = 'none';
+    }, 500);
+};
+
+
+
 
   return (
     <div className="bg-white pb-20 ">
@@ -129,7 +179,7 @@ const OurProductCatalogue = () => {
             {groupedProducts[kategoriProduk].map((product) => (
               <div
                 key={product.idProduk}
-                className="bg-white shadow-md rounded-xl duration-500 hover:scale-105 hover:shadow-xl overflow-hidden p-4" // Added padding here
+                className={`bg-white shadow-md rounded-xl hover:scale-105 hover:shadow-xl overflow-hidden p-4 ${cartAnimationProductId === product.idProduk ? 'add-to-cart-button-animation' : ''}`}// Tambahkan kelas animasi jika cartAnimation true
                 style={{ width: "100%", maxWidth: "350px" }}
               >
                 <Link to="">
@@ -168,7 +218,7 @@ const OurProductCatalogue = () => {
                         </del>
                       </div>
                       <p className="text-sm text-gray-600 mt-2">
-                        Stok: {product.idStokProduk}
+                        Stok: {product.stokProduk}
                       </p>
                       <p className="text-sm text-gray-600 mt-2">
                         Limit Harian : {product.limitHarian}
@@ -177,9 +227,13 @@ const OurProductCatalogue = () => {
                   </div>
                 </Link>
                 <div className="mb-4">
-                  <Button
+                <Button
+                    id={`addToCartButton_${product.idProduk}`}
                     className="w-full"
-                    onClick={() => handleAddToCart(product)}
+                    onClick={() => {
+                      handleAddToCart(product);
+                      flyToNavbar(`addToCartButton_${product.idProduk}`);
+                    }}
                   >
                     Add To Cart
                   </Button>
@@ -201,7 +255,7 @@ const OurProductCatalogue = () => {
           {productsHampers.map((productHampers) => (
             <div
               key={productHampers.idProdukHampers}
-              className="bg-white shadow-md rounded-xl durat ion-500 hover:scale-105 hover:shadow-xl overflow-hidden p-4" // Added padding here
+              className={`bg-white shadow-md rounded-xl overflow-hidden p-4 ${cartAnimationProductId === productHampers.idProdukHampers ? 'add-to-cart-animation' : ''}`} // Added padding here
               style={{ width: "100%", maxWidth: "350px" }}
             >
               <Link to="">
@@ -255,6 +309,7 @@ const OurProductCatalogue = () => {
           ))}
         </div>
       </div>
+      <ToastContainer/>
     </div>
   );
 };

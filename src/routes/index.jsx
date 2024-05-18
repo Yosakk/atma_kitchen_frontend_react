@@ -54,6 +54,7 @@ import EditPencatatanPengeluaranLain from "../pages/mo/pencatatan/editPencatatan
 //owner
 import ReadGajiPegawai from "../pages/owner/pegawai/readGajiPegawai";
 import EditGajiPegawai from "../pages/owner/pegawai/editGajiPegawai";
+import ReadPesananCustomer from "../pages/admin/pesanan/readPesananCustomer";
 
 
 
@@ -135,6 +136,11 @@ const router = createBrowserRouter([
         path : "/admin/pegawai/profile",
         element : <ProfilePagePegawai />
       },
+      {
+        path : "/admin/pesanan/read",
+        element : <ReadPesananCustomer />
+      },
+      
       
     ]
   },

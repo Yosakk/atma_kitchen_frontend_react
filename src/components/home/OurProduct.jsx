@@ -159,7 +159,7 @@ const OurProduct = () => {
                       </del>
                     </div>
                     <p className="text-sm text-gray-600 mt-2">
-                      Stok: {product.idStokProduk}
+                      Stok: {product.stokProduk}
                     </p>
                     <p className="text-sm text-gray-600 mt-2">
                       Limit Harian : {product.limitHarian}
@@ -229,7 +229,7 @@ const OurProduct = () => {
                         </del>
                       </div>
                       <p className="text-sm text-gray-600 mt-2">
-                        Stok: {product.idStokProduk}
+                        Stok: {product.stokProduk}
                       </p>
                       <p className="text-sm text-gray-600 mt-2">
                         Limit Harian : {product.limitHarian}
