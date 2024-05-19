@@ -40,7 +40,8 @@ const ReadPesananCustomer = () => {
         tanggal: item.tanggal_transaksi,
         status: item.status_transaksi === "-" ? "Belum Bayar" : item.status_transaksi,
         produk: {
-          nama: item.nama_produk,
+          nama: item.nama_produk 
+                || (item.id_produk_hampers ? item.nama_produk_hampers : "Produk Tidak Ditemukan"),
           deskripsi: item.deskripsi_produk,
           kategori: item.kategori_produk,
           gambar: item.gambar_produk,
@@ -49,6 +50,7 @@ const ReadPesananCustomer = () => {
         ongkir: item.biaya_pengiriman,
         total: item.total_pembayaran,
       }));
+      
       setHistoryData(mappedData);
       setIsLoading(false);
     } catch (error) {
@@ -56,6 +58,7 @@ const ReadPesananCustomer = () => {
       setIsLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchData();

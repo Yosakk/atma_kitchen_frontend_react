@@ -9,7 +9,7 @@ function KeranjangComponents() {
   const [products, setProducts] = useState(() => {
     const cart = localStorage.getItem("cart");
     if (cart) {
-      console.log(JSON.parse(cart))
+      console.log(JSON.parse(cart));
       return JSON.parse(cart);
     }
     return [];
@@ -22,7 +22,7 @@ function KeranjangComponents() {
 
   const handleQuantityChange = (id, delta) => {
     const updatedProducts = products.map((product) => {
-      if (product.idProduk === id) {
+      if (product.id_produk === id) {
         const newQuantity = product.quantity + delta;
         if (newQuantity > 0) {
           return { ...product, quantity: newQuantity };
@@ -32,12 +32,11 @@ function KeranjangComponents() {
     });
     setProducts(updatedProducts);
     updateCart(updatedProducts);
-   
   };
 
   const handleDelete = (id) => {
     const updatedProducts = products.filter(
-      (product) => product.idProduk !== id
+      (product) => product.id_produk !== id
     );
     setProducts(updatedProducts);
     updateCart(updatedProducts);
@@ -45,12 +44,12 @@ function KeranjangComponents() {
 
   const updateCart = (updatedProducts) => {
     localStorage.setItem("cart", JSON.stringify(updatedProducts));
-     
+
     window.dispatchEvent(new Event("cartUpdated"));
   };
 
   const total = products.reduce(
-    (acc, product) => acc + product.hargaProduk * product.quantity,
+    (acc, product) => acc + product.harga_produk * product.quantity,
     0
   );
   const totalProducts = products.reduce(
@@ -99,26 +98,53 @@ function KeranjangComponents() {
                 </thead>
                 <tbody>
                   {products.map((product) => (
-                    <tr key={product.idProduk} className="hover:bg-gray-100">
+                    <tr key={product.id_produk} className="hover:bg-gray-100">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          {getImage(product.gambarProduk) && (
-                            <img
-                              src={getImage(product.gambarProduk)}
-                              alt={product.namaProduk}
-                              className="h-10 w-10 rounded-full mr-4"
-                            />
+                          {product.id_produk_hampers ? ( // Periksa apakah produk adalah hampers
+                            <>
+                              {getImage(product.gambar_produk_hampers) && ( // Mengambil gambar hampers
+                                <img
+                                  src={getImage(product.gambar_produk_hampers)}
+                                  alt={product.nama_produk_hampers}
+                                  className="h-10 w-10 rounded-full mr-4"
+                                />
+                              )}
+                              <div>
+                                <span>{product.nama_produk_hampers}</span>{" "}
+                                {/* Menampilkan nama hampers */}
+                                <br />
+                                {/* Menampilkan jumlah item */}
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              {getImage(product.gambar_produk) && ( // Mengambil gambar produk
+                                <img
+                                  src={getImage(product.gambar_produk)}
+                                  alt={product.nama_produk}
+                                  className="h-10 w-10 rounded-full mr-4"
+                                />
+                              )}
+                              <div>
+                                <span>{product.nama_produk}</span>{" "}
+                                {/* Menampilkan nama produk */}
+                              </div>
+                            </>
                           )}
-                          {product.namaProduk}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        Rp {product.hargaProduk.toLocaleString()}
+                        Rp{" "}
+                        {product.id_produk_hampers
+                          ? product.harga_produk_hampers.toLocaleString() // Menghitung harga hampers
+                          : product.harga_produk.toLocaleString()}{" "}
+                        {/* Menghitung harga produk */}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <button
                           onClick={() =>
-                            handleQuantityChange(product.idProduk, -1)
+                            handleQuantityChange(product.id_produk, -1)
                           }
                           disabled={product.quantity <= 1}
                           className="text-gray-600 bg-gray-200 rounded-l px-2 py-1 hover:bg-gray-300"
@@ -128,7 +154,7 @@ function KeranjangComponents() {
                         <span className="px-4">{product.quantity}</span>
                         <button
                           onClick={() =>
-                            handleQuantityChange(product.idProduk, 1)
+                            handleQuantityChange(product.id_produk, 1)
                           }
                           className="text-gray-600 bg-gray-200 rounded-r px-2 py-1 hover:bg-gray-300"
                         >
@@ -137,13 +163,18 @@ function KeranjangComponents() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         Rp{" "}
-                        {(
-                          product.hargaProduk * product.quantity
-                        ).toLocaleString()}
+                        {product.id_produk_hampers
+                          ? (
+                              product.harga_produk_hampers * product.quantity
+                            ).toLocaleString() // Menghitung subtotal hampers
+                          : (
+                              product.harga_produk * product.quantity
+                            ).toLocaleString()}{" "}
+                        {/* Menghitung subtotal produk */}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <Button
-                          onClick={() => handleDelete(product.idProduk)}
+                          onClick={() => handleDelete(product.id_produk)}
                           className="bg-red-600 hover:bg-red-800"
                         >
                           <FontAwesomeIcon icon={faTrash} />
