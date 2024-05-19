@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "@material-tailwind/react";
+import { Button, Input } from "@material-tailwind/react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { Link } from "react-router-dom";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { showDataHampers, showDataProduk } from "../../api/admin/ProdukApi";
 import { getImage } from "../../api";
 import useRefresh from "../../services/useRefresh";
 
 import "../home/animation.css";
+import { isToday } from "date-fns";
 
 const groupProductsByCategory = (productList) => {
   // Group products by kategoriProduk
@@ -29,8 +32,10 @@ const shuffleArray = (array) => {
 const OurProductCatalogue = () => {
   const [produkData, setProdukData] = useState([]);
   const [hampersData, setHampersData] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [cartAnimationProductId, setCartAnimationProductId] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   useEffect(() => {
     fetchData();
@@ -72,6 +77,7 @@ const OurProductCatalogue = () => {
       ? item.detail_produk_titipan.penitip.nama_penitip
       : null,
     limitHarian: item.limit_harian ? item.limit_harian.jumlah_limit : null,
+    tanggalLimit: item.limit_harian ? item.limit_harian.tanggal_limit : null,
     stokProduk: item.stok_produk ? item.stok_produk.stok_produk : null,
     idStokProduk: item.stok_produk ? item.stok_produk.id_stok_produk : null,
     idPenitip: item.detail_produk_titipan
@@ -106,18 +112,19 @@ const OurProductCatalogue = () => {
   });
   const refresh = useRefresh("cartUpdated");
   const handleAddToCart = (product) => {
-    
     // Mengambil keranjang dari localStorage
-    let cart = localStorage.getItem('cart');
+    let cart = localStorage.getItem("cart");
     if (!cart) {
       cart = [];
     } else {
       cart = JSON.parse(cart);
     }
-  
+
     // Mengecek apakah produk sudah ada di keranjang
-    const existingProductIndex = cart.findIndex((item) => item.idProduk === product.idProduk);
-  
+    const existingProductIndex = cart.findIndex(
+      (item) => item.idProduk === product.idProduk
+    );
+
     if (existingProductIndex !== -1) {
       // Jika produk sudah ada di keranjang, tambahkan jumlahnya
       cart[existingProductIndex].quantity += 1;
@@ -125,11 +132,11 @@ const OurProductCatalogue = () => {
       // Jika produk belum ada di keranjang, tambahkan produk baru
       cart.push({ ...product, quantity: 1 });
     }
-  
+
     // Menyimpan kembali keranjang ke localStorage
-    localStorage.setItem('cart', JSON.stringify(cart));
-     console.log(cart)
-  
+    localStorage.setItem("cart", JSON.stringify(cart));
+    console.log(cart);
+
     // Emit event untuk memberi tahu perubahan pada keranjang
     window.dispatchEvent(new Event("cartUpdated"));
     setCartAnimationProductId(product.idProduk);
@@ -137,31 +144,76 @@ const OurProductCatalogue = () => {
       setCartAnimationProductId(null);
     }, 500);
     // Menampilkan toast bahwa produk berhasil ditambahkan ke keranjang
-    toast.success('Produk berhasil ditambahkan ke keranjang');
+    toast.success("Produk berhasil ditambahkan ke keranjang");
   };
   const flyToNavbar = (buttonId) => {
     const button = document.getElementById(buttonId);
-    const navbar = document.getElementById('navbar');
+    const navbar = document.getElementById("navbar");
     const buttonRect = button.getBoundingClientRect();
     const navbarRect = navbar.getBoundingClientRect();
 
     const deltaX = navbarRect.left - buttonRect.left;
     const deltaY = navbarRect.top - buttonRect.top;
 
-    button.style.transition = 'transform 0.5s ease-out';
+    button.style.transition = "transform 0.5s ease-out";
     button.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
 
     setTimeout(() => {
-        button.style.transition = 'none';
-        button.style.transform = 'none';
+      button.style.transition = "none";
+      button.style.transform = "none";
     }, 500);
-};
+  };
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    console.log("Filtered Products by Date:", date);
+  };
 
+  // useEffect(() => {
+  //   // Memanggil fungsi untuk memfilter produk berdasarkan tanggal yang dipilih
+  //   const filteredProducts = filterProductsByDate(products);
 
+  //   // Menyimpan produk yang sudah difilter ke dalam state atau variabel yang sesuai
+  //   // Di sini, saya asumsikan Anda memiliki state baru untuk menyimpan produk yang sudah difilter
+  //   // Anda mungkin perlu menyesuaikan sesuai dengan struktur data Anda
+  //   setFilteredProducts(filteredProducts);
 
+  // }, [selectedDate, products]);
+
+  const filterProductsByDate = (products) => {
+    const filteredProducts = products.filter((product) => {
+      // Tambahkan logika filter berdasarkan tanggal di sini
+      // console.log("test", selectedDate)
+      if (
+        product.tanggalLimit && // Pastikan produk memiliki limit harian
+        new Date(product.tanggalLimit) <= selectedDate // Bandingkan tanggal limit harian dengan tanggal yang dipilih
+      ) {
+        // Jika tanggal yang dipilih lebih besar atau sama dengan tanggal limit harian produk
+
+        return true; // Produk ditampilkan
+      } else {
+        // Jika tanggal yang dipilih kurang dari tanggal limit harian produk
+        return false; // Produk tidak ditampilkan
+      }
+    });
+
+    return filteredProducts;
+  };
 
   return (
     <div className="bg-white pb-20 ">
+      <div className="mb-4 mt-4 ml-10 relative w-full min-w-[100px] max-w-[300px]">
+        <label
+          htmlFor="tanggal_pengambilan"
+          className="block mb-2 text-sm font-medium text-gray-900"
+        >
+          Tanggal Pengambilan
+        </label>
+        <DatePicker
+          selected={selectedDate}
+          onChange={handleDateChange}
+          className="w-full md:w-fit mx-auto mt-4 mb-4 p-1 border-2 border-gray-300 rounded-lg"
+        />
+      </div>
       {/* Display shuffled products */}
       {Object.keys(groupedProducts).map((kategoriProduk, index) => (
         <div
@@ -180,7 +232,11 @@ const OurProductCatalogue = () => {
             {groupedProducts[kategoriProduk].map((product) => (
               <div
                 key={product.idProduk}
-                className={`bg-white shadow-md rounded-xl hover:scale-105 hover:shadow-xl overflow-hidden p-4 ${cartAnimationProductId === product.idProduk ? 'add-to-cart-button-animation' : ''}`}// Tambahkan kelas animasi jika cartAnimation true
+                className={`bg-white shadow-md rounded-xl hover:scale-105 hover:shadow-xl overflow-hidden p-4 ${
+                  cartAnimationProductId === product.idProduk
+                    ? "add-to-cart-button-animation"
+                    : ""
+                }`} // Tambahkan kelas animasi jika cartAnimation true
                 style={{ width: "100%", maxWidth: "350px" }}
               >
                 <Link to="">
@@ -222,13 +278,20 @@ const OurProductCatalogue = () => {
                         Stok: {product.stokProduk}
                       </p>
                       <p className="text-sm text-gray-600 mt-2">
-                        Limit Harian : {product.limitHarian}
+                        {product.limitHarian
+                          ? `Limit Harian : ${product.limitHarian}`
+                          : "Limit harian tidak tersedia"}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-2">
+                        {product.limitHarian
+                          ? `Tanggal Limit Harian : ${product.tanggalLimit}`
+                          : "Limit harian tidak tersedia"}
                       </p>
                     </div>
                   </div>
                 </Link>
                 <div className="mb-4">
-                <Button
+                  <Button
                     id={`addToCartButton_${product.idProduk}`}
                     className="w-full"
                     onClick={() => {
@@ -256,7 +319,11 @@ const OurProductCatalogue = () => {
           {productsHampers.map((productHampers) => (
             <div
               key={productHampers.idProdukHampers}
-              className={`bg-white shadow-md rounded-xl overflow-hidden p-4 ${cartAnimationProductId === productHampers.idProdukHampers ? 'add-to-cart-animation' : ''}`} // Added padding here
+              className={`bg-white shadow-md rounded-xl overflow-hidden p-4 ${
+                cartAnimationProductId === productHampers.idProdukHampers
+                  ? "add-to-cart-animation"
+                  : ""
+              }`} // Added padding here
               style={{ width: "100%", maxWidth: "350px" }}
             >
               <Link to="">
@@ -284,7 +351,7 @@ const OurProductCatalogue = () => {
                     >
                       {productHampers.deskripsiProduk}
                     </span>
-                    
+
                     <div className="flex items-center">
                       <p className="text-lg font-semibold text-black cursor-auto my-3 ">
                         Rp.{productHampers.hargaProduk}
@@ -310,7 +377,7 @@ const OurProductCatalogue = () => {
           ))}
         </div>
       </div>
-      <ToastContainer/>
+      <ToastContainer />
     </div>
   );
 };

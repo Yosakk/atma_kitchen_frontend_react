@@ -4,7 +4,7 @@ import { Typography, Button } from "@material-tailwind/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenSquare } from "@fortawesome/free-solid-svg-icons";
 // import SideNav from "../../components/SideNav";
-import HistoryCardPelanggan from "../pelanggan/HistoryCardPelanggan";
+// import HistoryCardPelanggan from "../pelanggan/HistoryCardPelanggan";
 import { Link, useParams } from "react-router-dom";
 import { Sidenav } from "../../../widgets/layout";
 import React, { useState, useEffect } from "react";
