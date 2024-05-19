@@ -12,7 +12,9 @@ export function DashboardNavbar() {
   const handleLogout = () => {
     // Hapus session storage di sini
     sessionStorage.removeItem('token');
+    sessionStorage.removeItem("isLogin");
   };
+
 
   return (
     <Navbar

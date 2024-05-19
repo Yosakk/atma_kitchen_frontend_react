@@ -83,6 +83,7 @@ const OurProductCatalogue = () => {
     idPenitip: item.detail_produk_titipan
       ? item.detail_produk_titipan.penitip.id_penitip
       : null,
+      
   }));
   const productsHampers = hampersData.map((item) => ({
     // idProduk: item.id_produk,
@@ -164,40 +165,34 @@ const OurProductCatalogue = () => {
     }, 500);
   };
   const handleDateChange = (date) => {
-    setSelectedDate(date);
-    console.log("Filtered Products by Date:", date);
+    const formattedDate = date.toISOString().split('T')[0];
+    setSelectedDate(formattedDate);
+    console.log("Filtered Products by Date:", formattedDate);
+    console.log(formattedDate); // Format: yyyy-mm-dd
+  
+    const filteredProducts = filterProductsByDate(products, date);
+    setFilteredProducts(filteredProducts);
   };
+  
+  const filterProductsByDate = (products, selectedDate) => {
+  const today = new Date();
+  const formattedToday = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
 
-  // useEffect(() => {
-  //   // Memanggil fungsi untuk memfilter produk berdasarkan tanggal yang dipilih
-  //   const filteredProducts = filterProductsByDate(products);
-
-  //   // Menyimpan produk yang sudah difilter ke dalam state atau variabel yang sesuai
-  //   // Di sini, saya asumsikan Anda memiliki state baru untuk menyimpan produk yang sudah difilter
-  //   // Anda mungkin perlu menyesuaikan sesuai dengan struktur data Anda
-  //   setFilteredProducts(filteredProducts);
-
-  // }, [selectedDate, products]);
-
-  const filterProductsByDate = (products) => {
-    const filteredProducts = products.filter((product) => {
-      // Tambahkan logika filter berdasarkan tanggal di sini
-      // console.log("test", selectedDate)
-      if (
-        product.tanggalLimit && // Pastikan produk memiliki limit harian
-        new Date(product.tanggalLimit) <= selectedDate // Bandingkan tanggal limit harian dengan tanggal yang dipilih
-      ) {
-        // Jika tanggal yang dipilih lebih besar atau sama dengan tanggal limit harian produk
-
-        return true; // Produk ditampilkan
-      } else {
-        // Jika tanggal yang dipilih kurang dari tanggal limit harian produk
-        return false; // Produk tidak ditampilkan
-      }
-    });
-
-    return filteredProducts;
-  };
+  const filteredProducts = products.filter((product) => {
+    if (
+      product.tanggalLimit && // Pastikan produk memiliki limit harian
+      (selectedDate ?
+        new Date(product.tanggalLimit).getTime() <= selectedDate.getTime() :
+        new Date(product.tanggalLimit).toISOString().split('T')[0] === formattedToday) // Bandingkan tanggal limit harian dengan tanggal yang dipilih atau hari ini
+    ) {
+      return true; // Produk ditampilkan
+    } else {
+      return false; // Produk tidak ditampilkan
+    }
+  });
+  return filteredProducts;
+};
+  
 
   return (
     <div className="bg-white pb-20 ">
@@ -212,6 +207,7 @@ const OurProductCatalogue = () => {
           selected={selectedDate}
           onChange={handleDateChange}
           className="w-full md:w-fit mx-auto mt-4 mb-4 p-1 border-2 border-gray-300 rounded-lg"
+          dateFormat={'yyyy-MM-dd'}
         />
       </div>
       {/* Display shuffled products */}
