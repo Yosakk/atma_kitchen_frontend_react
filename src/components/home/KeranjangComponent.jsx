@@ -9,6 +9,7 @@ function KeranjangComponents() {
   const [products, setProducts] = useState(() => {
     const cart = localStorage.getItem("cart");
     if (cart) {
+      console.log(JSON.parse(cart))
       return JSON.parse(cart);
     }
     return [];
@@ -31,6 +32,7 @@ function KeranjangComponents() {
     });
     setProducts(updatedProducts);
     updateCart(updatedProducts);
+   
   };
 
   const handleDelete = (id) => {
@@ -43,6 +45,7 @@ function KeranjangComponents() {
 
   const updateCart = (updatedProducts) => {
     localStorage.setItem("cart", JSON.stringify(updatedProducts));
+     
     window.dispatchEvent(new Event("cartUpdated"));
   };
 

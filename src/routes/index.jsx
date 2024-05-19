@@ -55,6 +55,11 @@ import EditPencatatanPengeluaranLain from "../pages/mo/pencatatan/editPencatatan
 import ReadGajiPegawai from "../pages/owner/pegawai/readGajiPegawai";
 import EditGajiPegawai from "../pages/owner/pegawai/editGajiPegawai";
 import ReadPesananCustomer from "../pages/admin/pesanan/readPesananCustomer";
+import ReadKonfirmasiPembayaran from "../pages/admin/pesanan/readKonfirmasiPembayaran";
+import AddKonfirmasiPembayaran from "../pages/admin/pesanan/addKonfirmasiPembayaran";
+import ReadKonfirmasiPesanan from "../pages/mo/pesanan/readKonfirmasiPesanan";
+import PembayaranPage from "../pages/customer/PembayaranPage";
+import CetakNota from "../pages/customer/CetakNota";
 
 
 
@@ -140,6 +145,14 @@ const router = createBrowserRouter([
         path : "/admin/pesanan/read",
         element : <ReadPesananCustomer />
       },
+      {
+        path : "/admin/konfirmasi/read",
+        element : <ReadKonfirmasiPembayaran />
+      },
+      {
+        path : "/admin/konfirmasi/add",
+        element : <AddKonfirmasiPembayaran />
+      },
       
       
     ]
@@ -208,6 +221,10 @@ const router = createBrowserRouter([
         path : "/mo/pencatatanPengeluaranLain/edit/:id",
         element : <EditPencatatanPengeluaranLain />
       },                    
+      {
+        path : "/mo/konfirmasi/pesanan/read",
+        element : <ReadKonfirmasiPesanan />
+      },                    
       
     ]
   },
@@ -274,6 +291,14 @@ const router = createBrowserRouter([
       {
         path: "/keranjang",
         element: <KeranjangPage />
+      },
+      {
+        path: "/pembayaran/:id",
+        element: <PembayaranPage />
+      },
+      {
+        path: "/nota/read",
+        element: <CetakNota />
       },
       // {
       //   path: "/catalogue/produk",

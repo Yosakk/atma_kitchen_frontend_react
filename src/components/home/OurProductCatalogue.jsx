@@ -128,6 +128,7 @@ const OurProductCatalogue = () => {
   
     // Menyimpan kembali keranjang ke localStorage
     localStorage.setItem('cart', JSON.stringify(cart));
+     console.log(cart)
   
     // Emit event untuk memberi tahu perubahan pada keranjang
     window.dispatchEvent(new Event("cartUpdated"));

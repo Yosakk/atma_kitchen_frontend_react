@@ -8,9 +8,11 @@ import {
   RectangleStackIcon,
   UserGroupIcon,
   DocumentTextIcon,
+  ClipboardDocumentListIcon,
 } from "@heroicons/react/24/solid";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBox, faUserTie } from '@fortawesome/free-solid-svg-icons';
+
   const icon = {
     className: "w-5 h-5 text-inherit",
   };
@@ -90,6 +92,18 @@ import { faBox, faUserTie } from '@fortawesome/free-solid-svg-icons';
               icon: <RectangleStackIcon {...icon} />,
               name: "editpencatatanPengeluaranLain",
               path: "/mo/pencatatanPengeluaranLain/edit",
+            },
+          ],
+        },
+        {
+          icon: <ClipboardDocumentListIcon {...icon} />,
+          name: "Konfirmasi Pesanan",
+          path: "/mo/konfirmasi/pesanan/read",
+          pages: [
+            {
+              icon: <RectangleStackIcon {...icon} />,
+              name: "read Konfirmasi",
+              path: "/mo/konfirmasi/pesanan/read",
             },
           ],
         },

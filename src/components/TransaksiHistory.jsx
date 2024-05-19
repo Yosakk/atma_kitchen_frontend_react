@@ -7,38 +7,69 @@ import {
   Chip,
   CardBody,
   CardFooter,
+  Tabs,
+  TabsHeader,
+  Tab,
   Button,
-  Dialog,
-  DialogHeader,
-  DialogBody,
-  DialogFooter,
 } from "@material-tailwind/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { useParams } from "react-router-dom";
-import { showAllTransaksiHistoryCustomer } from "../../../api/customer/TransaksiApi";
-import { getImage } from "../../../api";
+import { useParams, Link } from "react-router-dom";
+import { showTransaksiHistoryCustomer } from "../api/customer/TransaksiApi";
+import { getImage } from "../api";
 
-const ReadPesananCustomer = () => {
+const TABS = [
+  {
+    label: "Semua",
+    value: "Semua",
+  },
+  {
+    label: "Menunggu",
+    value: "-",
+  },
+  {
+    label: "Belum Dibayar",
+    value: "Belum Dibayar",
+  },
+  {
+    label: "Terbayar",
+    value: "Sudah Dibayar",
+  },
+  {
+    label: "Diproses",
+    value: "Diproses",
+  },
+  {
+    label: "Dikirim",
+    value: "Dikirim",
+  },
+  {
+    label: "Selesai",
+    value: "Selesai",
+  },
+];
+
+const TransaksiHistory = () => {
   let { id } = useParams();
   console.log("masuk history", id);
 
+  const [selectedTab, setSelectedTab] = useState("Semua");
   const [historyData, setHistoryData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchValue, setSearchValue] = useState("");
-  const itemsPerPage = 5;
+  const itemsPerPage = 5; // Ubah sesuai dengan jumlah item yang ingin ditampilkan per halaman
+
+  useEffect(() => {
+    fetchData();
+  }, [selectedTab, searchValue]);
 
   const fetchData = async () => {
     try {
-      console.log("masuk fetch", id);
-      const response = await showAllTransaksiHistoryCustomer();
-      const filteredData = response.data.filter(
-        (item) => item.status_transaksi === "-" && item.jenis_pengiriman === "Diantar"
-      );
-      const mappedData = filteredData.map((item) => ({
+      const response = await showTransaksiHistoryCustomer(id);
+      const mappedData = response.data.map((item) => ({
         id: item.id_transaksi,
         tanggal: item.tanggal_transaksi,
-        status: item.status_transaksi === "-" ? "Belum Bayar" : item.status_transaksi,
+        status: item.status_transaksi,
         produk: {
           nama: item.nama_produk,
           deskripsi: item.deskripsi_produk,
@@ -46,8 +77,8 @@ const ReadPesananCustomer = () => {
           gambar: item.gambar_produk,
           harga: item.total_harga_transaksi,
         },
-        ongkir: item.biaya_pengiriman,
         total: item.total_pembayaran,
+        ongkir: item.biaya_pengiriman,
       }));
       setHistoryData(mappedData);
       setIsLoading(false);
@@ -56,10 +87,6 @@ const ReadPesananCustomer = () => {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   const handleClickPrevious = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
@@ -72,9 +99,16 @@ const ReadPesananCustomer = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = currentPage * itemsPerPage;
 
-  const filteredData = historyData.filter((item) =>
-    item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
-  );
+  const filteredData =
+    selectedTab === "Semua"
+      ? historyData.filter((item) =>
+          item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
+        )
+      : historyData.filter(
+          (item) =>
+            item.status === selectedTab &&
+            item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
+        );
 
   const groupedData = groupBy(filteredData, "id");
   const totalPages = Math.ceil(Object.keys(groupedData).length / itemsPerPage);
@@ -85,17 +119,36 @@ const ReadPesananCustomer = () => {
         <div className="mb-8 flex items-center justify-between gap-8">
           <div>
             <Typography variant="h5" color="blue-gray">
-              Pesanan Yang Perlu Di Input Jarak
+              Riwayat Pemesanan
+            </Typography>
+            <Typography color="gray" className="mt-1 font-normal">
+              Lihat semua pemesanan Anda
             </Typography>
           </div>
         </div>
-        <div className="w-full md:w-72">
-          <Input
-            label="Search"
-            icon={<MagnifyingGlassIcon className="h-5 w-5" />}
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
+        <div className="flex flex-col items-center justify-between gap-4 md:flex-row ">
+          <Tabs value={selectedTab} className="w-full overflow-x-auto">
+            <TabsHeader>
+              {TABS.map(({ label, value }) => (
+                <Tab
+                  key={value}
+                  value={value}
+                  active={selectedTab === value}
+                  onClick={() => setSelectedTab(value)}
+                >
+                  &nbsp;&nbsp;&nbsp;{label}&nbsp;&nbsp;&nbsp;
+                </Tab>
+              ))}
+            </TabsHeader>
+          </Tabs>
+          <div className="w-full md:w-72">
+            <Input
+              label="Search"
+              icon={<MagnifyingGlassIcon className="h-5 w-5" />}
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+          </div>
         </div>
       </CardHeader>
 
@@ -104,7 +157,11 @@ const ReadPesananCustomer = () => {
           {Object.keys(groupedData)
             .slice(startIndex, endIndex)
             .map((groupKey, index) => (
-              <TransactionCard key={index} groupKey={groupKey} items={groupedData[groupKey]} />
+              <TransactionCard
+                key={index}
+                groupKey={groupKey}
+                items={groupedData[groupKey]}
+              />
             ))}
         </CardBody>
       )}
@@ -113,10 +170,20 @@ const ReadPesananCustomer = () => {
           Page {currentPage} of {totalPages}
         </Typography>
         <div className="flex gap-2">
-          <Button variant="outlined" size="sm" onClick={handleClickPrevious} disabled={currentPage === 1}>
+          <Button
+            variant="outlined"
+            size="sm"
+            onClick={handleClickPrevious}
+            disabled={currentPage === 1}
+          >
             Previous
           </Button>
-          <Button variant="outlined" size="sm" onClick={handleClickNext} disabled={currentPage === totalPages}>
+          <Button
+            variant="outlined"
+            size="sm"
+            onClick={handleClickNext}
+            disabled={currentPage === totalPages}
+          >
             Next
           </Button>
         </div>
@@ -127,26 +194,13 @@ const ReadPesananCustomer = () => {
 
 const TransactionCard = ({ groupKey, items }) => {
   const [expanded, setExpanded] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [jarak, setJarak] = useState("");
-  const [namaPengirim, setNamaPengirim] = useState("");
   const firstItem = items[0];
-
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
-  };
-
-  const handleSave = () => {
-    // Save logic here
-    console.log("Saved:", { jarak, namaPengirim });
-    toggleModal();
-  };
 
   return (
     <div className="border p-3 rounded-lg mb-4">
-      <Typography variant="h6" color="black" className="mb-4">
+      {/* <Typography variant="h6" color="black" className="mb-4">
         ID Transaksi: {groupKey}
-      </Typography>
+      </Typography> */}
       <Typography variant="h6" color="black">
         Tanggal Transaksi : {firstItem.tanggal}
       </Typography>
@@ -164,6 +218,8 @@ const TransactionCard = ({ groupKey, items }) => {
                 : firstItem.status === "Diproses"
                 ? "blue"
                 : firstItem.status === "-"
+                ? "purple"
+                : firstItem.status === "Belum Dibayar"
                 ? "purple"
                 : firstItem.status === "Sudah Dibayar"
                 ? "lightBlue"
@@ -206,20 +262,34 @@ const TransactionCard = ({ groupKey, items }) => {
             </div>
           </div>
           <div className="flex justify-end col-span-6 md:col-span-2">
-            <Typography variant="paragraph" color="blue-gray" className="mb-2 flex items-center">
+            <Typography
+              variant="paragraph"
+              color="blue-gray"
+              className="mb-2  flex items-center"
+            >
               Rp {item.produk.harga}
             </Typography>
           </div>
         </div>
       ))}
+
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-4">
-          <Button variant="outlined" size="sm" color="blue" onClick={() => setExpanded(!expanded)}>
+          <Button
+            variant="outlined"
+            size="sm"
+            color="blue"
+            onClick={() => setExpanded(!expanded)}
+          >
             {expanded ? "Lihat Lebih Sedikit" : "Lihat Lebih Banyak"}
           </Button>
         </div>
         <div className="mt-4">
-          <Typography variant="paragraph" color="blue-gray" className="mb-2 ml-auto">
+          <Typography
+            variant="paragraph"
+            color="blue-gray"
+            className="mb-2 ml-auto"
+          >
             Ongkos Kirim: Rp {firstItem.ongkir}
           </Typography>
           <Typography variant="h6" color="black" className="mb-2 ml-auto">
@@ -227,51 +297,33 @@ const TransactionCard = ({ groupKey, items }) => {
           </Typography>
         </div>
       </div>
-      <div className="flex justify-end items-center mt-4">
-        <Button variant="filled" size="sm" color="blue" onClick={toggleModal}>
-          Input Jarak
-        </Button>
-      </div>
+      {firstItem.status === "Belum Dibayar" && (
+        <div className="flex justify-end items-center mt-4">
+          <Link to={`/pembayaran/${groupKey}`}>
+            <Button variant="filled" color="lightBlue">
+              Bayar
+            </Button>
+          </Link>
+        </div>
+      )}
 
-      <Dialog open={isModalOpen} handler={toggleModal}>
-        <DialogHeader>Input Jarak dan Nama Pengirim</DialogHeader>
-        <DialogBody divider>
-          <div className="mb-4">
-            <Input
-              type="number"
-              label="Jarak"
-              value={jarak}
-              onChange={(e) => setJarak(e.target.value)}
-              step="0.01"
-            />
-          </div>
-          <div className="mb-4">
-            <Input
-              type="text"
-              label="Nama Pengirim"
-              value={namaPengirim}
-              onChange={(e) => setNamaPengirim(e.target.value)}
-            />
-          </div>
-        </DialogBody>
-        <DialogFooter>
-          <Button variant="text" color="red" onClick={toggleModal} className="mr-1">
-            Cancel
-          </Button>
-          <Button variant="gradient" color="green" onClick={handleSave}>
-            Save
-          </Button>
-        </DialogFooter>
-      </Dialog>
+      {/* <div className="flex justify-end">
+                <Typography variant="paragraph" color="blue-gray" className="mb-2 col-span-2 flex justify-center items-center">
+                    Total : {firstItem.total}
+                </Typography>
+            </div> */}
     </div>
   );
 };
 
-export default ReadPesananCustomer;
+export default TransaksiHistory;
 
+// Fungsi untuk mengelompokkan data berdasarkan kunci tertentu
 function groupBy(array, key) {
   return array.reduce((result, currentValue) => {
-    (result[currentValue[key]] = result[currentValue[key]] || []).push(currentValue);
+    (result[currentValue[key]] = result[currentValue[key]] || []).push(
+      currentValue
+    );
     return result;
   }, {});
 }

@@ -9,6 +9,7 @@ import {
   ShoppingBagIcon,
   UserGroupIcon,
   BookOpenIcon,
+  ClipboardDocumentListIcon,
 } from "@heroicons/react/24/solid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBox } from "@fortawesome/free-solid-svg-icons";
@@ -112,8 +113,8 @@ export const routes = [
         ],
       },
       {
-        icon: <UserGroupIcon {...icon} />,
-        name: "Pesanan",
+        icon: <ClipboardDocumentListIcon {...icon} />,
+        name: "Input Jarak Pesanan",
         path: "/admin/pesanan/read",
         pages: [
           {
@@ -121,10 +122,17 @@ export const routes = [
             name: "readpesanan",
             path: "/admin/pesanan/read",
           },
+        ],
+      },
+      {
+        icon: <ClipboardDocumentListIcon {...icon} />,
+        name: "Konfirmasi Pembayaran",
+        path: "/admin/konfirmasi/read",
+        pages: [
           {
             icon: <RectangleStackIcon {...icon} />,
-            name: "editpesanan",
-            path: "/admin/pesanan/read",
+            name: "read Konfirmasi",
+            path: "/admin/konfirmasi/read",
           },
         ],
       },

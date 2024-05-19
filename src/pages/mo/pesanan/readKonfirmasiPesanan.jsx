@@ -7,66 +7,36 @@ import {
   Chip,
   CardBody,
   CardFooter,
-  Tabs,
-  TabsHeader,
-  Tab,
   Button,
+  Dialog,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@material-tailwind/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { useParams } from "react-router-dom";
-import { showTransaksiHistoryCustomer } from "../api/customer/TransaksiApi";
-import { getImage } from "../api";
+import { useParams, Link } from "react-router-dom";
+import { showAllTransaksiHistoryCustomer } from "../../../api/customer/TransaksiApi";
+import { getImage } from "../../../api";
 
-const TABS = [
-    {
-      label: "Semua",
-      value: "Semua",
-    },
-    {
-      label: "Belum Bayar",
-      value: "-",
-    },
-    {
-      label: "Menunggu",
-      value: "Menunggu",
-    },
-    {
-      label: "Terbayar",
-      value: "Sudah Dibayar",
-    },
-    {
-      label: "Diproses",
-      value: "Diproses",
-    },
-    {
-      label: "Dikirim",
-      value: "Dikirim",
-    },
-    {
-      label: "Selesai",
-      value: "Selesai",
-    },
-  ];
-
-const HistoryCard = () => {
+const ReadKonfirmasiPesanan = () => {
   let { id } = useParams();
   console.log("masuk history", id);
 
-  const [selectedTab, setSelectedTab] = useState("Semua");
   const [historyData, setHistoryData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchValue, setSearchValue] = useState("");
-  const itemsPerPage = 5; // Ubah sesuai dengan jumlah item yang ingin ditampilkan per halaman
-
-  useEffect(() => {
-    fetchData();
-  }, [selectedTab, searchValue]);
+  const [acceptModalOpen, setAcceptModalOpen] = useState(false); // State untuk mengontrol tampilan modal
+  const itemsPerPage = 5;
 
   const fetchData = async () => {
     try {
-      const response = await showTransaksiHistoryCustomer(id);
-      const mappedData = response.data.map((item) => ({
+      console.log("masuk fetch", id);
+      const response = await showAllTransaksiHistoryCustomer();
+      const filteredData = response.data.filter(
+        (item) => item.status_transaksi === "Sudah Dibayar"
+      );
+      const mappedData = filteredData.map((item) => ({
         id: item.id_transaksi,
         tanggal: item.tanggal_transaksi,
         status: item.status_transaksi,
@@ -77,6 +47,7 @@ const HistoryCard = () => {
           gambar: item.gambar_produk,
           harga: item.total_harga_transaksi,
         },
+        ongkir: item.biaya_pengiriman,
         total: item.total_pembayaran,
       }));
       setHistoryData(mappedData);
@@ -86,6 +57,10 @@ const HistoryCard = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleClickPrevious = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
@@ -98,16 +73,9 @@ const HistoryCard = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = currentPage * itemsPerPage;
 
-  const filteredData =
-    selectedTab === "Semua"
-      ? historyData.filter((item) =>
-          item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
-        )
-      : historyData.filter(
-          (item) =>
-            item.status === selectedTab &&
-            item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
-        );
+  const filteredData = historyData.filter((item) =>
+    item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
+  );
 
   const groupedData = groupBy(filteredData, "id");
   const totalPages = Math.ceil(Object.keys(groupedData).length / itemsPerPage);
@@ -118,36 +86,17 @@ const HistoryCard = () => {
         <div className="mb-8 flex items-center justify-between gap-8">
           <div>
             <Typography variant="h5" color="blue-gray">
-              Riwayat Pemesanan
-            </Typography>
-            <Typography color="gray" className="mt-1 font-normal">
-              Lihat semua pemesanan Anda
+              Konfirmasi Pesanan
             </Typography>
           </div>
         </div>
-        <div className="flex flex-col items-center justify-between gap-4 md:flex-row ">
-          <Tabs value={selectedTab} className="w-full overflow-x-auto">
-            <TabsHeader>
-              {TABS.map(({ label, value }) => (
-                <Tab
-                  key={value}
-                  value={value}
-                  active={selectedTab === value}
-                  onClick={() => setSelectedTab(value)}
-                >
-                  &nbsp;&nbsp;&nbsp;{label}&nbsp;&nbsp;&nbsp;
-                </Tab>
-              ))}
-            </TabsHeader>
-          </Tabs>
-          <div className="w-full md:w-72">
-            <Input
-              label="Search"
-              icon={<MagnifyingGlassIcon className="h-5 w-5" />}
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-            />
-          </div>
+        <div className="w-full md:w-72">
+          <Input
+            label="Search"
+            icon={<MagnifyingGlassIcon className="h-5 w-5" />}
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+          />
         </div>
       </CardHeader>
 
@@ -160,6 +109,7 @@ const HistoryCard = () => {
                 key={index}
                 groupKey={groupKey}
                 items={groupedData[groupKey]}
+                setAcceptModalOpen={setAcceptModalOpen} // Mengirim fungsi untuk membuka modal ke komponen TransactionCard
               />
             ))}
         </CardBody>
@@ -187,11 +137,34 @@ const HistoryCard = () => {
           </Button>
         </div>
       </CardFooter>
+
+      {/* Modal untuk menerima pesanan */}
+      <Dialog
+        open={acceptModalOpen}
+        onClose={() => setAcceptModalOpen(false)}
+        className="w-[400px]"
+      >
+        <DialogHeader>Menerima Pesanan</DialogHeader>
+        <DialogBody>
+          Apakah Anda yakin ingin menerima pesanan ini?
+        </DialogBody>
+        <DialogFooter>
+          <Button color="red" className="mr-2" onClick={() => setAcceptModalOpen(false)}>
+            Batal
+          </Button>
+          <Button color="blue" onClick={() => {
+            // Logika untuk menerima pesanan
+            setAcceptModalOpen(false);
+          }}>
+            Terima
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </Card>
   );
 };
 
-const TransactionCard = ({ groupKey, items }) => {
+const TransactionCard = ({ groupKey, items, setAcceptModalOpen }) => {
   const [expanded, setExpanded] = useState(false);
   const firstItem = items[0];
 
@@ -205,7 +178,7 @@ const TransactionCard = ({ groupKey, items }) => {
       </Typography>
       <div className="flex pb-3">
         <Typography variant="h6" color="black" className="ml-auto">
-        <Chip
+          <Chip
             size="sm"
             variant="ghost"
             value={firstItem.status}
@@ -262,53 +235,63 @@ const TransactionCard = ({ groupKey, items }) => {
             <Typography
               variant="paragraph"
               color="blue-gray"
-              className="mb-2  flex items-center"
+              className="mb-2 flex items-center"
             >
               Rp {item.produk.harga}
             </Typography>
           </div>
         </div>
       ))}
-      {firstItem.status === "-" && (
-  <div className="flex justify-end">
-    <Button variant="filled" color="lightBlue">
-      Bayar
-    </Button>
-  </div>
-)}
-
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-4">
           <Button
-            variant="text"
+            variant="outlined"
             size="sm"
+            color="blue"
             onClick={() => setExpanded(!expanded)}
           >
             {expanded ? "Lihat Lebih Sedikit" : "Lihat Lebih Banyak"}
           </Button>
-
         </div>
-        <Typography
-          variant="paragraph"
-          color="blue-gray"
-          className="mb-2 ml-auto"
-        >
-          Total : {firstItem.total}
-        </Typography>
+        <div className="mt-4">
+          <Typography
+            variant="paragraph"
+            color="blue-gray"
+            className="mb-2 ml-auto"
+          >
+            Ongkos Kirim: Rp {firstItem.ongkir}
+          </Typography>
+          <Typography variant="h6" color="black" className="mb-2 ml-auto">
+            Total Belanja: Rp {firstItem.total}
+          </Typography>
+        </div>
       </div>
+      <div className="flex justify-end items-center mt-4">
+      <Button
+          variant="filled"
+          size="sm"
+          color="red"
+          className="mr-2"
+          // onClick={() => setAcceptModalOpen(true)}
+        >
+          Tolak
+        </Button>
 
-      {/* <div className="flex justify-end">
-                <Typography variant="paragraph" color="blue-gray" className="mb-2 col-span-2 flex justify-center items-center">
-                    Total : {firstItem.total}
-                </Typography>
-            </div> */}
+        {/* Tombol "Terima" untuk membuka modal */}
+        <Button
+          variant="filled"
+          size="sm"
+          color="blue"
+          onClick={() => setAcceptModalOpen(true)}
+        >
+          Terima
+        </Button>
+      </div>
     </div>
   );
 };
 
-export default HistoryCard;
-
-// Fungsi untuk mengelompokkan data berdasarkan kunci tertentu
+export default ReadKonfirmasiPesanan;
 function groupBy(array, key) {
   return array.reduce((result, currentValue) => {
     (result[currentValue[key]] = result[currentValue[key]] || []).push(

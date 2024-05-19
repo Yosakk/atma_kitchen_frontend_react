@@ -108,7 +108,7 @@ const ProfilePagePelanggan = () => {
                 </div> */}
                 <div className="ml-3 w-full rounded-lg bg-transparent ">
                     <div>
-                        <HistoryCardPelanggan />
+                        {/* <HistoryCardPelanggan /> */}
                     </div>
                 </div>
             </div>

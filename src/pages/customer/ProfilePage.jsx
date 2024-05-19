@@ -15,11 +15,11 @@ import {
 } from "@heroicons/react/24/outline";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenSquare } from "@fortawesome/free-solid-svg-icons";
-import HistoryCardPage from "../../components/HistoryCard";
 import AlamatCardPage from "../../components/AlamatCard";
 import { Link, useParams } from "react-router-dom";
 import SideNav from "../../components/SideNav";
 import { showDataCustomer } from "../../api/customer/customerApi";
+import TransaksiHistory from "../../components/TransaksiHistory";
 
 const NAVS = [
     {
@@ -64,7 +64,7 @@ const ProfilePage = () => {
     const handleItemClick = (item) => {
         setActiveItem(item);
         if (item === "Pesanan Saya") {
-            setContent(<HistoryCardPage />);
+            setContent(<TransaksiHistory/>);
         } else if (item === "Alamat Saya") {
             setContent(<AlamatCardPage />);
         } else {
