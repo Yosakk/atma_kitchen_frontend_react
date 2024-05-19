@@ -189,6 +189,7 @@ const OurProductCatalogue = () => {
       cart.push({ ...product, quantity: 1 });
     }
     kategori.push(type);
+    
     // Menyimpan kembali keranjang ke localStorage
     localStorage.setItem("cart", JSON.stringify(cart));
     console.log(cart);
