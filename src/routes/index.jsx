@@ -61,6 +61,8 @@ import ReadKonfirmasiPesanan from "../pages/mo/pesanan/readKonfirmasiPesanan";
 import PembayaranPage from "../pages/customer/PembayaranPage";
 import CetakNota from "../pages/customer/CetakNota";
 import CheckoutPage from "../pages/customer/CheckoutPage";
+import PembayaranBerhasil from "../pages/customer/PembayaranBerhasil";
+import CetakNotaPDF from "../pages/customer/CetakNotaPDF";
 
 
 
@@ -298,20 +300,27 @@ const router = createBrowserRouter([
         element: <PembayaranPage />
       },
       {
-        path: "/nota/read",
-        element: <CetakNota />
+        path: "/pembayaran/nota/:id",
+        element: <PembayaranBerhasil />
       },
       {
         path: "/checkout/view",
         element: <CheckoutPage />
       },
       // {
-      //   path: "/catalogue/produk",
-      //   element: <ProdukPage />
+      //   path: "/checkout/pembayaran",
+      //   element: <PembayaranPage />
       // },
+      {
+        path: "/pembayaran/cetaknotaPDF/:id",
+        element: <CetakNotaPDF />
+      },
     ],
   },
 ]);
+
+
+
 const AppRouter = () => {
   return (
     <>

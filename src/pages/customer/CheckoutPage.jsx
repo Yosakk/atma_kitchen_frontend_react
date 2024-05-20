@@ -15,14 +15,14 @@ function CheckoutPage() {
           style={{ width: 300, height: 300 }}
         />
         <div className="text-center mt-4">
-          <h2 className="text-xl font-bold">Transaksi Berhasil</h2>
-          <p>Silahkan Tunggu Konfirmasi Dari Admin</p>
+          <h2 className="text-xl font-bold">Pemesanan Berhasil</h2>
+          <p>Silahkan Tunggu Konfirmasi Ongkos Kirim Dari Admin</p>
         </div>
       </div>
       <div className="w-full flex justify-center mt-4">
         <div className="w-full max-w-md">
-        <Link to="/customer/profile">
-          <Button className="w-full">Back To Profile</Button>
+        <Link to="/home">
+          <Button className="w-full">Back To home</Button>
           </Link>
         </div>
       </div>

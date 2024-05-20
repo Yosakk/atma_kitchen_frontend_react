@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import { getImage } from "../../api";
 import { Button, Input } from "@material-tailwind/react";
 import useRefresh from "../../services/useRefresh";
@@ -6,11 +6,23 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { storeTransaksi } from "../../api/customer/TransaksiApi";
+
+const formReducer = (state, event) => {
+  return {
+    ...state,
+    [event.target.name]: event.target.value,
+  };
+};
 
 function KeranjangComponents() {
+  const [formData, setFormData] = useReducer(formReducer, {});
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   const [products, setProducts] = useState(() => {
     const cart = localStorage.getItem("cart");
+    console.log(cart);
     if (cart) {
       return JSON.parse(cart);
     }
@@ -18,7 +30,9 @@ function KeranjangComponents() {
   });
 
   const [kategori, setKategori] = useState(() => {
+
     const kategori = localStorage.getItem("kategori");
+    console.log("ini kategori di keranjang", kategori)
     if (kategori) {
       return JSON.parse(kategori);
     }
@@ -32,10 +46,10 @@ function KeranjangComponents() {
       return "Invalid category data";
     }
 
-    const hasPreOrder = kategori.some((item) => item === "Pre Order");
+    const hasPreOrder = kategori.some((item) => item === "Pre-Order");
 
     if (hasPreOrder) {
-      return "Pre Order";
+      return "Pre-Order";
     }
 
     const allReadyStock = kategori.every((item) => item === "Ready Stock");
@@ -45,6 +59,45 @@ function KeranjangComponents() {
     }
 
     return "mixed";
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const produk_id = products.map((product) => product.id_produk);
+    const jumlah = products.map((product) => product.quantity);
+    const jenis_produk = kategori.map((kategori) => kategori);
+    const jenis_pengiriman = selectedDeliveryType;
+    const finalFormData = {
+      ...formData,
+      jenis_pengiriman,
+      produk_id,
+      jumlah,
+      jenis_produk
+    };
+
+    console.log(finalFormData);
+
+    storeTransaksi(finalFormData)
+      .then((res) => {
+        const transaksiId = res.data.id_transaksi;
+        console.log(transaksiId)
+        toast.success("Transaksi Produk berhasil!");
+        localStorage.clear("cart");
+        localStorage.clear("kategori");
+        setTimeout(() => {
+          if (selectedDeliveryType === "Pickup") {
+            navigate(`/pembayaran/${transaksiId}`);// Change this to your desired route for Pickup
+          } else if (selectedDeliveryType === "Diantar") {
+            navigate("/checkout/view")// Change this to your desired route for Delivery
+          }
+          
+        }, 2000);
+
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.error("Transaksi Produk gagal!");
+      });
   };
 
   useEffect(() => {
@@ -68,6 +121,7 @@ function KeranjangComponents() {
       }
       return product;
     });
+    console.log(updatedProducts);
     setProducts(updatedProducts);
     updateCart(updatedProducts);
   };
@@ -160,6 +214,7 @@ function KeranjangComponents() {
                               )}
                               <div>
                                 <span>{product.nama_produk_hampers}</span>
+                                <span className="ml-1 text-gray-500">({product.kategori})</span>
                               </div>
                             </>
                           ) : (
@@ -208,11 +263,11 @@ function KeranjangComponents() {
                         Rp{" "}
                         {product.id_produk_hampers
                           ? (
-                              product.harga_produk_hampers * product.quantity
-                            ).toLocaleString()
+                            product.harga_produk_hampers * product.quantity
+                          ).toLocaleString()
                           : (
-                              product.harga_produk * product.quantity
-                            ).toLocaleString()}{" "}
+                            product.harga_produk * product.quantity
+                          ).toLocaleString()}{" "}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <Button
@@ -234,107 +289,106 @@ function KeranjangComponents() {
       </div>
 
       <div className="md:w-1/3 p-4 bg-gray-50 shadow rounded-lg">
-        <div className="font-semibold text-xl mb-4">Ringkasan Belanja</div>
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <span>Total Produk:</span>
-            <span>{totalProducts}</span>
+        <form onSubmit={handleSubmit}>
+          <div className="font-semibold text-xl mb-4">Ringkasan Belanja</div>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span>Total Produk:</span>
+              <span>{totalProducts}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Total Harga:</span>
+              <span>Rp {total.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Status Kategori:</span>
+              <span>{categoryStatus}</span>
+            </div>
           </div>
-          <div className="flex justify-between">
-            <span>Total Harga:</span>
-            <span>Rp {total.toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Status Kategori:</span>
-            <span>{categoryStatus}</span>
-          </div>
-        </div>
 
-        <div className="mt-4">
-          <div className="mb-2">
-            <label htmlFor="pickup-date" className="block text-gray-700">
-              Tanggal Pengambilan:
+          <div className="mt-4">
+            <div className="mb-2">
+              <label htmlFor="pickup-date" className="block text-gray-700">
+                Tanggal Pengambilan:
+              </label>
+              <Input
+                type="date"
+                id="pickup-date"
+                name="tanggal_pengambilan"
+
+                onChange={setFormData}
+                min={getCurrentDate(
+                  categoryStatus === "Pre-Order" ? 2 : categoryStatus === "Ready Stock" ? 0 : 0
+                )}
+                className="mt-1 block w-full"
+              />
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <label htmlFor="alamat" className="block text-gray-700">
+              Alamat Pengiriman:
             </label>
-            <Input
-              type="date"
-              id="pickup-date"
-              value={pickupDate}
-              onChange={(e) => setPickupDate(e.target.value)}
-              min={getCurrentDate(
-                categoryStatus === "Pre Order" ? 2 : categoryStatus === "Ready Stock" ? 0 : 0
-              )}
-              className="mt-1 block w-full"
-            />
+            <select
+              id="alamat"
+              name="alamat_pengiriman"
+
+              onChange={setFormData}
+              className="mt-1 p-2 border border-gray-300 rounded w-full"
+            >
+              <option value="">Pilih Alamat</option>
+              {addresses.map((address, index) => (
+                <option key={index} value={address}>
+                  {address}
+                </option>
+              ))}
+            </select>
           </div>
-        </div>
 
-        <div className="mt-4">
-          <label htmlFor="alamat" className="block text-gray-700">
-            Alamat Pengiriman:
-          </label>
-          <select
-            id="alamat"
-            value={selectedAddress}
-            onChange={(e) => setSelectedAddress(e.target.value)}
-            className="mt-1 p-2 border border-gray-300 rounded w-full"
-          >
-            <option value="">Pilih Alamat</option>
-            {addresses.map((address, index) => (
-              <option key={index} value={address}>
-                {address}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="mt-4">
-          <label className="block text-gray-700">
-            Jenis Pengiriman:
-          </label>
-          <div className="flex items-center mt-2">
-            <input
-              type="radio"
-              id="pickup"
-              name="delivery-type"
-              value="Pickup"
-              checked={selectedDeliveryType === "Pickup"}
-              onChange={(e) => setSelectedDeliveryType(e.target.value)}
-              className="mr-2"
-            />
-            <label htmlFor="pickup" className="mr-4">
-              Ambil Sendiri
+          <div className="mt-4">
+            <label className="block text-gray-700">
+              Jenis Pengiriman:
             </label>
-            <input
-              type="radio"
-              id="delivery"
-              name="delivery-type"
-              value="Delivery"
-              checked={selectedDeliveryType === "Delivery"}
-              onChange={(e) => setSelectedDeliveryType(e.target.value)}
-              className="mr-2"
-            />
-            <label htmlFor="delivery">
-              Antar ke Alamat
-            </label>
+            <div className="flex items-center mt-2">
+              <input
+                type="radio"
+                id="pickup"
+                name="jenis_pengiriman"
+                value="Pickup"
+                checked={selectedDeliveryType === "Pickup"}
+                onChange={(e) => setSelectedDeliveryType(e.target.value)}
+                className="mr-2"
+              />
+              <label htmlFor="pickup" className="mr-4">
+                Ambil Sendiri
+              </label>
+              <input
+                type="radio"
+                id="delivery"
+                name="jenis_pengiriman"
+                value="Diantar"
+                checked={selectedDeliveryType === "Diantar"}
+                onChange={(e) => setSelectedDeliveryType(e.target.value)}
+                className="mr-2"
+              />
+              <label htmlFor="delivery">
+                Antar ke Alamat
+              </label>
+            </div>
           </div>
-        </div>
 
-        <div className="mt-4 flex justify-center">
-          <Link to="/checkout/view">
-          
-          <Button
-            className="w-full bg-[#FFC655] text-white p-2 rounded hover:bg-[#FFA900] mt-4"
-            onClick={() => {
-              toast.success("Berhasil Checkout");
-              // Logika lain yang Anda butuhkan untuk checkout
-            }}
-          >
-            Checkout <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
-          </Button>
-          </Link>
-        </div>
+          <div className="mt-4 flex justify-center">
+            <Button
+              type="submit"
+              className="w-full bg-[#FFC655] text-white p-2 rounded hover:bg-[#FFA900] mt-4"
+            >
+              Checkout <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
+            </Button>
+
+          </div>
+        </form>
       </div>
-      <ToastContainer/>
+      <ToastContainer />
     </div>
   );
 }

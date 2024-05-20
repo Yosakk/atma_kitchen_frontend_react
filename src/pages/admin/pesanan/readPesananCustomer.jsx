@@ -173,10 +173,10 @@ const TransactionCard = ({ groupKey, items }) => {
         </Typography>
       </div>
       <div className="flex justify-between mb-3">
-        <Typography variant="h6" color="black">
+        <Typography variant="small" color="black">
           Tanggal Transaksi : {firstItem.tanggal}
         </Typography>
-        <Typography variant="h6" color="black">
+        <Typography variant="small" color="black">
           Tanggal Pengambilan : {firstItem.tanggalAmbil}
         </Typography>
       </div>

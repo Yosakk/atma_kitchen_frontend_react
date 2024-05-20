@@ -33,7 +33,7 @@ const ReadKonfirmasiPembayaran = () => {
       console.log("masuk fetch", id);
       const response = await showAllTransaksiHistoryCustomer();
       const filteredData = response.data.filter(
-        (item) => item.transaksi.status_transaksi === "Sudah Dibayar"
+        (item) => item.transaksi && item.transaksi.status_transaksi === "Sudah Dibayar"
       );
       const mappedData = filteredData.map((item) => ({
         id: item.transaksi.id_transaksi,
@@ -158,10 +158,10 @@ const TransactionCard = ({ groupKey, items }) => {
         </Typography>
       </div>
       <div className="flex justify-between mb-3">
-        <Typography variant="h6" color="black">
+        <Typography variant="small" color="black">
           Tanggal Transaksi : {firstItem.tanggal}
         </Typography>
-        <Typography variant="h6" color="black">
+        <Typography variant="small" color="black">
           Tanggal Pengambilan : {firstItem.tanggalAmbil}
         </Typography>
       </div>

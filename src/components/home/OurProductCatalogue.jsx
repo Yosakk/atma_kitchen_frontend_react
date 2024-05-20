@@ -220,11 +220,11 @@ const OurProductCatalogue = () => {
     }
   
     // Check if there is any "Pre Order" category in the array
-    const hasPreOrder = kategori.some((item) => item === "Pre Order");
+    const hasPreOrder = kategori.some((item) => item === "Pre-Order");
   
     // If there's at least one "Pre Order" category, return "Pre Order"
     if (hasPreOrder) {
-      return "Pre Order";
+      return "Pre-Order";
     }
   
     // If all categories are "Ready Stock", return "Ready Stock"
@@ -369,7 +369,7 @@ const OurProductCatalogue = () => {
                     className="flex-grow"
                     color="red"
                     onClick={() => {
-                      handleAddToCart(product, "Pre Order"); // Tambahkan "Pre Order" sebagai parameter
+                      handleAddToCart(product, "Pre-Order"); // Tambahkan "Pre Order" sebagai parameter
                       flyToNavbar(`addToCartButton_${product.id_produk}`);
                     }}
                     disabled={
@@ -442,7 +442,7 @@ const OurProductCatalogue = () => {
                 <Button
                   className="w-full"
                   onClick={() =>
-                    handleAddToCart(productHampers, "Pre Order") // Tambahkan "Hampers" sebagai parameter
+                    handleAddToCart(productHampers, "Pre-Order") // Tambahkan "Hampers" sebagai parameter
                   }
                 >
                   Add To Cart

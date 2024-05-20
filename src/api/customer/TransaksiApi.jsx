@@ -83,8 +83,6 @@ export const editStatusTransaksiAdmin = async (id, data) => {
 
 export const editStatusTransaksiMO = async (id, data) => {
     const token = sessionStorage.getItem("token");
-    console.log("ini idnya : ", id);
-    console.log("ini datanya : ", data);
     try {
         const response = await urlAxios.put(`/edit/status/transaksi/MO/${id}`, data, {
             headers: {
@@ -98,3 +96,35 @@ export const editStatusTransaksiMO = async (id, data) => {
         throw error.response.data;
     }
 }
+
+export const storeTransaksi = async (data) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.post("/transaksi", data, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        });
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+}
+export const showDataNota = async (id) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.get(`/nota/transaksi/${id}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+
+};

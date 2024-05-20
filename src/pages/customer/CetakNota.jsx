@@ -1,100 +1,183 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { showDataNota } from "../../api/customer/TransaksiApi";
 import Lottie from "lottie-react";
 import AnimationPage from "../../assets/images/Animation - 1716104307179.json";
-import { Button, Input } from "@material-tailwind/react";
-import { Link } from "react-router-dom";
+import { Button } from "@material-tailwind/react";
+import { useLocation, useParams } from "react-router-dom";
 
 function CetakNota() {
+  let { id } = useParams();
+  console.log("masuk Cetak", id);
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const pointsUsed = queryParams.get("pointsUsed");
+  const [isLoading, setIsLoading] = useState(true);
+  const [notaData, setNotaData] = useState(null);
+  const idTransaksi = useState(id);
+  const nilaiPoin = pointsUsed * 100;
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await showDataNota(idTransaksi);
+      setNotaData(response.data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <>
-      <div className="flex justify-center mt-8">
-        {" "}
-        {/* Menggunakan flex dan justify-center */}
-        <Lottie
-          animationData={AnimationPage}
-          loop={true}
-          autoplay={true}
-          style={{ width: 200, height: 200 }}
-        />
-      </div>
-      <div className="max-w-xl mx-auto p-4 border border-gray-300 rounded-lg shadow-md bg-white">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold">Atma Kitchen</h2>
-          <p className="text-sm">Jl. Centralpark No. 10 Yogyakarta</p>
-        </div>
+    <div className="container mx-auto max-w-screen-xl px-4">
+      {isLoading ? (
+        <div className="text-center mt-8">Loading...</div>
+      ) : (
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="text-center mb-4">
+            <h2 className="text-2xl font-bold text-indigo-700">Atma Kitchen</h2>
+            <p className="text-sm text-gray-500">
+              Jl. Centralpark No. 10 Yogyakarta
+            </p>
+          </div>
 
-        {/* Animasi Lottie */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm">
+                <strong>No Nota:</strong> {notaData.nomor_nota}
+              </p>
+              <p className="text-sm">
+                <strong>Tanggal pesan:</strong> {notaData.tanggal_transaksi}
+              </p>
+              <p className="text-sm">
+                <strong>Lunas pada:</strong> {notaData.pembayaran.tanggal_pembayaran}
+              </p>
+              <p className="text-sm">
+                <strong>Tanggal ambil:</strong> {notaData.tanggal_pengambilan}
+              </p>
+            </div>
 
-        <div className="mt-4">
-          <p className="text-sm">
-            <strong>No Nota:</strong> 24.02.101
-          </p>
-          <p className="text-sm">
-            <strong>Tanggal pesan:</strong> 15/2/2024 18:50
-          </p>
-          <p className="text-sm">
-            <strong>Lunas pada:</strong> 15/2/2024 19:01
-          </p>
-          <p className="text-sm">
-            <strong>Tanggal ambil:</strong> 18/2/2024 09:00
-          </p>
-        </div>
+            <div>
+              <p className="text-sm">
+                <strong>Customer:</strong>
+                {notaData.user_by_pelanggan.nama_user}
+              </p>
+              <p className="text-sm">{notaData.user_by_pelanggan.email}</p>
+              <p className="text-sm">
+                {notaData.user_by_pelanggan.nomor_telepon}
+              </p>
+              {/* <p className="text-sm">
+                {notaData.user.alamat[0].detail_alamat}
+              </p> */}
+              <p className="text-sm">{notaData.alamat_pengiriman}</p>
+              <p className="text-sm">
+                <strong>Delivery:</strong> {notaData.jenis_pengiriman}
+                {notaData.jenis_pengiriman === "Diantar" &&
+                  " Kurir Atma Kitchen"}
+              </p>
+            </div>
+          </div>
 
-        <div className="mt-4">
-          <p className="text-sm">
-            <strong>Customer:</strong> cath123@gmail.com / Catherine
-          </p>
-          <p className="text-sm">Perumahan Griva Persada XII/20</p>
-          <p className="text-sm">Caturtunggal, Depok, Sleman</p>
-          <p className="text-sm">
-            <strong>Delivery:</strong> Kurir Atma Kitchen
-          </p>
-        </div>
+          <hr className="my-4" />
 
-        <div className="mt-4">
-          <p className="text-sm">
-            <strong>1 Hampers Paket A</strong> 650.000
-          </p>
-          <p className="text-sm">
-            <strong>1 Keripik Kentang 250 gr</strong> 75.000
-          </p>
-        </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              {/* Detail transaksi */}
+              {notaData.detail_transaksi.map((item, index) => {
+                // Cek jika nama_produk tidak ditemukan, lakukan pencarian nama_produk_hampers
+                const namaProduk = item.produk
+                  ? item.produk.nama_produk
+                  : item.produk_hampers
+                  ? item.produk_hampers.nama_produk_hampers
+                  : "Produk tidak ditemukan";
 
-        <div className="mt-4 border-t border-gray-300 pt-4">
-          <p className="text-sm">
-            <strong>Total:</strong> 725.000
-          </p>
-          <p className="text-sm">
-            <strong>Ongkos Kirim (rad. 5 km):</strong> 10.000
-          </p>
-          <p className="text-sm">
-            <strong>Total:</strong> 735.000
-          </p>
-          <p className="text-sm">
-            <strong>Potongan 120 poin:</strong> -12.000
-          </p>
-          <p className="text-sm">
-            <strong>Total:</strong> 723.000
-          </p>
-        </div>
+                return (
+                  <p className="text-sm" key={index}>
+                    <strong>
+                      {item.jumlah_produk} x {namaProduk}
+                    </strong>
+                  </p>
+                );
+              })}
+            </div>
+            <div>
+              {/* Detail transaksi */}
+              {notaData.detail_transaksi.map((item, index) => (
+                <p className="text-sm" key={index}>
+                  Rp.{item.total_harga_transaksi.toLocaleString("id-ID")}
+                </p>
+              ))}
+            </div>
+          </div>
 
-        <div className="mt-4 border-t border-gray-300 pt-4">
-          <p className="text-sm">
-            <strong>Poin dari pesanan ini:</strong> 106
-          </p>
-          <p className="text-sm">
-            <strong>Total poin customer:</strong> 110
-          </p>
+          <hr className="my-4" />
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              {/* <div>
+                <p className="text-sm">
+                  <strong>Potongan 120 poin:</strong>{" "}
+                  {notaData.user_by_pelanggan.poin}
+                </p>
+                <p className="text-sm">
+                  <strong>Total Pembayaran:</strong> {notaData.total_pembayaran}
+                </p>
+                <p className="text-sm">
+                  <strong>Ongkos Kirim (rad. 5 km):</strong>{" "}
+                  {notaData.biaya_pengiriman}
+                </p>
+              </div> */}
+            </div>
+
+            <div>
+              {/* <p className="text-sm">
+                <strong>Poin dari pesanan ini:</strong>{" "}
+                {notaData.user_by_pelanggan.poin}
+              </p>
+              <p className="text-sm">
+                <strong>Total poin customer:</strong>{" "}
+                {notaData.user_by_pelanggan.poin}
+              </p> */}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm">
+                <strong>Poin dari pesanan ini:</strong> {notaData.pembayaran.poin_reward}
+              </p>
+              <p className="text-sm">
+                <strong>Total poin customer:</strong> {notaData.user.poin}
+              </p>
+            </div>
+            <div>
+              <div>
+                <p className="text-sm">
+                  <strong>Potongan {pointsUsed} poin:</strong> -{nilaiPoin.toLocaleString("id-ID")}
+                </p>
+                
+                <p className="text-sm">
+                  <strong>Biaya Pengiriman:</strong>
+                  Rp.{notaData.biaya_pengiriman.toLocaleString("id-ID")}
+                </p>
+                <p className="text-sm">
+                  <strong>Total Pembayaran:</strong> Rp.{notaData.total_pembayaran.toLocaleString("id-ID") - nilaiPoin.toLocaleString("id-ID")}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center mt-6">
+            {/* <Button color="indigo" ripple="light"className="w-full"
+                    onClick={handleCetakNota}>
+              Cetak Nota
+            </Button> */}
+          </div>
         </div>
-      </div>
-      <div className="w-full flex justify-center mt-4">
-        <div className="w-full max-w-md">
-          <Link to="/customer/profile">
-            <Button className="w-full">Back To Profile</Button>
-          </Link>
-        </div>
-      </div>
-    </>
+      )}
+    </div>
   );
 }
 

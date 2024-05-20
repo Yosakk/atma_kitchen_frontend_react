@@ -18,7 +18,7 @@ import logo from "../../assets/images/img0.png";
 
 export function CarouselWithContent() {
   return (
-    <div className="relative">
+    <div className="relative pt-4">
       <Carousel
         className=" w-full h-[80vh] md:h-[90vh] lg:h-[100vh] xl:h-[80vh] 2xl:h-[90vh] mt-10"
         infinite={true}
