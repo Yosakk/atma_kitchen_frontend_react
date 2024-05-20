@@ -33,21 +33,25 @@ const ReadKonfirmasiPembayaran = () => {
       console.log("masuk fetch", id);
       const response = await showAllTransaksiHistoryCustomer();
       const filteredData = response.data.filter(
-        (item) => item.status_transaksi === "Belum Dibayar"
+        (item) => item.transaksi.status_transaksi === "Sudah Dibayar"
       );
       const mappedData = filteredData.map((item) => ({
-        id: item.id_transaksi,
-        tanggal: item.tanggal_transaksi,
-        status: item.status_transaksi,
+        id: item.transaksi.id_transaksi,
+        tanggal: item.transaksi.tanggal_transaksi,
+        tanggalAmbil: item.transaksi.tanggal_pengambilan,
+        status: item.transaksi.status_transaksi,
         produk: {
-          nama: item.nama_produk,
-          deskripsi: item.deskripsi_produk,
-          kategori: item.kategori_produk,
-          gambar: item.gambar_produk,
-          harga: item.total_harga_transaksi,
+          nama: (item.id_produk ? item.produk.nama_produk : null) || (item.id_produk_hampers ? item.produk_hampers.nama_produk_hampers : "Produk Tidak Ditemukan"),
+          jumlahProduk: (item.jumlah_produk) || (item.jumlah_produk_hampers),
+          deskripsi: (item.produk ? item.produk.deskripsi_produk : null) || (item.produk_hampers ? item.produk_hampers.deskripsi_produk_hampers : null),
+          kategori: (item.produk ? item.produk.kategori_produk : null) || ("Hampers"),
+          gambar: (item.produk ? item.produk.gambar_produk : null) || (item.produk_hampers ? item.produk_hampers.gambar_produk_hampers : null),
+          harga: (item.produk ? item.produk.harga_produk : null) || (item.produk_hampers ? item.produk_hampers.harga_produk_hampers : null),
+          jenisProduk: item.jenis_produk
         },
-        ongkir: item.biaya_pengiriman,
-        total: item.total_pembayaran,
+        ongkir: item.transaksi.biaya_pengiriman,
+        total: item.transaksi.total_pembayaran,
+        nomorNota: item.transaksi.nomor_nota
       }));
       setHistoryData(mappedData);
       setIsLoading(false);
@@ -145,12 +149,22 @@ const TransactionCard = ({ groupKey, items }) => {
 
   return (
     <div className="border p-3 rounded-lg mb-4">
-      <Typography variant="h6" color="black" className="mb-4">
-        ID Transaksi: {groupKey}
-      </Typography>
-      <Typography variant="h6" color="black">
-        Tanggal Transaksi : {firstItem.tanggal}
-      </Typography>
+      <div className="flex justify-between">
+        <Typography variant="h6" color="black" className="mb-4">
+          ID Transaksi: {groupKey}
+        </Typography>
+        <Typography variant="h6" color="black" className="mb-4">
+          Nomor Nota: {firstItem.nomorNota}
+        </Typography>
+      </div>
+      <div className="flex justify-between mb-3">
+        <Typography variant="h6" color="black">
+          Tanggal Transaksi : {firstItem.tanggal}
+        </Typography>
+        <Typography variant="h6" color="black">
+          Tanggal Pengambilan : {firstItem.tanggalAmbil}
+        </Typography>
+      </div>
       <div className="flex pb-3">
         <Typography variant="h6" color="black" className="ml-auto">
           <Chip
@@ -158,16 +172,8 @@ const TransactionCard = ({ groupKey, items }) => {
             variant="ghost"
             value={firstItem.status}
             color={
-              firstItem.status === "Selesai"
+              firstItem.status === "Sudah Dibayar"
                 ? "green"
-                : firstItem.status === "Dikirim"
-                ? "amber"
-                : firstItem.status === "Diproses"
-                ? "blue"
-                : firstItem.status === "-"
-                ? "purple"
-                : firstItem.status === "Sudah Dibayar"
-                ? "lightBlue"
                 : "red"
             }
           />
@@ -183,9 +189,18 @@ const TransactionCard = ({ groupKey, items }) => {
             />
           </div>
           <div className="col-span-3">
-            <Typography variant="h5" color="blue-gray" className="mb-2">
-              {item.produk.nama}
-            </Typography>
+          <div className="flex items-center">
+              <Typography variant="h5" color="blue-gray" className="mb-2 mr-3">
+                {item.produk.nama}
+              </Typography>
+              <Typography variant="paragraph" color="blue-gray" className="mb-2 mr-2">
+                x {item.produk.jumlahProduk}
+              </Typography>
+              <Typography variant="paragraph" color="gray" className="mb-2">
+                ({item.produk.jenisProduk})
+              </Typography>
+            </div>
+
             <Typography>{item.produk.deskripsi}</Typography>
             <div className="w-max mt-2">
               <Chip
@@ -196,12 +211,12 @@ const TransactionCard = ({ groupKey, items }) => {
                   item.produk.kategori === "Cake"
                     ? "green"
                     : item.produk.kategori === "Roti"
-                    ? "amber"
-                    : item.produk.kategori === "Minuman"
-                    ? "blue"
-                    : item.produk.kategori === "Titipan"
-                    ? "purple"
-                    : "red"
+                      ? "amber"
+                      : item.produk.kategori === "Minuman"
+                        ? "blue"
+                        : item.produk.kategori === "Titipan"
+                          ? "purple"
+                          : "red"
                 }
               />
             </div>
@@ -212,7 +227,7 @@ const TransactionCard = ({ groupKey, items }) => {
               color="blue-gray"
               className="mb-2 flex items-center"
             >
-              Rp {item.produk.harga}
+              Rp {(item.produk.harga || 0) * (item.produk.jumlahProduk || 0)}
             </Typography>
           </div>
         </div>
@@ -237,12 +252,12 @@ const TransactionCard = ({ groupKey, items }) => {
             Ongkos Kirim: Rp {firstItem.ongkir}
           </Typography>
           <Typography variant="h6" color="black" className="mb-2 ml-auto">
-            Total Belanja: Rp {firstItem.total}
+            Total Belanja: Rp {firstItem.total + firstItem.ongkir}
           </Typography>
         </div>
       </div>
       <div className="flex justify-end items-center mt-4">
-        <Link to="/admin/konfirmasi/add">
+        <Link to={`/admin/konfirmasi/add/${groupKey}`}>
           <Button variant="filled" size="sm" color="blue">
             Konfirmasi
           </Button>

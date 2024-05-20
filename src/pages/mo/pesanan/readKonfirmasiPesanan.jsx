@@ -15,8 +15,10 @@ import {
 } from "@material-tailwind/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useParams, Link } from "react-router-dom";
-import { showAllTransaksiHistoryCustomer } from "../../../api/customer/TransaksiApi";
+import { showAllTransaksiHistoryCustomer, editStatusTransaksiMO } from "../../../api/customer/TransaksiApi";
 import { getImage } from "../../../api";
+import AlertAnimation from '../../../assets/images/AlertAnimation.json';
+import Lottie from 'lottie-react';
 
 const ReadKonfirmasiPesanan = () => {
   let { id } = useParams();
@@ -26,7 +28,10 @@ const ReadKonfirmasiPesanan = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchValue, setSearchValue] = useState("");
-  const [acceptModalOpen, setAcceptModalOpen] = useState(false); // State untuk mengontrol tampilan modal
+  const [acceptModalOpen, setAcceptModalOpen] = useState(false);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [currentTransactionId, setCurrentTransactionId] = useState(null);
+  const [acceptError, setAcceptError] = useState("");
   const itemsPerPage = 5;
 
   const fetchData = async () => {
@@ -34,21 +39,25 @@ const ReadKonfirmasiPesanan = () => {
       console.log("masuk fetch", id);
       const response = await showAllTransaksiHistoryCustomer();
       const filteredData = response.data.filter(
-        (item) => item.status_transaksi === "Sudah Dibayar"
+        (item) => item.transaksi.status_transaksi === "Pembayaran Valid"
       );
       const mappedData = filteredData.map((item) => ({
-        id: item.id_transaksi,
-        tanggal: item.tanggal_transaksi,
-        status: item.status_transaksi,
+        id: item.transaksi.id_transaksi,
+        nomorNota: item.transaksi.nomor_nota,
+        tanggal: item.transaksi.tanggal_transaksi,
+        tanggalAmbil: item.transaksi.tanggal_pengambilan,
+        status: item.transaksi.status_transaksi,
         produk: {
-          nama: item.nama_produk,
-          deskripsi: item.deskripsi_produk,
-          kategori: item.kategori_produk,
-          gambar: item.gambar_produk,
-          harga: item.total_harga_transaksi,
+          nama: (item.id_produk ? item.produk.nama_produk : null) || (item.id_produk_hampers ? item.produk_hampers.nama_produk_hampers : "Produk Tidak Ditemukan"),
+          jumlahProduk: (item.jumlah_produk) || (item.jumlah_produk_hampers),
+          deskripsi: (item.produk ? item.produk.deskripsi_produk : null) || (item.produk_hampers ? item.produk_hampers.deskripsi_produk_hampers : null),
+          kategori: (item.produk ? item.produk.kategori_produk : null) || ("Hampers"),
+          gambar: (item.produk ? item.produk.gambar_produk : null) || (item.produk_hampers ? item.produk_hampers.gambar_produk_hampers : null),
+          harga: (item.produk ? item.produk.harga_produk : null) || (item.produk_hampers ? item.produk_hampers.harga_produk_hampers : null),
+          jenisProduk: item.jenis_produk
         },
-        ongkir: item.biaya_pengiriman,
-        total: item.total_pembayaran,
+        ongkir: item.transaksi.biaya_pengiriman,
+        total: item.transaksi.total_pembayaran,
       }));
       setHistoryData(mappedData);
       setIsLoading(false);
@@ -80,6 +89,53 @@ const ReadKonfirmasiPesanan = () => {
   const groupedData = groupBy(filteredData, "id");
   const totalPages = Math.ceil(Object.keys(groupedData).length / itemsPerPage);
 
+  const handleAccept = () => {
+    editStatusTransaksiMO(currentTransactionId, { status_transaksi: "Diterima" })
+      .then((res) => {
+        console.log(res);
+        setAcceptModalOpen(false);
+        setAcceptError("");
+        fetchData();
+      })
+      .catch((error) => {
+        console.error("Error updating transaction status:", error);
+        const { message, bahan_baku_kurang } = error;
+        if (Array.isArray(bahan_baku_kurang)) {
+          setAcceptError(
+            <>
+              <Lottie
+                animationData={AlertAnimation}
+                style={{ width: 200, height: 200 }}
+                className="mx-auto"
+              />
+              <Typography variant="h5">{`${message}:`}</Typography>
+              <Typography variant="paragraph">
+                {bahan_baku_kurang.map((bb, index) => (
+                  <div key={index} className="ml-3">
+                    {`${index + 1}. ${bb.nama_bahan} (Diminta: ${bb.jumlah_diminta}, Stok: ${bb.stok_tercukupi})`}
+                  </div>
+                ))}
+              </Typography>
+            </>
+          );
+        } else {
+          setAcceptError(message);
+        }
+      });
+  };
+
+  const handleReject = () => {
+    editStatusTransaksiMO(currentTransactionId, { status_transaksi: "Ditolak" })
+      .then((res) => {
+        console.log(res);
+        setRejectModalOpen(false);
+        fetchData();
+      })
+      .catch((error) => {
+        console.error("Error updating transaction status:", error);
+      });
+  };
+
   return (
     <Card className="h-full w-full">
       <CardHeader floated={false} shadow={false} className="rounded-none">
@@ -109,7 +165,9 @@ const ReadKonfirmasiPesanan = () => {
                 key={index}
                 groupKey={groupKey}
                 items={groupedData[groupKey]}
-                setAcceptModalOpen={setAcceptModalOpen} // Mengirim fungsi untuk membuka modal ke komponen TransactionCard
+                setAcceptModalOpen={setAcceptModalOpen}
+                setRejectModalOpen={setRejectModalOpen}
+                setCurrentTransactionId={setCurrentTransactionId}
               />
             ))}
         </CardBody>
@@ -146,17 +204,38 @@ const ReadKonfirmasiPesanan = () => {
       >
         <DialogHeader>Menerima Pesanan</DialogHeader>
         <DialogBody>
-          Apakah Anda yakin ingin menerima pesanan ini?
+          {acceptError ? (
+            <Typography color="red">{acceptError}</Typography>
+          ) : (
+            "Apakah Anda yakin ingin menerima pesanan ini?"
+          )}
         </DialogBody>
         <DialogFooter>
           <Button color="red" className="mr-2" onClick={() => setAcceptModalOpen(false)}>
             Batal
           </Button>
-          <Button color="blue" onClick={() => {
-            // Logika untuk menerima pesanan
-            setAcceptModalOpen(false);
-          }}>
+          <Button color="blue" onClick={handleAccept}>
             Terima
+          </Button>
+        </DialogFooter>
+      </Dialog>
+
+      {/* Modal untuk menolak pesanan */}
+      <Dialog
+        open={rejectModalOpen}
+        onClose={() => setRejectModalOpen(false)}
+        className="w-[400px]"
+      >
+        <DialogHeader>Menolak Pesanan</DialogHeader>
+        <DialogBody>
+          Apakah Anda yakin ingin menolak pesanan ini?
+        </DialogBody>
+        <DialogFooter>
+          <Button color="red" className="mr-2" onClick={() => setRejectModalOpen(false)}>
+            Batal
+          </Button>
+          <Button color="blue" onClick={handleReject}>
+            Tolak
           </Button>
         </DialogFooter>
       </Dialog>
@@ -164,18 +243,33 @@ const ReadKonfirmasiPesanan = () => {
   );
 };
 
-const TransactionCard = ({ groupKey, items, setAcceptModalOpen }) => {
+const TransactionCard = ({ groupKey, items, setAcceptModalOpen, setRejectModalOpen, setCurrentTransactionId }) => {
   const [expanded, setExpanded] = useState(false);
   const firstItem = items[0];
 
+  const parseNumber = (value) => {
+    return isNaN(value) ? 0 : Number(value);
+  };
+
+
   return (
     <div className="border p-3 rounded-lg mb-4">
-      <Typography variant="h6" color="black" className="mb-4">
-        ID Transaksi: {groupKey}
-      </Typography>
-      <Typography variant="h6" color="black">
-        Tanggal Transaksi : {firstItem.tanggal}
-      </Typography>
+      <div className="flex justify-between">
+        <Typography variant="h6" color="black" className="mb-4">
+          ID Transaksi: {groupKey}
+        </Typography>
+        <Typography variant="h6" color="black" className="mb-4">
+          Nomor Nota: {firstItem.nomorNota}
+        </Typography>
+      </div>
+      <div className="flex justify-between mb-3">
+        <Typography variant="h6" color="black">
+          Tanggal Transaksi : {firstItem.tanggal}
+        </Typography>
+        <Typography variant="h6" color="black">
+          Tanggal Pengambilan : {firstItem.tanggalAmbil}
+        </Typography>
+      </div>
       <div className="flex pb-3">
         <Typography variant="h6" color="black" className="ml-auto">
           <Chip
@@ -183,22 +277,15 @@ const TransactionCard = ({ groupKey, items, setAcceptModalOpen }) => {
             variant="ghost"
             value={firstItem.status}
             color={
-              firstItem.status === "Selesai"
-                ? "green"
-                : firstItem.status === "Dikirim"
-                ? "amber"
-                : firstItem.status === "Diproses"
-                ? "blue"
-                : firstItem.status === "-"
-                ? "purple"
-                : firstItem.status === "Sudah Dibayar"
-                ? "lightBlue"
+              firstItem.status === "Pembayaran Valid"
+                ? "teal"
                 : "red"
             }
           />
         </Typography>
       </div>
       {items.slice(0, expanded ? items.length : 1).map((item, idx) => (
+
         <div key={idx} className="grid grid-cols-6 border-b border-t pt-4 pb-4">
           <div className="mx-auto col-span-3 md:col-span-1 flex justify-center items-center">
             <img
@@ -208,9 +295,17 @@ const TransactionCard = ({ groupKey, items, setAcceptModalOpen }) => {
             />
           </div>
           <div className="col-span-3">
-            <Typography variant="h5" color="blue-gray" className="mb-2">
-              {item.produk.nama}
-            </Typography>
+            <div className="flex items-center">
+              <Typography variant="h5" color="blue-gray" className="mb-2 mr-3">
+                {item.produk.nama}
+              </Typography>
+              <Typography variant="paragraph" color="blue-gray" className="mb-2 mr-2">
+                x {item.produk.jumlahProduk}
+              </Typography>
+              <Typography variant="paragraph" color="gray" className="mb-2">
+                ({item.produk.jenisProduk})
+              </Typography>
+            </div>
             <Typography>{item.produk.deskripsi}</Typography>
             <div className="w-max mt-2">
               <Chip
@@ -221,12 +316,12 @@ const TransactionCard = ({ groupKey, items, setAcceptModalOpen }) => {
                   item.produk.kategori === "Cake"
                     ? "green"
                     : item.produk.kategori === "Roti"
-                    ? "amber"
-                    : item.produk.kategori === "Minuman"
-                    ? "blue"
-                    : item.produk.kategori === "Titipan"
-                    ? "purple"
-                    : "red"
+                      ? "amber"
+                      : item.produk.kategori === "Minuman"
+                        ? "blue"
+                        : item.produk.kategori === "Titipan"
+                          ? "purple"
+                          : "red"
                 }
               />
             </div>
@@ -237,7 +332,7 @@ const TransactionCard = ({ groupKey, items, setAcceptModalOpen }) => {
               color="blue-gray"
               className="mb-2 flex items-center"
             >
-              Rp {item.produk.harga}
+              Rp {(item.produk.harga || 0) * (item.produk.jumlahProduk || 0)}
             </Typography>
           </div>
         </div>
@@ -253,26 +348,35 @@ const TransactionCard = ({ groupKey, items, setAcceptModalOpen }) => {
             {expanded ? "Lihat Lebih Sedikit" : "Lihat Lebih Banyak"}
           </Button>
         </div>
-        <div className="mt-4">
-          <Typography
-            variant="paragraph"
-            color="blue-gray"
-            className="mb-2 ml-auto"
-          >
-            Ongkos Kirim: Rp {firstItem.ongkir}
-          </Typography>
-          <Typography variant="h6" color="black" className="mb-2 ml-auto">
-            Total Belanja: Rp {firstItem.total}
-          </Typography>
+        <div>
+          <div className="mt-4 flex justify-end">
+            <div>
+              <Typography variant="paragraph" color="blue-gray" className="mb-2">
+                Ongkos Kirim: Rp {firstItem.ongkir}
+              </Typography>
+            </div>
+
+          </div>
+          <div className="grid grid-cols-2">
+            <Typography variant="h6" color="black" className="mb-2">
+              Total Belanja: Rp {firstItem.total} <span className="ml-3">||</span>
+            </Typography>
+            <Typography variant="h6" color="black" className="mb-2 justify-end">
+              Total Pembayaran: Rp {firstItem.total + firstItem.ongkir}
+            </Typography>
+          </div>
         </div>
       </div>
       <div className="flex justify-end items-center mt-4">
-      <Button
+        <Button
           variant="filled"
           size="sm"
           color="red"
           className="mr-2"
-          // onClick={() => setAcceptModalOpen(true)}
+          onClick={() => {
+            setCurrentTransactionId(groupKey); // Set the current transaction ID
+            setRejectModalOpen(true); // Open the reject modal
+          }}
         >
           Tolak
         </Button>
@@ -282,7 +386,10 @@ const TransactionCard = ({ groupKey, items, setAcceptModalOpen }) => {
           variant="filled"
           size="sm"
           color="blue"
-          onClick={() => setAcceptModalOpen(true)}
+          onClick={() => {
+            setCurrentTransactionId(groupKey); // Set the current transaction ID
+            setAcceptModalOpen(true); // Open the accept modal
+          }}
         >
           Terima
         </Button>
@@ -292,6 +399,7 @@ const TransactionCard = ({ groupKey, items, setAcceptModalOpen }) => {
 };
 
 export default ReadKonfirmasiPesanan;
+
 function groupBy(array, key) {
   return array.reduce((result, currentValue) => {
     (result[currentValue[key]] = result[currentValue[key]] || []).push(

@@ -65,20 +65,20 @@ const TransaksiHistory = () => {
 
   const fetchData = async () => {
     try {
-      const response = await showTransaksiHistoryCustomer(id);
+      const response = await showTransaksiHistoryCustomer();
       const mappedData = response.data.map((item) => ({
-        id: item.id_transaksi,
-        tanggal: item.tanggal_transaksi,
-        status: item.status_transaksi,
+        id: item.transaksi.id_transaksi,
+        tanggal: item.transaksi.tanggal_transaksi,
+        status: item.transaksi.status_transaksi,
         produk: {
-          nama: item.nama_produk,
-          deskripsi: item.deskripsi_produk,
-          kategori: item.kategori_produk,
-          gambar: item.gambar_produk,
-          harga: item.total_harga_transaksi,
+          nama: (item.id_produk ? item.produk.nama_produk : null) || (item.id_produk_hampers ? item.produk_hampers.nama_produk_hampers : "Produk Tidak Ditemukan"),
+          deskripsi: (item.produk ? item.produk.deskripsi_produk : null) || (item.produk_hampers ? item.produk_hampers.deskripsi_produk_hampers : null),
+          kategori: (item.produk ? item.produk.kategori_produk : null) || ("Hampers"),
+          gambar: (item.produk ? item.produk.gambar_produk : null) || (item.produk_hampers ? item.produk_hampers.gambar_produk_hampers : null),
+          harga: (item.produk ? item.produk.harga_produk : null) || (item.produk_hampers ? item.produk_hampers.harga_produk_hampers : null),
         },
-        total: item.total_pembayaran,
-        ongkir: item.biaya_pengiriman,
+        total: item.transaksi.total_pembayaran,
+        ongkir: item.transaksi.biaya_pengiriman,
       }));
       setHistoryData(mappedData);
       setIsLoading(false);

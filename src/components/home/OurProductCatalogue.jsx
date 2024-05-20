@@ -10,16 +10,16 @@ import { getImage } from "../../api";
 import useRefresh from "../../services/useRefresh";
 
 import "../home/animation.css";
-import { isToday } from "date-fns";
+import { isToday, addDays } from "date-fns";
 
 const groupProductsByCategory = (productList) => {
-  // Group products by kategoriProduk
+  // Group products by kategori_produk
   const groupedProducts = {};
   productList.forEach((product) => {
-    if (!groupedProducts[product.kategoriProduk]) {
-      groupedProducts[product.kategoriProduk] = [];
+    if (!groupedProducts[product.kategori_produk]) {
+      groupedProducts[product.kategori_produk] = [];
     }
-    groupedProducts[product.kategoriProduk].push(product);
+    groupedProducts[product.kategori_produk].push(product);
   });
   return groupedProducts;
 };
@@ -28,6 +28,25 @@ const shuffleArray = (array) => {
   // Using Fisher-Yates shuffle algorithm
   return array;
 };
+const getCurrentDate = () => {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, "0"); // Bulan dimulai dari 0
+  const dd = String(today.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+const today = new Date();
+const year = today.getFullYear();
+const month = String(today.getMonth() + 1).padStart(2, "0"); // Bulan dimulai dari 0
+const day = String(today.getDate()).padStart(2, "0");
+const currentDate = `${year}-${month}-${day}`;
+
+const addDaysFromToday = (n) => {
+  const today = new Date();
+  // console.log("ini today",today)
+  return addDays(today, n);
+};
 
 const OurProductCatalogue = () => {
   const [produkData, setProdukData] = useState([]);
@@ -35,7 +54,15 @@ const OurProductCatalogue = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [cartAnimationProductId, setCartAnimationProductId] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(currentDate);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const minPreOrderDate = addDaysFromToday(3); // Tanggal H+2 dari hari ini
+
+  // Fungsi untuk mengecek apakah tanggal dipilih kurang dari H+2 dari hari ini
+  const isDateBeforeMinPreOrder = (selectedDate) => {
+    // console.log("ini minimal",minPreOrderDate)
+    return selectedDate < minPreOrderDate.toISOString().split("T")[0];
+  };
 
   useEffect(() => {
     fetchData();
@@ -52,6 +79,7 @@ const OurProductCatalogue = () => {
       setIsLoading(false);
     }
   };
+
   const fetchDataHampers = async () => {
     try {
       const response = await showDataHampers();
@@ -62,57 +90,80 @@ const OurProductCatalogue = () => {
       setIsLoading(false);
     }
   };
+  const todayDate = selectedDate;
 
-  const products = produkData.map((item) => ({
-    idProduk: item.id_produk,
-    // idProdukHampers: item.id_produk_hampers,
-    namaProduk: item.nama_produk,
-    gambarProduk: item.gambar_produk,
-    deskripsiProduk: item.deskripsi_produk,
-    hargaProduk: item.harga_produk,
-    kategoriProduk: item.kategori_produk,
-    statusProduk: item.status_produk,
-    kuantitas: item.quantitas,
-    namaPenitip: item.detail_produk_titipan
-      ? item.detail_produk_titipan.penitip.nama_penitip
-      : null,
-    limitHarian: item.limit_harian ? item.limit_harian.jumlah_limit : null,
-    tanggalLimit: item.limit_harian ? item.limit_harian.tanggal_limit : null,
-    stokProduk: item.stok_produk ? item.stok_produk.stok_produk : null,
-    idStokProduk: item.stok_produk ? item.stok_produk.id_stok_produk : null,
-    idPenitip: item.detail_produk_titipan
-      ? item.detail_produk_titipan.penitip.id_penitip
-      : null,
-      
-  }));
+  const checkDailyLimit = (item, selectedDate) => {
+    const formattedDate = selectedDate;
+    const dailyLimitEntry = item.limit_harian.find(
+      (limit) => limit.tanggal_limit === formattedDate
+    );
+    if (dailyLimitEntry) {
+      return {
+        limitHarian: dailyLimitEntry.jumlah_limit,
+        tanggalLimit: formattedDate,
+      };
+    }
+    return { limitHarian: 0, tanggalLimit: "-" };
+  };
+
+  const products = produkData.map((item) => {
+    const { limitHarian, tanggalLimit } = checkDailyLimit(item, selectedDate);
+    return {
+      id_produk: item.id_produk,
+      nama_produk: item.nama_produk,
+      gambar_produk: item.gambar_produk,
+      deskripsi_produk: item.deskripsi_produk,
+      harga_produk: item.harga_produk,
+      kategori_produk: item.kategori_produk,
+      statusProduk: item.status_produk,
+      kuantitas: item.quantitas,
+      namaPenitip: item.detail_produk_titipan
+        ? item.detail_produk_titipan.penitip.nama_penitip
+        : null,
+      limitHarian: limitHarian,
+      tanggalLimit: tanggalLimit,
+      stok_produk: item.stok_produk ? item.stok_produk.stok_produk : null,
+      idStokProduk: item.stok_produk ? item.stok_produk.id_stok_produk : null,
+      idPenitip: item.detail_produk_titipan
+        ? item.detail_produk_titipan.penitip.id_penitip
+        : null,
+    };
+  });
+
   const productsHampers = hampersData.map((item) => ({
-    // idProduk: item.id_produk,
-    idProdukHampers: item.id_produk_hampers,
-    namaProduk: item.nama_produk_hampers,
-    gambarProduk: item.gambar_produk_hampers,
-    deskripsiProduk: item.deskripsi_produk_hampers,
-    hargaProduk: item.harga_produk_hampers,
+    id_produk_hampers: item.id_produk_hampers,
+    nama_produk_hampers: item.nama_produk_hampers,
+    gambar_produk_hampers: item.gambar_produk_hampers,
+    deskripsi_produk_hampers: item.deskripsi_produk_hampers,
+    harga_produk_hampers: item.harga_produk_hampers,
   }));
-  // Group products by kategoriProduk
+
+  // Group products by kategori_produk
   const groupedProducts = groupProductsByCategory(products);
 
-  // Shuffle products within each kategoriProduk
-  Object.keys(groupedProducts).forEach((kategoriProduk) => {
-    groupedProducts[kategoriProduk] = shuffleArray(
-      groupedProducts[kategoriProduk]
+  // Shuffle products within each kategori_produk
+  Object.keys(groupedProducts).forEach((kategori_produk) => {
+    groupedProducts[kategori_produk] = shuffleArray(
+      groupedProducts[kategori_produk]
     );
   });
 
   const groupedHampers = groupProductsByCategory(productsHampers);
 
-  // Shuffle hampers products within each kategoriProduk
-  Object.keys(groupedHampers).forEach((kategoriProduk) => {
-    groupedHampers[kategoriProduk] = shuffleArray(
-      groupedHampers[kategoriProduk]
+  // Shuffle hampers products within each kategori_produk
+  Object.keys(groupedHampers).forEach((kategori_produk) => {
+    groupedHampers[kategori_produk] = shuffleArray(
+      groupedHampers[kategori_produk]
     );
   });
+
   const refresh = useRefresh("cartUpdated");
-  const handleAddToCart = (product) => {
+  const handleAddToCart = (product, type) => {
+    setSelectedProduct(product);
+    const item = {
+      product: product,
+      type: type,
+    };
     // Mengambil keranjang dari localStorage
     let cart = localStorage.getItem("cart");
     if (!cart) {
@@ -120,33 +171,73 @@ const OurProductCatalogue = () => {
     } else {
       cart = JSON.parse(cart);
     }
+    let kategori = localStorage.getItem("kategori");
+    if (!kategori) {
+      kategori = [];
+    } else {
+      kategori = JSON.parse(kategori);
+    }
 
     // Mengecek apakah produk sudah ada di keranjang
     const existingProductIndex = cart.findIndex(
-      (item) => item.idProduk === product.idProduk
+      (item) => item.id_produk === product.id_produk
     );
 
     if (existingProductIndex !== -1) {
       // Jika produk sudah ada di keranjang, tambahkan jumlahnya
       cart[existingProductIndex].quantity += 1;
+      kategori[existingProductIndex]= type;
     } else {
       // Jika produk belum ada di keranjang, tambahkan produk baru
       cart.push({ ...product, quantity: 1 });
+      kategori.push(type);
     }
-
+    
+    
     // Menyimpan kembali keranjang ke localStorage
     localStorage.setItem("cart", JSON.stringify(cart));
     console.log(cart);
-
+    localStorage.setItem("kategori", JSON.stringify(kategori));
+    console.log(kategori)
+    // localStorage.removeItem("kategori");
     // Emit event untuk memberi tahu perubahan pada keranjang
     window.dispatchEvent(new Event("cartUpdated"));
-    setCartAnimationProductId(product.idProduk);
+    setCartAnimationProductId(product.id_produk);
     setTimeout(() => {
       setCartAnimationProductId(null);
     }, 500);
     // Menampilkan toast bahwa produk berhasil ditambahkan ke keranjang
     toast.success("Produk berhasil ditambahkan ke keranjang");
+    const categoryStatus = checkCategory(kategori);
+    console.log("Category Status:", categoryStatus);
+    // Simpan tombol mana yang ditekan ke localStorage
+    
   };
+  const checkCategory = (kategori) => {
+    // Pastikan kategori adalah array
+    if (!Array.isArray(kategori)) {
+      return "Invalid category data";
+    }
+  
+    // Check if there is any "Pre Order" category in the array
+    const hasPreOrder = kategori.some((item) => item === "Pre Order");
+  
+    // If there's at least one "Pre Order" category, return "Pre Order"
+    if (hasPreOrder) {
+      return "Pre Order";
+    }
+  
+    // If all categories are "Ready Stock", return "Ready Stock"
+    const allReadyStock = kategori.every((item) => item === "Ready Stock");
+  
+    if (allReadyStock) {
+      return "Ready Stock";
+    }
+  
+    // Default case, if the array is empty or has mixed statuses
+    return "mixed";
+  };
+
   const flyToNavbar = (buttonId) => {
     const button = document.getElementById(buttonId);
     const navbar = document.getElementById("navbar");
@@ -164,35 +255,12 @@ const OurProductCatalogue = () => {
       button.style.transform = "none";
     }, 500);
   };
-  const handleDateChange = (date) => {
-    const formattedDate = date.toISOString().split('T')[0];
-    setSelectedDate(formattedDate);
-    console.log("Filtered Products by Date:", formattedDate);
-    console.log(formattedDate); // Format: yyyy-mm-dd
-  
-    const filteredProducts = filterProductsByDate(products, date);
-    setFilteredProducts(filteredProducts);
-  };
-  
-  const filterProductsByDate = (products, selectedDate) => {
-  const today = new Date();
-  const formattedToday = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
 
-  const filteredProducts = products.filter((product) => {
-    if (
-      product.tanggalLimit && // Pastikan produk memiliki limit harian
-      (selectedDate ?
-        new Date(product.tanggalLimit).getTime() <= selectedDate.getTime() :
-        new Date(product.tanggalLimit).toISOString().split('T')[0] === formattedToday) // Bandingkan tanggal limit harian dengan tanggal yang dipilih atau hari ini
-    ) {
-      return true; // Produk ditampilkan
-    } else {
-      return false; // Produk tidak ditampilkan
-    }
-  });
-  return filteredProducts;
-};
-  
+  const handleDateChange = (date) => {
+    const formattedDate = date.toISOString().split("T")[0]; // Mengubah tanggal yang dipilih menjadi format yang sesuai
+    setSelectedDate(formattedDate); // Memperbarui selectedDate dengan tanggal yang dipilih
+    console.log("Selected Date:", formattedDate); // Mencetak tanggal yang dipilih ke konsol
+  };
 
   return (
     <div className="bg-white pb-20 ">
@@ -204,32 +272,34 @@ const OurProductCatalogue = () => {
           Tanggal Pengambilan
         </label>
         <DatePicker
-          selected={selectedDate}
-          onChange={handleDateChange}
+          selected={selectedDate} // Menggunakan selectedDate sebagai nilai tanggal yang dipilih
+          onChange={handleDateChange} // Memanggil fungsi handleDateChange ketika tanggal berubah
           className="w-full md:w-fit mx-auto mt-4 mb-4 p-1 border-2 border-gray-300 rounded-lg"
-          dateFormat={'yyyy-MM-dd'}
+          dateFormat={"yyyy-MM-dd"}
+          minDate={getCurrentDate()}
         />
       </div>
       {/* Display shuffled products */}
-      {Object.keys(groupedProducts).map((kategoriProduk, index) => (
+      {Object.keys(groupedProducts).map((kategori_produk, index) => (
         <div
           key={index}
           className="w-full md:w-fit mx-auto mt-12 mb-6 pt-6 px-4 justify-items-center justify-center"
         >
+          
           <div>
             <h1 className="text-xl md:text-2xl font-bold mb-6 ">
-              {kategoriProduk}
+              {kategori_produk}
             </h1>
             <p className=" md:text-lg text-gray-600 mb-12">
-              {`Produk-produk ${kategoriProduk.toLowerCase()} yang berkualitas tinggi dari Atma Kitchen.`}
+              {`Produk-produk ${kategori_produk.toLowerCase()} yang berkualitas tinggi dari Atma Kitchen.`}
             </p>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 xl:grid-cols-4 justify-items-center justify-start m-10 gap-y-10 md:gap-x-6 mb-5">
-            {groupedProducts[kategoriProduk].map((product) => (
+            {groupedProducts[kategori_produk].map((product) => (
               <div
-                key={product.idProduk}
+                key={product.id_produk}
                 className={`bg-white shadow-md rounded-xl hover:scale-105 hover:shadow-xl overflow-hidden p-4 ${
-                  cartAnimationProductId === product.idProduk
+                  cartAnimationProductId === product.id_produk
                     ? "add-to-cart-button-animation"
                     : ""
                 }`} // Tambahkan kelas animasi jika cartAnimation true
@@ -238,8 +308,8 @@ const OurProductCatalogue = () => {
                 <Link to="">
                   <div className="h-80 w-full">
                     <img
-                      src={getImage(product.gambarProduk)}
-                      alt={product.namaProduk}
+                      src={getImage(product.gambar_produk)}
+                      alt={product.nama_produk}
                       className="h-full w-full object-fit rounded-t-xl"
                     />
                   </div>
@@ -247,7 +317,7 @@ const OurProductCatalogue = () => {
                   <div className="px-4 py-3 flex-grow justify-between">
                     <div className="px-4 py-3">
                       <p className="text-md font-bold text-black truncate block capitalize">
-                        {product.namaProduk}
+                        {product.nama_produk}
                       </p>
                       <span
                         className="text-gray-400 mr-3 text-xs overflow-y-auto"
@@ -258,20 +328,15 @@ const OurProductCatalogue = () => {
                           WebkitBoxOrient: "vertical",
                         }}
                       >
-                        {product.deskripsiProduk}
+                        {product.deskripsi_produk}
                       </span>
                       <div className="flex items-center">
                         <p className="text-lg font-semibold text-black cursor-auto my-3">
-                          Rp.{product.hargaProduk}
+                          Rp.{product.harga_produk}
                         </p>
-                        <del>
-                          <p className="text-sm text-gray-600 cursor-auto ml-2">
-                            Rp.{product.discountedPrice}
-                          </p>
-                        </del>
                       </div>
                       <p className="text-sm text-gray-600 mt-2">
-                        Stok: {product.stokProduk}
+                        Stok: {product.stok_produk}
                       </p>
                       <p className="text-sm text-gray-600 mt-2">
                         {product.limitHarian
@@ -286,16 +351,33 @@ const OurProductCatalogue = () => {
                     </div>
                   </div>
                 </Link>
-                <div className="mb-4">
+                <div className="w-full flex mb-4 items-center justify-between">
                   <Button
-                    id={`addToCartButton_${product.idProduk}`}
-                    className="w-full"
+                    id={`addToCartButton_${product.id_produk}`}
+                    className="flex-grow mr-2"
+                    color="blue"
                     onClick={() => {
-                      handleAddToCart(product);
-                      flyToNavbar(`addToCartButton_${product.idProduk}`);
+                      handleAddToCart(product, "Ready Stock"); // Tambahkan "Ready Stok" sebagai parameter
+                      flyToNavbar(`addToCartButton_${product.id_produk}`);
                     }}
+                    disabled={product.stok_produk <= 0}
                   >
-                    Add To Cart
+                    Ready Stock
+                  </Button>
+                  <Button
+                    id={`addToCartButton_${product.id_produk}`}
+                    className="flex-grow"
+                    color="red"
+                    onClick={() => {
+                      handleAddToCart(product, "Pre Order"); // Tambahkan "Pre Order" sebagai parameter
+                      flyToNavbar(`addToCartButton_${product.id_produk}`);
+                    }}
+                    disabled={
+                      isDateBeforeMinPreOrder(selectedDate) ||
+                      product.limit_harian <= 0
+                    }
+                  >
+                    Pre Order
                   </Button>
                 </div>
               </div>
@@ -314,19 +396,19 @@ const OurProductCatalogue = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 justify-items-center justify-start m-10 gap-y-10 md:gap-x-6 mb-5">
           {productsHampers.map((productHampers) => (
             <div
-              key={productHampers.idProdukHampers}
+              key={productHampers.id_produk_hampers}
               className={`bg-white shadow-md rounded-xl overflow-hidden p-4 ${
-                cartAnimationProductId === productHampers.idProdukHampers
+                cartAnimationProductId === productHampers.id_produk_hampers
                   ? "add-to-cart-animation"
                   : ""
-              }`} // Added padding here
+              }`}
               style={{ width: "100%", maxWidth: "350px" }}
             >
               <Link to="">
                 <div className="h-80 w-full">
                   <img
-                    src={getImage(productHampers.gambarProduk)}
-                    alt={productHampers.namaProduk}
+                    src={getImage(productHampers.gambar_produk_hampers)}
+                    alt={productHampers.nama_produk_hampers}
                     className="h-full w-full object-fit rounded-t-xl"
                   />
                 </div>
@@ -334,7 +416,7 @@ const OurProductCatalogue = () => {
                 <div className="px-4 py-3 flex-grow justify-between">
                   <div className="px-4 py-3">
                     <p className="text-md font-bold text-black truncate block capitalize">
-                      {productHampers.namaProduk}
+                      {productHampers.nama_produk_hampers}
                     </p>
                     <span
                       className="text-gray-400 mr-3 text-xs overflow-y-auto"
@@ -345,18 +427,13 @@ const OurProductCatalogue = () => {
                         WebkitBoxOrient: "vertical",
                       }}
                     >
-                      {productHampers.deskripsiProduk}
+                      {productHampers.deskripsi_produk_hampers}
                     </span>
 
                     <div className="flex items-center">
                       <p className="text-lg font-semibold text-black cursor-auto my-3 ">
-                        Rp.{productHampers.hargaProduk}
+                        Rp.{productHampers.harga_produk_hampers}
                       </p>
-                      <del>
-                        <p className="text-sm text-gray-600 cursor-auto ml-2">
-                          Rp.{productHampers.discountedPrice}
-                        </p>
-                      </del>
                     </div>
                   </div>
                 </div>
@@ -364,7 +441,9 @@ const OurProductCatalogue = () => {
               <div className="mb-4">
                 <Button
                   className="w-full"
-                  onClick={() => handleAddToCart(productHampers)}
+                  onClick={() =>
+                    handleAddToCart(productHampers, "Pre Order") // Tambahkan "Hampers" sebagai parameter
+                  }
                 >
                   Add To Cart
                 </Button>

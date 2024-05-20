@@ -1,11 +1,15 @@
 import React from "react";
 import Lottie from "lottie-react";
 import AnimationPage from "../../assets/images/Animation - 1716104307179.json";
+import { Button, Input } from "@material-tailwind/react";
+import { Link } from "react-router-dom";
 
 function CetakNota() {
   return (
     <>
-      <div className="flex justify-center mt-8"> {/* Menggunakan flex dan justify-center */}
+      <div className="flex justify-center mt-8">
+        {" "}
+        {/* Menggunakan flex dan justify-center */}
         <Lottie
           animationData={AnimationPage}
           loop={true}
@@ -81,6 +85,13 @@ function CetakNota() {
           <p className="text-sm">
             <strong>Total poin customer:</strong> 110
           </p>
+        </div>
+      </div>
+      <div className="w-full flex justify-center mt-4">
+        <div className="w-full max-w-md">
+          <Link to="/customer/profile">
+            <Button className="w-full">Back To Profile</Button>
+          </Link>
         </div>
       </div>
     </>

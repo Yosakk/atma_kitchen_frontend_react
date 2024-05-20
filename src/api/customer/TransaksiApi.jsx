@@ -14,12 +14,12 @@ export const showTransaksiHistory = async (id) => {
     } catch (error) {
         throw error.response.data;
     }
-    
+
 };
-export const showTransaksiHistoryCustomer = async (id) => {
+export const showTransaksiHistoryCustomer = async () => {
     const token = sessionStorage.getItem("token");
     try {
-        const response = await urlAxios.get(`/transaksiHistory/historyPesananCustomer/${id}`, {
+        const response = await urlAxios.get(`/transaksiHistory/historyPesananCustomer`, {
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
@@ -30,7 +30,7 @@ export const showTransaksiHistoryCustomer = async (id) => {
     } catch (error) {
         throw error.response.data;
     }
-    
+
 };
 export const showAllTransaksiHistoryCustomer = async () => {
     const token = sessionStorage.getItem("token");
@@ -46,6 +46,55 @@ export const showAllTransaksiHistoryCustomer = async () => {
     } catch (error) {
         throw error.response.data;
     }
-    
+
 };
 
+export const editStatusTransaksiDiantar = async (id, data) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.put(`/edit/jarak/${id}`, data, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log(response.data);
+        return response.data
+    } catch (error) {
+        throw error.response.data;
+    }
+}
+
+export const editStatusTransaksiAdmin = async (id, data) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.put(`/edit/status/transaksi/admin/${id}`, data, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log(response.data);
+        return response.data
+    } catch (error) {
+        throw error.response.data;
+    }
+}
+
+export const editStatusTransaksiMO = async (id, data) => {
+    const token = sessionStorage.getItem("token");
+    console.log("ini idnya : ", id);
+    console.log("ini datanya : ", data);
+    try {
+        const response = await urlAxios.put(`/edit/status/transaksi/MO/${id}`, data, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log(response.data);
+        return response.data
+    } catch (error) {
+        throw error.response.data;
+    }
+}

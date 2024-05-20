@@ -264,6 +264,7 @@ const NavbarLogin = () => {
   const handleSignOut = () => {
     console.log("logout");
     localStorage.removeItem("cart"); // Menghapus data dari sessionStorage
+    localStorage.removeItem("kategori");
     // const cart = localStorage.getItem("cart"); // Menghapus data dari sessionStorage
     // console.log(cart)
     sessionStorage.removeItem("isLogin");

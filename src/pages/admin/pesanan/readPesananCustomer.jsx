@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import {
   Card,
   CardHeader,
@@ -15,40 +15,55 @@ import {
 } from "@material-tailwind/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useParams } from "react-router-dom";
-import { showAllTransaksiHistoryCustomer } from "../../../api/customer/TransaksiApi";
+import { showAllTransaksiHistoryCustomer, editStatusTransaksiDiantar } from "../../../api/customer/TransaksiApi";
 import { getImage } from "../../../api";
+import useRefresh from "../../../services/useRefresh";
+
+const formReducer = (state, event) => {
+  return {
+    ...state,
+    [event.target.name]: event.target.value,
+  };
+};
 
 const ReadPesananCustomer = () => {
   let { id } = useParams();
-  console.log("masuk history", id);
-
+  const [formData, setFormData] = useReducer(formReducer, {});
   const [historyData, setHistoryData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchValue, setSearchValue] = useState("");
   const itemsPerPage = 5;
+  const refresh = useRefresh(historyData);
 
   const fetchData = async () => {
     try {
-      console.log("masuk fetch", id);
       const response = await showAllTransaksiHistoryCustomer();
       const filteredData = response.data.filter(
-        (item) => item.status_transaksi === "-" && item.jenis_pengiriman === "Diantar"
+        (item) =>
+          item.transaksi &&
+          item.transaksi.status_transaksi === "-" &&
+          item.transaksi.jenis_pengiriman === "Diantar"
       );
       const mappedData = filteredData.map((item) => ({
-        id: item.id_transaksi,
-        tanggal: item.tanggal_transaksi,
-        status: item.status_transaksi === "-" ? "Belum Bayar" : item.status_transaksi,
+        id: item.transaksi.id_transaksi,
+        tanggal: item.transaksi.tanggal_transaksi,
+        tanggalAmbil: item.transaksi.tanggal_pengambilan,
+        status: item.transaksi.status_transaksi === "-" ? "Belum Bayar" : item.transaksi.status_transaksi,
         produk: {
-          nama: item.nama_produk,
-          deskripsi: item.deskripsi_produk,
-          kategori: item.kategori_produk,
-          gambar: item.gambar_produk,
-          harga: item.total_harga_transaksi,
+          nama: (item.id_produk ? item.produk.nama_produk : null) || (item.id_produk_hampers ? item.produk_hampers.nama_produk_hampers : "Produk Tidak Ditemukan"),
+          jumlahProduk: (item.jumlah_produk) || (item.jumlah_produk_hampers),
+          deskripsi: (item.produk ? item.produk.deskripsi_produk : null) || (item.produk_hampers ? item.produk_hampers.deskripsi_produk_hampers : null),
+          kategori: (item.produk ? item.produk.kategori_produk : null) || ("Hampers"),
+          gambar: (item.produk ? item.produk.gambar_produk : null) || (item.produk_hampers ? item.produk_hampers.gambar_produk_hampers : null),
+          harga: (item.produk ? item.produk.harga_produk : null) || (item.produk_hampers ? item.produk_hampers.harga_produk_hampers : null),
+          jenisProduk: item.jenis_produk,
         },
-        ongkir: item.biaya_pengiriman,
-        total: item.total_pembayaran,
+        ongkir: item.transaksi.biaya_pengiriman,
+        total: item.transaksi.total_pembayaran,
+        nomorNota: item.transaksi.nomor_nota
       }));
+
       setHistoryData(mappedData);
       setIsLoading(false);
     } catch (error) {
@@ -128,28 +143,43 @@ const ReadPesananCustomer = () => {
 const TransactionCard = ({ groupKey, items }) => {
   const [expanded, setExpanded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [jarak, setJarak] = useState("");
-  const [namaPengirim, setNamaPengirim] = useState("");
+  const [formData, setFormData] = useReducer(formReducer, {});
   const firstItem = items[0];
+
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
 
-  const handleSave = () => {
-    // Save logic here
-    console.log("Saved:", { jarak, namaPengirim });
-    toggleModal();
+  const handleSave = async () => {
+    try {
+      await editStatusTransaksiDiantar(firstItem.id, formData);
+      console.log("Saved:", formData);
+      toggleModal();
+
+    } catch (error) {
+      console.error("Error saving data:", error);
+    }
   };
 
   return (
     <div className="border p-3 rounded-lg mb-4">
-      <Typography variant="h6" color="black" className="mb-4">
-        ID Transaksi: {groupKey}
-      </Typography>
-      <Typography variant="h6" color="black">
-        Tanggal Transaksi : {firstItem.tanggal}
-      </Typography>
+      <div className="flex justify-between">
+        <Typography variant="h6" color="black" className="mb-4">
+          ID Transaksi: {groupKey}
+        </Typography>
+        <Typography variant="h6" color="black" className="mb-4">
+          Nomor Nota: {firstItem.nomorNota}
+        </Typography>
+      </div>
+      <div className="flex justify-between mb-3">
+        <Typography variant="h6" color="black">
+          Tanggal Transaksi : {firstItem.tanggal}
+        </Typography>
+        <Typography variant="h6" color="black">
+          Tanggal Pengambilan : {firstItem.tanggalAmbil}
+        </Typography>
+      </div>
       <div className="flex pb-3">
         <Typography variant="h6" color="black" className="ml-auto">
           <Chip
@@ -160,14 +190,14 @@ const TransactionCard = ({ groupKey, items }) => {
               firstItem.status === "Selesai"
                 ? "green"
                 : firstItem.status === "Dikirim"
-                ? "amber"
-                : firstItem.status === "Diproses"
-                ? "blue"
-                : firstItem.status === "-"
-                ? "purple"
-                : firstItem.status === "Sudah Dibayar"
-                ? "lightBlue"
-                : "red"
+                  ? "amber"
+                  : firstItem.status === "Diproses"
+                    ? "blue"
+                    : firstItem.status === "-"
+                      ? "purple"
+                      : firstItem.status === "Sudah Dibayar"
+                        ? "lightBlue"
+                        : "red"
             }
           />
         </Typography>
@@ -182,9 +212,17 @@ const TransactionCard = ({ groupKey, items }) => {
             />
           </div>
           <div className="col-span-3">
-            <Typography variant="h5" color="blue-gray" className="mb-2">
-              {item.produk.nama}
-            </Typography>
+            <div className="flex items-center">
+              <Typography variant="h5" color="blue-gray" className="mb-2 mr-3">
+                {item.produk.nama}
+              </Typography>
+              <Typography variant="paragraph" color="blue-gray" className="mb-2 mr-2">
+                x {item.produk.jumlahProduk}
+              </Typography>
+              <Typography variant="paragraph" color="gray" className="mb-2">
+                ({item.produk.jenisProduk})
+              </Typography>
+            </div>
             <Typography>{item.produk.deskripsi}</Typography>
             <div className="w-max mt-2">
               <Chip
@@ -195,19 +233,19 @@ const TransactionCard = ({ groupKey, items }) => {
                   item.produk.kategori === "Cake"
                     ? "green"
                     : item.produk.kategori === "Roti"
-                    ? "amber"
-                    : item.produk.kategori === "Minuman"
-                    ? "blue"
-                    : item.produk.kategori === "Titipan"
-                    ? "purple"
-                    : "red"
+                      ? "amber"
+                      : item.produk.kategori === "Minuman"
+                        ? "blue"
+                        : item.produk.kategori === "Titipan"
+                          ? "purple"
+                          : "red"
                 }
               />
             </div>
           </div>
           <div className="flex justify-end col-span-6 md:col-span-2">
             <Typography variant="paragraph" color="blue-gray" className="mb-2 flex items-center">
-              Rp {item.produk.harga}
+              Rp {(item.produk.harga || 0) * (item.produk.jumlahProduk || 0)}
             </Typography>
           </div>
         </div>
@@ -223,7 +261,7 @@ const TransactionCard = ({ groupKey, items }) => {
             Ongkos Kirim: Rp {firstItem.ongkir}
           </Typography>
           <Typography variant="h6" color="black" className="mb-2 ml-auto">
-            Total Belanja: Rp {firstItem.total}
+            Total Belanja: Rp {firstItem.total + firstItem.ongkir}
           </Typography>
         </div>
       </div>
@@ -240,8 +278,8 @@ const TransactionCard = ({ groupKey, items }) => {
             <Input
               type="number"
               label="Jarak"
-              value={jarak}
-              onChange={(e) => setJarak(e.target.value)}
+              name="jarak_pengiriman"
+              onChange={setFormData}
               step="0.01"
             />
           </div>
@@ -249,8 +287,8 @@ const TransactionCard = ({ groupKey, items }) => {
             <Input
               type="text"
               label="Nama Pengirim"
-              value={namaPengirim}
-              onChange={(e) => setNamaPengirim(e.target.value)}
+              name="nama_pengirim"
+              onChange={setFormData}
             />
           </div>
         </DialogBody>
