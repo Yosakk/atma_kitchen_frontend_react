@@ -70,6 +70,9 @@ const OurProduct = () => {
       const preorderProducts = shuffledProducts.filter(
         (product) => product.stokProduk === null || product.stokProduk === 0
       );
+      // console.log("Total produk:", products.length);
+      // console.log("Produk ready stock:", readyStockProducts.length);
+      // console.log("Produk pre-order:", preorderProducts.length);
 
       setRandomProducts(preorderProducts.slice(0, 4));
       setRandomProductsTitipan(readyStockProducts.slice(0, 4));
@@ -154,16 +157,11 @@ const OurProduct = () => {
                       </p>
                       <del>
                         <p className="text-sm text-gray-600 cursor-auto ml-2">
-                          Rp.{product.discountedPrice}
+                          Rp.{product.hargaProduk+10000}
                         </p>
                       </del>
                     </div>
-                    <p className="text-sm text-gray-600 mt-2">
-                      Stok: {product.stokProduk}
-                    </p>
-                    <p className="text-sm text-gray-600 mt-2">
-                      Limit Harian : {product.limitHarian}
-                    </p>
+
                   </div>
                 </div>
               </Link>
@@ -224,7 +222,7 @@ const OurProduct = () => {
                         </p>
                         <del>
                           <p className="text-sm text-gray-600 cursor-auto ml-2">
-                            Rp.{product.discountedPrice}
+                            Rp.{product.hargaProduk + 10000}
                           </p>
                         </del>
                       </div>

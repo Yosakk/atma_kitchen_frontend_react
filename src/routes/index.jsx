@@ -60,6 +60,7 @@ import AddKonfirmasiPembayaran from "../pages/admin/pesanan/addKonfirmasiPembaya
 import ReadKonfirmasiPesanan from "../pages/mo/pesanan/readKonfirmasiPesanan";
 import PembayaranPage from "../pages/customer/PembayaranPage";
 import CetakNota from "../pages/customer/CetakNota";
+import CheckoutPage from "../pages/customer/CheckoutPage";
 
 
 
@@ -299,6 +300,10 @@ const router = createBrowserRouter([
       {
         path: "/nota/read",
         element: <CetakNota />
+      },
+      {
+        path: "/checkout/view",
+        element: <CheckoutPage />
       },
       // {
       //   path: "/catalogue/produk",

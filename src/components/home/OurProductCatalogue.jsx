@@ -44,6 +44,7 @@ const currentDate = `${year}-${month}-${day}`;
 
 const addDaysFromToday = (n) => {
   const today = new Date();
+  // console.log("ini today",today)
   return addDays(today, n);
 };
 
@@ -55,10 +56,11 @@ const OurProductCatalogue = () => {
   const [cartAnimationProductId, setCartAnimationProductId] = useState(null);
   const [selectedDate, setSelectedDate] = useState(currentDate);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const minPreOrderDate = addDaysFromToday(2); // Tanggal H+2 dari hari ini
+  const minPreOrderDate = addDaysFromToday(3); // Tanggal H+2 dari hari ini
 
   // Fungsi untuk mengecek apakah tanggal dipilih kurang dari H+2 dari hari ini
   const isDateBeforeMinPreOrder = (selectedDate) => {
+    // console.log("ini minimal",minPreOrderDate)
     return selectedDate < minPreOrderDate.toISOString().split("T")[0];
   };
 
@@ -184,18 +186,20 @@ const OurProductCatalogue = () => {
     if (existingProductIndex !== -1) {
       // Jika produk sudah ada di keranjang, tambahkan jumlahnya
       cart[existingProductIndex].quantity += 1;
+      kategori[existingProductIndex]= type;
     } else {
       // Jika produk belum ada di keranjang, tambahkan produk baru
       cart.push({ ...product, quantity: 1 });
+      kategori.push(type);
     }
-    kategori.push(type);
+    
     
     // Menyimpan kembali keranjang ke localStorage
     localStorage.setItem("cart", JSON.stringify(cart));
     console.log(cart);
     localStorage.setItem("kategori", JSON.stringify(kategori));
     console.log(kategori)
-
+    // localStorage.removeItem("kategori");
     // Emit event untuk memberi tahu perubahan pada keranjang
     window.dispatchEvent(new Event("cartUpdated"));
     setCartAnimationProductId(product.id_produk);
@@ -204,9 +208,34 @@ const OurProductCatalogue = () => {
     }, 500);
     // Menampilkan toast bahwa produk berhasil ditambahkan ke keranjang
     toast.success("Produk berhasil ditambahkan ke keranjang");
-
+    const categoryStatus = checkCategory(kategori);
+    console.log("Category Status:", categoryStatus);
     // Simpan tombol mana yang ditekan ke localStorage
     
+  };
+  const checkCategory = (kategori) => {
+    // Pastikan kategori adalah array
+    if (!Array.isArray(kategori)) {
+      return "Invalid category data";
+    }
+  
+    // Check if there is any "Pre Order" category in the array
+    const hasPreOrder = kategori.some((item) => item === "Pre Order");
+  
+    // If there's at least one "Pre Order" category, return "Pre Order"
+    if (hasPreOrder) {
+      return "Pre Order";
+    }
+  
+    // If all categories are "Ready Stock", return "Ready Stock"
+    const allReadyStock = kategori.every((item) => item === "Ready Stock");
+  
+    if (allReadyStock) {
+      return "Ready Stock";
+    }
+  
+    // Default case, if the array is empty or has mixed statuses
+    return "mixed";
   };
 
   const flyToNavbar = (buttonId) => {
@@ -256,6 +285,7 @@ const OurProductCatalogue = () => {
           key={index}
           className="w-full md:w-fit mx-auto mt-12 mb-6 pt-6 px-4 justify-items-center justify-center"
         >
+          
           <div>
             <h1 className="text-xl md:text-2xl font-bold mb-6 ">
               {kategori_produk}
@@ -327,12 +357,12 @@ const OurProductCatalogue = () => {
                     className="flex-grow mr-2"
                     color="blue"
                     onClick={() => {
-                      handleAddToCart(product, "Ready Stok"); // Tambahkan "Ready Stok" sebagai parameter
+                      handleAddToCart(product, "Ready Stock"); // Tambahkan "Ready Stok" sebagai parameter
                       flyToNavbar(`addToCartButton_${product.id_produk}`);
                     }}
                     disabled={product.stok_produk <= 0}
                   >
-                    Ready Stok
+                    Ready Stock
                   </Button>
                   <Button
                     id={`addToCartButton_${product.id_produk}`}
