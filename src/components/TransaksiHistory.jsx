@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import {
   Card,
   CardHeader,
@@ -27,7 +27,7 @@ const TABS = [
     value: "-",
   },
   {
-    label: "Belum Dibayar",
+    label: "Bayar",
     value: "Belum Dibayar",
   },
   {
@@ -35,12 +35,12 @@ const TABS = [
     value: "Sudah Dibayar",
   },
   {
-    label: "Diproses",
-    value: "Diproses",
+    label: "Diterima",
+    value: "Diterima",
   },
   {
-    label: "Dikirim",
-    value: "Dikirim",
+    label: "Ditolak",
+    value: "Ditolak",
   },
   {
     label: "Selesai",
@@ -48,16 +48,17 @@ const TABS = [
   },
 ];
 
+
+
 const TransaksiHistory = () => {
   let { id } = useParams();
   console.log("masuk history", id);
-
   const [selectedTab, setSelectedTab] = useState("Semua");
   const [historyData, setHistoryData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchValue, setSearchValue] = useState("");
-  const itemsPerPage = 5; // Ubah sesuai dengan jumlah item yang ingin ditampilkan per halaman
+  const itemsPerPage = 5;
 
   useEffect(() => {
     fetchData();
@@ -68,14 +69,18 @@ const TransaksiHistory = () => {
       const response = await showTransaksiHistoryCustomer();
       const mappedData = response.data.map((item) => ({
         id: item.transaksi.id_transaksi,
+        nomorNota: item.transaksi.nomor_nota,
         tanggal: item.transaksi.tanggal_transaksi,
+        tanggalAmbil: item.transaksi.tanggal_pengambilan,
         status: item.transaksi.status_transaksi,
         produk: {
           nama: (item.id_produk ? item.produk.nama_produk : null) || (item.id_produk_hampers ? item.produk_hampers.nama_produk_hampers : "Produk Tidak Ditemukan"),
+          jumlahProduk: (item.jumlah_produk) || (item.jumlah_produk_hampers),
           deskripsi: (item.produk ? item.produk.deskripsi_produk : null) || (item.produk_hampers ? item.produk_hampers.deskripsi_produk_hampers : null),
           kategori: (item.produk ? item.produk.kategori_produk : null) || ("Hampers"),
           gambar: (item.produk ? item.produk.gambar_produk : null) || (item.produk_hampers ? item.produk_hampers.gambar_produk_hampers : null),
           harga: (item.produk ? item.produk.harga_produk : null) || (item.produk_hampers ? item.produk_hampers.harga_produk_hampers : null),
+          jenisProduk: item.jenis_produk
         },
         total: item.transaksi.total_pembayaran,
         ongkir: item.transaksi.biaya_pengiriman,
@@ -102,13 +107,13 @@ const TransaksiHistory = () => {
   const filteredData =
     selectedTab === "Semua"
       ? historyData.filter((item) =>
-          item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
-        )
+        item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
+      )
       : historyData.filter(
-          (item) =>
-            item.status === selectedTab &&
-            item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
-        );
+        (item) =>
+          item.status === selectedTab &&
+          item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
+      );
 
   const groupedData = groupBy(filteredData, "id");
   const totalPages = Math.ceil(Object.keys(groupedData).length / itemsPerPage);
@@ -201,9 +206,19 @@ const TransactionCard = ({ groupKey, items }) => {
       {/* <Typography variant="h6" color="black" className="mb-4">
         ID Transaksi: {groupKey}
       </Typography> */}
-      <Typography variant="h6" color="black">
-        Tanggal Transaksi : {firstItem.tanggal}
-      </Typography>
+      <div className="flex justify-between">
+        <Typography variant="h6" color="black" className="mb-4">
+          Nomor Nota: {firstItem.nomorNota}
+        </Typography>
+      </div>
+      <div className="flex justify-between mb-3">
+        <Typography variant="small" color="black">
+          Tanggal Transaksi : {firstItem.tanggal}
+        </Typography>
+        <Typography variant="small" color="black">
+          Tanggal Pengambilan : {firstItem.tanggalAmbil}
+        </Typography>
+      </div>
       <div className="flex pb-3">
         <Typography variant="h6" color="black" className="ml-auto">
           <Chip
@@ -213,17 +228,17 @@ const TransactionCard = ({ groupKey, items }) => {
             color={
               firstItem.status === "Selesai"
                 ? "green"
-                : firstItem.status === "Dikirim"
-                ? "amber"
-                : firstItem.status === "Diproses"
-                ? "blue"
-                : firstItem.status === "-"
-                ? "purple"
-                : firstItem.status === "Belum Dibayar"
-                ? "purple"
-                : firstItem.status === "Sudah Dibayar"
-                ? "lightBlue"
-                : "red"
+                : firstItem.status === "Ditolak"
+                  ? "amber"
+                  : firstItem.status === "Diterima"
+                    ? "blue"
+                    : firstItem.status === "-"
+                      ? "purple"
+                      : firstItem.status === "Belum Dibayar"
+                        ? "purple"
+                        : firstItem.status === "Sudah Dibayar"
+                          ? "lightBlue"
+                          : "red"
             }
           />
         </Typography>
@@ -238,9 +253,17 @@ const TransactionCard = ({ groupKey, items }) => {
             />
           </div>
           <div className="col-span-3">
-            <Typography variant="h5" color="blue-gray" className="mb-2">
-              {item.produk.nama}
-            </Typography>
+            <div className="flex items-center">
+              <Typography variant="h5" color="blue-gray" className="mb-2 mr-3">
+                {item.produk.nama}
+              </Typography>
+              <Typography variant="paragraph" color="blue-gray" className="mb-2 mr-2">
+                x {item.produk.jumlahProduk}
+              </Typography>
+              <Typography variant="paragraph" color="gray" className="mb-2">
+                ({item.produk.jenisProduk})
+              </Typography>
+            </div>
             <Typography>{item.produk.deskripsi}</Typography>
             <div className="w-max mt-2">
               <Chip
@@ -251,28 +274,23 @@ const TransactionCard = ({ groupKey, items }) => {
                   item.produk.kategori === "Cake"
                     ? "green"
                     : item.produk.kategori === "Roti"
-                    ? "amber"
-                    : item.produk.kategori === "Minuman"
-                    ? "blue"
-                    : item.produk.kategori === "Titipan"
-                    ? "purple"
-                    : "red"
+                      ? "amber"
+                      : item.produk.kategori === "Minuman"
+                        ? "blue"
+                        : item.produk.kategori === "Titipan"
+                          ? "purple"
+                          : "red"
                 }
               />
             </div>
           </div>
           <div className="flex justify-end col-span-6 md:col-span-2">
-            <Typography
-              variant="paragraph"
-              color="blue-gray"
-              className="mb-2  flex items-center"
-            >
-              Rp {item.produk.harga}
+            <Typography variant="paragraph" color="blue-gray" className="mb-2 flex items-center">
+              Rp {(item.produk.harga || 0) * (item.produk.jumlahProduk || 0)}
             </Typography>
           </div>
         </div>
       ))}
-
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-4">
           <Button
@@ -293,7 +311,7 @@ const TransactionCard = ({ groupKey, items }) => {
             Ongkos Kirim: Rp {firstItem.ongkir}
           </Typography>
           <Typography variant="h6" color="black" className="mb-2 ml-auto">
-            Total Belanja: Rp {firstItem.total}
+            Total Belanja: Rp {firstItem.total + firstItem.ongkir}
           </Typography>
         </div>
       </div>

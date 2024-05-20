@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import NavbarLogin from "../../components/NavbarLogin";
 import FooterUser from "../../components/Footer";
@@ -11,25 +11,60 @@ import {
   CardBody,
   Button,
 } from "@material-tailwind/react";
+import { showPoin } from "../../api/customer/PembayaranApi";
+import { storePembayaran } from "../../api/customer/PembayaranApi";
+
+const formReducer = (state, event) => {
+  if (event.target.type === "file") {
+    return {
+      ...state,
+      [event.target.name]: event.target.files[0],
+    };
+  }
+
+  return {
+    ...state,
+    [event.target.name]: event.target.value,
+  };
+};
 
 const PembayaranPage = () => {
   let { id } = useParams();
   console.log("masukparams", id);
 
   // Harga barang atau layanan
-  const hargaBarang = 100000;
-  const nilaiSatuPoin = 100;
 
   const [file, setFile] = useState(null);
   const [pointsUsed, setPointsUsed] = useState("");
-  const [totalPembayaran, setTotalPembayaran] = useState(hargaBarang);
+  const [formData, setFormData] = useReducer(formReducer, {});
+  const [totalPembayaran, setTotalPembayaran] = useState([]);
+  const hargaBarang = totalPembayaran;
+  const nilaiSatuPoin = 100;
+  const [totalProduk, setTotalProduk] = useState([]);
+  const [biayaPengriman, setBiayaPengriman] = useState([]);
   const [poinDiperoleh, setPoinDiperoleh] = useState(0);
   const [totalSetelahPoin, setTotalSetelahPoin] = useState(hargaBarang);
-  const [sisaPoin, setSisaPoin] = useState(0);
+  const [sisaPoin, setSisaPoin] = useState([]);
   const [totalPoinSebelumnya, setTotalPoinSebelumnya] = useState(10);
   const navigate = useNavigate();
+  const [poin, setPoin] = useState([]);
+
+  const fetchData = async () => {
+    try {
+      const response = await showPoin(id);
+      const totalHarga = response.data.biaya_pengiriman + response.data.total_pembayaran;
+      setPoin(response.poin);
+      setBiayaPengriman(response.data.biaya_pengiriman)
+      setTotalPembayaran(totalHarga)
+      setTotalProduk(response.data.total_pembayaran)
+      setSisaPoin(response.data.user.poin)
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   useEffect(() => {
+    fetchData();
     // Perhitungan total harga setelah dikurangi dengan penggunaan poin
     const totalSetelahPoin = totalPembayaran - pointsUsed * nilaiSatuPoin;
     setTotalSetelahPoin(totalSetelahPoin);
@@ -40,17 +75,26 @@ const PembayaranPage = () => {
     // Lakukan validasi di sini
     // Misalnya, pastikan file sudah dipilih dan total penggunaan poin tidak melebihi poin yang dimiliki oleh pengguna
     // Jika validasi berhasil, lakukan pengiriman data ke backend atau lakukan tindakan sesuai kebutuhan
-
-    // Contoh validasi:
-    if (!file) {
-      toast.error("Silakan pilih gambar bukti pembayaran.");
-      return;
-    }
-
-    if (parseInt(pointsUsed) <= 0 || isNaN(parseInt(pointsUsed))) {
-      toast.error("Total penggunaan poin harus diisi dengan angka yang valid.");
-      return;
-    }
+    const point = pointsUsed;
+    console.log(pointsUsed);
+    const finalFormData = {
+      ...formData,
+      point
+    };
+    storePembayaran(id, finalFormData)
+      .then((res) => {
+        toast.success("Pembayaran Produk berhasil!");
+        setTimeout(() => {
+          navigate("/nota/read")
+        }, 2000);
+      })
+      .catch((err) => {
+        console.log(err);
+        if (!file) {
+          toast.error("Silakan pilih gambar bukti pembayaran.");
+          return;
+        }
+      })
 
     // Perhitungan poin yang diperoleh dari transaksi baru
     const poinDiperolehBaru = parseInt(totalPembayaran / nilaiSatuPoin);
@@ -67,27 +111,6 @@ const PembayaranPage = () => {
 
     // setPoinDiperoleh(poinDiperolehBaru);
     setSisaPoin(sisaPoin);
-    // Lakukan tindakan lanjutan di sini, seperti pengiriman data ke backend
-    // Contoh:
-    // fetch('/api/pembayaran', {
-    //     method: 'POST',
-    //     body: JSON.stringify({
-    //         file: file,
-    //         pointsUsed: pointsUsed
-    //     }),
-    //     headers: {
-    //         'Content-Type': 'application/json'
-    //     }
-    // })
-    // .then(response => response.json())
-    // .then(data => {
-    //     // Lakukan sesuatu setelah berhasil melakukan pembayaran, misalnya navigasi ke halaman lain
-    //     navigate('/konfirmasi-pembayaran');
-    // })
-    // .catch(error => {
-    //     console.error('Error:', error);
-    //     toast.error("Terjadi kesalahan saat melakukan pembayaran. Silakan coba lagi nanti.");
-    // });
   };
 
   return (
@@ -106,6 +129,27 @@ const PembayaranPage = () => {
             </CardHeader>
             <CardBody>
               <form onSubmit={handleSubmit}>
+                <div className="mb-4 grid grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="nama_bahan_baku"
+                      className="block mb-2 text-sm font-medium text-gray-900"
+                    >
+                      Total Harga Produk
+                    </label>
+                    <p className="text-blue text-lg">Rp {totalProduk.toLocaleString("id-ID")}</p>
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="biaya_pengiriman"
+                      className="block mb-2 text-sm font-medium text-gray-900"
+                    >
+                      Biaya Pengiriman
+                    </label>
+                    <p className="text-blue text-lg">Rp {biayaPengriman.toLocaleString("id-ID")}</p>
+                  </div>
+
+                </div>
                 <div className="mb-4">
                   <label
                     htmlFor="nama_bahan_baku"
@@ -113,7 +157,7 @@ const PembayaranPage = () => {
                   >
                     Total Pembayaran
                   </label>
-                  <p className="text-blue text-lg">{totalPembayaran} IDR</p>
+                  <p className="text-blue text-lg">Rp {totalPembayaran.toLocaleString("id-ID")}</p>
                 </div>
                 <div className="mb-4">
                   <label
@@ -122,7 +166,7 @@ const PembayaranPage = () => {
                   >
                     Poin yang Diperoleh
                   </label>
-                  <p className="text-blue text-lg">{poinDiperoleh} Poin</p>
+                  <p className="text-blue text-lg">{poin} Poin</p>
                 </div>
                 <div className="mb-4">
                   <label
@@ -131,7 +175,7 @@ const PembayaranPage = () => {
                   >
                     Total Setelah Poin
                   </label>
-                  <p className="text-blue text-lg">{totalSetelahPoin} IDR</p>
+                  <p className="text-blue text-lg">Rp {totalSetelahPoin.toLocaleString("id-ID")}</p>
                 </div>
                 <div className="mb-4">
                   <label
@@ -151,12 +195,14 @@ const PembayaranPage = () => {
                   </label>
                   <Input
                     type="file"
+                    name="bukti_pembayaran"
                     color="lightBlue"
                     size="regular"
                     label="Bukti Pembayaran"
                     outline={false}
                     placeholder="Upload Gambar Bukti Pembayaran"
-                    onChange={(e) => setFile(e.target.files[0])}
+                    onChange={setFormData}
+                    required
                   />
                 </div>
                 <div className="mb-4">
@@ -168,6 +214,7 @@ const PembayaranPage = () => {
                   </label>
                   <Input
                     type="number"
+                    name="point"
                     color="lightBlue"
                     size="regular"
                     label="Pengunaan Poin"
@@ -180,15 +227,15 @@ const PembayaranPage = () => {
 
                 <div className="mb-4">
                   {/* <Link to="/nota/read"> */}
-                    <Button
-                      type="submit"
-                      color="lightBlue"
-                      size="lg"
-                      ripple="light"
-                      block
-                    >
-                      Bayar
-                    </Button>
+                  <Button
+                    type="submit"
+                    color="lightBlue"
+                    size="lg"
+                    ripple="light"
+                    block
+                  >
+                    Bayar
+                  </Button>
                   {/* </Link> */}
                 </div>
               </form>
