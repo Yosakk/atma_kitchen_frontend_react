@@ -31,3 +31,22 @@ export const editDataCustomer = async (data) => {
         throw error.response.data;
     }
 };
+
+export const showAlamat = async () => {
+    const token = sessionStorage.getItem("token");
+    console.log("masok");
+
+    try {
+        const response = await urlAxios.get("/show/alamat/user", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};
+
+

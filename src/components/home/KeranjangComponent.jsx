@@ -8,6 +8,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Link, useNavigate } from "react-router-dom";
 import { storeTransaksi } from "../../api/customer/TransaksiApi";
+import { showAlamat } from "../../api/customer/customerApi";
 
 const formReducer = (state, event) => {
   return {
@@ -19,7 +20,24 @@ const formReducer = (state, event) => {
 function KeranjangComponents() {
   const [formData, setFormData] = useReducer(formReducer, {});
   const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const [alamatData, setAlamatData] = useState([]);
+  useEffect(() => {
+    fetchData();
+  }, []);
+  const fetchData = async () => {
+    try {
+      const response = await showAlamat();
+      setAlamatData(response.data);
+      console.log("masuk alamat", response.data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setIsLoading(false);
+    }
+  };
+
   const [products, setProducts] = useState(() => {
     const cart = localStorage.getItem("cart");
     console.log(cart);
@@ -30,9 +48,8 @@ function KeranjangComponents() {
   });
 
   const [kategori, setKategori] = useState(() => {
-
     const kategori = localStorage.getItem("kategori");
-    console.log("ini kategori di keranjang", kategori)
+    console.log("ini kategori di keranjang", kategori);
     if (kategori) {
       return JSON.parse(kategori);
     }
@@ -72,7 +89,7 @@ function KeranjangComponents() {
       jenis_pengiriman,
       produk_id,
       jumlah,
-      jenis_produk
+      jenis_produk,
     };
 
     console.log(finalFormData);
@@ -80,19 +97,17 @@ function KeranjangComponents() {
     storeTransaksi(finalFormData)
       .then((res) => {
         const transaksiId = res.data.id_transaksi;
-        console.log(transaksiId)
+        console.log(transaksiId);
         toast.success("Transaksi Produk berhasil!");
         localStorage.clear("cart");
         localStorage.clear("kategori");
         setTimeout(() => {
           if (selectedDeliveryType === "Pickup") {
-            navigate(`/pembayaran/${transaksiId}`);// Change this to your desired route for Pickup
+            navigate(`/pembayaran/${transaksiId}`); // Change this to your desired route for Pickup
           } else if (selectedDeliveryType === "Diantar") {
-            navigate("/checkout/view")// Change this to your desired route for Delivery
+            navigate("/checkout/view"); // Change this to your desired route for Delivery
           }
-          
         }, 2000);
-
       })
       .catch((err) => {
         console.log(err);
@@ -130,7 +145,9 @@ function KeranjangComponents() {
     const updatedProducts = products.filter(
       (product) => product.id_produk !== id
     );
-    const productIndex = products.findIndex((product) => product.id_produk === id);
+    const productIndex = products.findIndex(
+      (product) => product.id_produk === id
+    );
     setProducts(updatedProducts);
     updateCart(updatedProducts);
     removeCategoryFromLocalStorage(productIndex);
@@ -159,7 +176,12 @@ function KeranjangComponents() {
     0
   );
 
-  const addresses = ["Alamat 1", "Alamat 2", "Alamat 3"];
+  const addressesTableData = alamatData.map((item) => ({
+    id_alamat: item.id_alamat,
+    id_user: item.id_user,
+    full_address: item.full_address,
+  }));
+  // const addresses = ["Alamat 1", "Alamat 2", "Alamat 3"];
   const [selectedDeliveryType, setSelectedDeliveryType] = useState("");
 
   const getCurrentDate = (offsetDays = 0) => {
@@ -214,7 +236,9 @@ function KeranjangComponents() {
                               )}
                               <div>
                                 <span>{product.nama_produk_hampers}</span>
-                                <span className="ml-1 text-gray-500">({product.kategori})</span>
+                                <span className="ml-1 text-gray-500">
+                                  ({product.kategori})
+                                </span>
                               </div>
                             </>
                           ) : (
@@ -263,11 +287,11 @@ function KeranjangComponents() {
                         Rp{" "}
                         {product.id_produk_hampers
                           ? (
-                            product.harga_produk_hampers * product.quantity
-                          ).toLocaleString()
+                              product.harga_produk_hampers * product.quantity
+                            ).toLocaleString()
                           : (
-                            product.harga_produk * product.quantity
-                          ).toLocaleString()}{" "}
+                              product.harga_produk * product.quantity
+                            ).toLocaleString()}{" "}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <Button
@@ -315,10 +339,13 @@ function KeranjangComponents() {
                 type="date"
                 id="pickup-date"
                 name="tanggal_pengambilan"
-
                 onChange={setFormData}
                 min={getCurrentDate(
-                  categoryStatus === "Pre-Order" ? 2 : categoryStatus === "Ready Stock" ? 0 : 0
+                  categoryStatus === "Pre-Order"
+                    ? 2
+                    : categoryStatus === "Ready Stock"
+                    ? 0
+                    : 0
                 )}
                 className="mt-1 block w-full"
               />
@@ -332,23 +359,20 @@ function KeranjangComponents() {
             <select
               id="alamat"
               name="alamat_pengiriman"
-
               onChange={setFormData}
               className="mt-1 p-2 border border-gray-300 rounded w-full"
             >
               <option value="">Pilih Alamat</option>
-              {addresses.map((address, index) => (
-                <option key={index} value={address}>
-                  {address}
+              {addressesTableData.map((address, index) => (
+                <option key={index} value={address.full_address}>
+                  {address.full_address}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="mt-4">
-            <label className="block text-gray-700">
-              Jenis Pengiriman:
-            </label>
+            <label className="block text-gray-700">Jenis Pengiriman:</label>
             <div className="flex items-center mt-2">
               <input
                 type="radio"
@@ -371,9 +395,7 @@ function KeranjangComponents() {
                 onChange={(e) => setSelectedDeliveryType(e.target.value)}
                 className="mr-2"
               />
-              <label htmlFor="delivery">
-                Antar ke Alamat
-              </label>
+              <label htmlFor="delivery">Antar ke Alamat</label>
             </div>
           </div>
 
@@ -384,7 +406,6 @@ function KeranjangComponents() {
             >
               Checkout <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
             </Button>
-
           </div>
         </form>
       </div>

@@ -116,10 +116,10 @@ const PembayaranPage = () => {
     }
 
     // Perhitungan sisa poin yang dimiliki setelah pembayaran
-    const sisaPoin = poinYangBisaDigunakan - parseInt(pointsUsed);
+    // const sisaPoin = poinYangBisaDigunakan - parseInt(pointsUsed);
 
     // setPoinDiperoleh(poinDiperolehBaru);
-    setSisaPoin(sisaPoin);
+    // setSisaPoin(sisaPoin);
   };
 
   return (
