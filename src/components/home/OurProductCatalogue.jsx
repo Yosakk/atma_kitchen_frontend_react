@@ -2,15 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Button, Input } from "@material-tailwind/react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { showDataHampers, showDataProduk } from "../../api/admin/ProdukApi";
 import { getImage } from "../../api";
 import useRefresh from "../../services/useRefresh";
+import { Link, useNavigate } from "react-router-dom";
 
 import "../home/animation.css";
 import { isToday, addDays } from "date-fns";
+import RedirectToLogin from "../redirectToLogin";
 
 const groupProductsByCategory = (productList) => {
   // Group products by kategori_produk
@@ -57,7 +58,8 @@ const OurProductCatalogue = () => {
   const [selectedDate, setSelectedDate] = useState(currentDate);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const minPreOrderDate = addDaysFromToday(3); // Tanggal H+2 dari hari ini
-
+  const [loggedIn, setLoggedIn] = useState(false); // Tambahkan state untuk menyimpan status login
+  const navigate = useNavigate();
   // Fungsi untuk mengecek apakah tanggal dipilih kurang dari H+2 dari hari ini
   const isDateBeforeMinPreOrder = (selectedDate) => {
     // console.log("ini minimal",minPreOrderDate)
@@ -156,10 +158,25 @@ const OurProductCatalogue = () => {
       groupedHampers[kategori_produk]
     );
   });
+  useEffect(() => {
+    // Pemeriksaan status login pada mounting komponen
+    // Misalnya, Anda dapat memeriksa apakah pengguna memiliki token otentikasi
+    // Jika ada token, Anda dapat mengatur loggedIn menjadi true
+    const token = sessionStorage.getItem("token");
+    console.log(token);
+    if (token) {
+      setLoggedIn(true);
+    }
+  }, []);
 
   const refresh = useRefresh("cartUpdated");
   const handleAddToCart = (product, type) => {
     setSelectedProduct(product);
+    if (!loggedIn) {
+      navigate("/login");
+    }
+    // Mengambil ID produk, dengan prioritas dari id_produk_hampers jika tersedia
+    const productId = product.id_produk_hampers ? product.id_produk_hampers : product.id_produk;
     const item = {
       product: product,
       type: type,
@@ -180,29 +197,34 @@ const OurProductCatalogue = () => {
 
     // Mengecek apakah produk sudah ada di keranjang
     const existingProductIndex = cart.findIndex(
-      (item) => item.id_produk === product.id_produk
+      (item) => item.id_produk === productId // Menggunakan productId yang sudah didapatkan
     );
 
     if (existingProductIndex !== -1) {
-      // Jika produk sudah ada di keranjang, tambahkan jumlahnya
-      cart[existingProductIndex].quantity += 1;
-      kategori[existingProductIndex]= type;
+      // Jika produk sudah ada di keranjang
+      if (kategori[existingProductIndex] !== type) {
+        // Jika kategori yang akan dimasukkan berbeda, tambahkan jumlahnya
+        cart.push({ ...product, quantity: 1 }); // Menambahkan produk baru ke keranjang
+        kategori.push(type); // Menambahkan kategori baru ke kategori
+      } else {
+        // Jika kategori sama, tambahkan jumlahnya
+        cart[existingProductIndex].quantity += 1;
+      }
     } else {
       // Jika produk belum ada di keranjang, tambahkan produk baru
       cart.push({ ...product, quantity: 1 });
       kategori.push(type);
     }
-    
-    
+
     // Menyimpan kembali keranjang ke localStorage
     localStorage.setItem("cart", JSON.stringify(cart));
     console.log(cart);
     localStorage.setItem("kategori", JSON.stringify(kategori));
-    console.log(kategori)
+    console.log(kategori);
     // localStorage.removeItem("kategori");
     // Emit event untuk memberi tahu perubahan pada keranjang
     window.dispatchEvent(new Event("cartUpdated"));
-    setCartAnimationProductId(product.id_produk);
+    setCartAnimationProductId(productId); // Menggunakan productId yang sudah didapatkan
     setTimeout(() => {
       setCartAnimationProductId(null);
     }, 500);
@@ -211,29 +233,29 @@ const OurProductCatalogue = () => {
     const categoryStatus = checkCategory(kategori);
     console.log("Category Status:", categoryStatus);
     // Simpan tombol mana yang ditekan ke localStorage
-    
-  };
+};
+
   const checkCategory = (kategori) => {
     // Pastikan kategori adalah array
     if (!Array.isArray(kategori)) {
       return "Invalid category data";
     }
-  
+
     // Check if there is any "Pre Order" category in the array
     const hasPreOrder = kategori.some((item) => item === "Pre-Order");
-  
+
     // If there's at least one "Pre Order" category, return "Pre Order"
     if (hasPreOrder) {
       return "Pre-Order";
     }
-  
+
     // If all categories are "Ready Stock", return "Ready Stock"
     const allReadyStock = kategori.every((item) => item === "Ready Stock");
-  
+
     if (allReadyStock) {
       return "Ready Stock";
     }
-  
+
     // Default case, if the array is empty or has mixed statuses
     return "mixed";
   };
@@ -285,7 +307,6 @@ const OurProductCatalogue = () => {
           key={index}
           className="w-full md:w-fit mx-auto mt-12 mb-6 pt-6 px-4 justify-items-center justify-center"
         >
-          
           <div>
             <h1 className="text-xl md:text-2xl font-bold mb-6 ">
               {kategori_produk}
@@ -373,8 +394,9 @@ const OurProductCatalogue = () => {
                       flyToNavbar(`addToCartButton_${product.id_produk}`);
                     }}
                     disabled={
-                      isDateBeforeMinPreOrder(selectedDate) ||
-                      product.limit_harian <= 0
+                      isDateBeforeMinPreOrder(selectedDate) || // Jika tanggal tidak H+2
+                      product.limitHarian <= 0 || // Jika limit harian tidak tersedia
+                      product.tanggalLimit !== todayDate // Jika tanggal limit tidak sama dengan tanggal yang dipilih
                     }
                   >
                     Pre Order
@@ -441,9 +463,8 @@ const OurProductCatalogue = () => {
               <div className="mb-4">
                 <Button
                   className="w-full"
-                  onClick={() =>
-                    handleAddToCart(productHampers, "Pre-Order") // Tambahkan "Hampers" sebagai parameter
-                  }
+                  onClick={() => handleAddToCart(productHampers, "Pre-Order")}
+                  data-id={productHampers.id_produk_hampers} // Menggunakan data-id untuk menyimpan ID produk
                 >
                   Add To Cart
                 </Button>

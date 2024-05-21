@@ -304,6 +304,10 @@ const router = createBrowserRouter([
         element: <PembayaranBerhasil />
       },
       {
+        path: "/nota/:id",
+        element: <CetakNota />
+      },
+      {
         path: "/checkout/view",
         element: <CheckoutPage />
       },

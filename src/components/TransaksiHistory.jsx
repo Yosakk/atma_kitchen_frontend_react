@@ -35,6 +35,10 @@ const TABS = [
     value: "Sudah Dibayar",
   },
   {
+    label: "Valid",
+    value: "Pembayaran Valid",
+  },
+  {
     label: "Diterima",
     value: "Diterima",
   },
@@ -320,6 +324,24 @@ const TransactionCard = ({ groupKey, items }) => {
           <Link to={`/pembayaran/${groupKey}`}>
             <Button variant="filled" color="lightBlue">
               Bayar
+            </Button>
+          </Link>
+        </div>
+      )}
+      {firstItem.status === "Sudah Dibayar" && (
+        <div className="flex justify-end items-center mt-4">
+          <Link to={`/nota/${groupKey}`}>
+            <Button variant="filled" color="lightBlue">
+              Cetak Nota
+            </Button>
+          </Link>
+        </div>
+      )}
+      {firstItem.status === "Pembayaran Valid" && (
+        <div className="flex justify-end items-center mt-4">
+          <Link to={`/nota/${groupKey}`}>
+            <Button variant="filled" color="lightBlue">
+              Cetak Nota
             </Button>
           </Link>
         </div>

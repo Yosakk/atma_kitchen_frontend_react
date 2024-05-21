@@ -268,6 +268,7 @@ const NavbarLogin = () => {
     // const cart = localStorage.getItem("cart"); // Menghapus data dari sessionStorage
     // console.log(cart)
     sessionStorage.removeItem("isLogin");
+    sessionStorage.removeItem("token");
 
     // Emit event untuk memberi tahu perubahan pada keranjang
     window.dispatchEvent(new Event("cartUpdated"));

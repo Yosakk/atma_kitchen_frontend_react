@@ -80,15 +80,32 @@ function KeranjangComponents() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const produk_id = products.map((product) => product.id_produk);
-    const jumlah = products.map((product) => product.quantity);
+    const produk_id = products
+      .filter((product) => product.id_produk)
+      .map((product) => product.id_produk);
+
+    const produk_hampers_id = products
+      .filter((product) => product.id_produk_hampers)
+      .map((product) => product.id_produk_hampers);
+
+    const jumlah = products
+      .filter((product) => product.id_produk)
+      .map((product) => product.quantity);
+    const jumlah_produk_hampers = products
+      .filter((product) => product.id_produk_hampers)
+      .map((product) => product.quantity);
+
     const jenis_produk = kategori.map((kategori) => kategori);
     const jenis_pengiriman = selectedDeliveryType;
+    console.log(jumlah);
+    console.log("ini jumlah produk hampers", jumlah_produk_hampers);
+
     const finalFormData = {
       ...formData,
       jenis_pengiriman,
-      produk_id,
-      jumlah,
+      produk_id: produk_id.length > 0 ? produk_id : null,
+      jumlah: jumlah.length > 0 ? jumlah : null,
+      
       jenis_produk,
     };
 
@@ -126,9 +143,14 @@ function KeranjangComponents() {
 
   const refresh = useRefresh("cartUpdated");
 
-  const handleQuantityChange = (id, delta) => {
+  const handleQuantityChange = (id, delta, category, id_produk_hampers) => {
     const updatedProducts = products.map((product) => {
-      if (product.id_produk === id) {
+      // Cek apakah produk memiliki id yang cocok, kategori yang sesuai, dan id_produk_hampers yang sesuai
+      if (
+        product.id_produk === id &&
+        kategori[products.indexOf(product)] === category &&
+        product.id_produk_hampers === id_produk_hampers
+      ) {
         const newQuantity = product.quantity + delta;
         if (newQuantity > 0) {
           return { ...product, quantity: newQuantity };
@@ -136,21 +158,34 @@ function KeranjangComponents() {
       }
       return product;
     });
+
     console.log(updatedProducts);
     setProducts(updatedProducts);
     updateCart(updatedProducts);
   };
 
-  const handleDelete = (id) => {
-    const updatedProducts = products.filter(
-      (product) => product.id_produk !== id
-    );
-    const productIndex = products.findIndex(
-      (product) => product.id_produk === id
-    );
+  // const handleDelete = (id) => {
+  //   const updatedProducts = products.filter(
+  //     (product) => product.id_produk !== id
+  //   );
+  //   const productIndex = products.findIndex(
+  //     (product) => product.id_produk === id
+  //   );
+  //   setProducts(updatedProducts);
+  //   updateCart(updatedProducts);
+  //   removeCategoryFromLocalStorage(productIndex);
+  // };
+  const handleDelete = (id, kategoriProduk) => {
+    const updatedProducts = products.filter((product) => {
+      return !(
+        product.id_produk === id &&
+        kategoriProduk === kategori[products.indexOf(product)]
+      );
+    });
+
     setProducts(updatedProducts);
     updateCart(updatedProducts);
-    removeCategoryFromLocalStorage(productIndex);
+    removeCategoryFromLocalStorage(id, kategoriProduk);
   };
 
   const updateCart = (updatedProducts) => {
@@ -158,8 +193,17 @@ function KeranjangComponents() {
     window.dispatchEvent(new Event("cartUpdated"));
   };
 
-  const removeCategoryFromLocalStorage = (index) => {
+  // const removeCategoryFromLocalStorage = (index) => {
+  //   let kategori = JSON.parse(localStorage.getItem("kategori")) || [];
+  //   if (index >= 0 && index < kategori.length) {
+  //     kategori.splice(index, 1);
+  //     localStorage.setItem("kategori", JSON.stringify(kategori));
+  //     setKategori(kategori);
+  //   }
+  // };
+  const removeCategoryFromLocalStorage = (id, kategoriProduk) => {
     let kategori = JSON.parse(localStorage.getItem("kategori")) || [];
+    const index = products.findIndex((product) => product.id_produk === id);
     if (index >= 0 && index < kategori.length) {
       kategori.splice(index, 1);
       localStorage.setItem("kategori", JSON.stringify(kategori));
@@ -169,6 +213,10 @@ function KeranjangComponents() {
 
   const total = products.reduce(
     (acc, product) => acc + product.harga_produk * product.quantity,
+    0
+  );
+  const totalhampers = products.reduce(
+    (acc, product) => acc + product.harga_produk_hampers * product.quantity,
     0
   );
   const totalProducts = products.reduce(
@@ -221,7 +269,7 @@ function KeranjangComponents() {
                   </tr>
                 </thead>
                 <tbody>
-                  {products.map((product) => (
+                  {products.map((product, index) => (
                     <tr key={product.id_produk} className="hover:bg-gray-100">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
@@ -237,7 +285,7 @@ function KeranjangComponents() {
                               <div>
                                 <span>{product.nama_produk_hampers}</span>
                                 <span className="ml-1 text-gray-500">
-                                  ({product.kategori})
+                                  ({kategori[index]})
                                 </span>
                               </div>
                             </>
@@ -252,6 +300,9 @@ function KeranjangComponents() {
                               )}
                               <div>
                                 <span>{product.nama_produk}</span>
+                                <span className="ml-1 text-gray-500">
+                                  ({kategori[index]})
+                                </span>
                               </div>
                             </>
                           )}
@@ -260,13 +311,18 @@ function KeranjangComponents() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         Rp{" "}
                         {product.id_produk_hampers
-                          ? product.harga_produk_hampers.toLocaleString()
-                          : product.harga_produk.toLocaleString()}{" "}
+                          ? product.harga_produk_hampers
+                          : product.harga_produk}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <button
                           onClick={() =>
-                            handleQuantityChange(product.id_produk, -1)
+                            handleQuantityChange(
+                              product.id_produk,
+                              -1,
+                              kategori[index],
+                              product.id_produk_hampers
+                            )
                           }
                           disabled={product.quantity <= 1}
                           className="text-gray-600 bg-gray-200 rounded-l px-2 py-1 hover:bg-gray-300"
@@ -276,7 +332,12 @@ function KeranjangComponents() {
                         <span className="px-4">{product.quantity}</span>
                         <button
                           onClick={() =>
-                            handleQuantityChange(product.id_produk, 1)
+                            handleQuantityChange(
+                              product.id_produk,
+                              1,
+                              kategori[index],
+                              product.id_produk_hampers
+                            )
                           }
                           className="text-gray-600 bg-gray-200 rounded-r px-2 py-1 hover:bg-gray-300"
                         >
@@ -295,7 +356,9 @@ function KeranjangComponents() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <Button
-                          onClick={() => handleDelete(product.id_produk)}
+                          onClick={() =>
+                            handleDelete(product.id_produk, kategori[index])
+                          }
                           className="bg-red-600 hover:bg-red-800"
                         >
                           <FontAwesomeIcon icon={faTrash} />
