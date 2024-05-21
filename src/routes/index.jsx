@@ -308,6 +308,10 @@ const router = createBrowserRouter([
         element: <CetakNota />
       },
       {
+        path: "/nota/cetaknotaPDF/:id",
+        element: <CetakNotaPDF />
+      },
+      {
         path: "/checkout/view",
         element: <CheckoutPage />
       },

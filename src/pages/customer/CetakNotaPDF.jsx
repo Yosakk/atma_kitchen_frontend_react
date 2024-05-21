@@ -116,7 +116,7 @@ const CetakNotaPDF = () => {
   const pointsUsed = queryParams.get("pointsUsed");
   const [isLoading, setIsLoading] = useState(true);
   const [notaData, setNotaData] = useState(null);
-  const nilaiPoin = pointsUsed * 100;
+  const nilaiPoin = notaData?.pembayaran.poin_digunakan * 100;
 
   useEffect(() => {
     fetchData();
@@ -144,7 +144,7 @@ const CetakNotaPDF = () => {
               Jl. Centralpark No. 10 Yogyakarta
             </Text>
           </View>
-          
+
           {/* <View style={styles.header}>
             <Text style={styles.title}>
               Invoice # {getValueOrDefault(notaData?.nomor_nota)}
@@ -252,19 +252,27 @@ const CetakNotaPDF = () => {
 
             <View style={styles.summaryRow}>
               <Text style={styles.summaryColumn}>
-                Potongan {getValueOrDefault(pointsUsed)} Poin
+                Potongan{" "}
+                {getValueOrDefault(notaData?.pembayaran.poin_digunakan) > 0
+                  ? `${notaData?.pembayaran.poin_digunakan} Poin`
+                  : "0"} Poin
               </Text>
               <Text style={styles.summaryColumn}>
-                Rp -{getValueOrDefault(nilaiPoin.toLocaleString("id-ID"))}
+                {getValueOrDefault(nilaiPoin) > 0
+                  ? `Rp -${nilaiPoin.toLocaleString("id-ID")}`
+                  : "0"}
               </Text>
             </View>
+
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryColumn}>Total</Text>
+              <Text style={styles.summaryColumn}>Total Transaksi</Text>
               <Text style={styles.summaryColumn}>
                 Rp{" "}
-                {getValueOrDefault(notaData?.total_pembayaran).toLocaleString(
-                  "id-ID"
-                ) - nilaiPoin.toLocaleString("id-ID")}
+                {(
+                  getValueOrDefault(notaData?.total_pembayaran) +
+                  getValueOrDefault(notaData?.biaya_pengiriman) -
+                  nilaiPoin
+                ).toLocaleString("id-ID")}
               </Text>
             </View>
             <View style={styles.summaryRow}>
@@ -280,9 +288,9 @@ const CetakNotaPDF = () => {
               <Text style={styles.summaryColumn}>TIP</Text>
               <Text style={styles.summaryColumn}>
                 Rp{" "}
-                {getValueOrDefault(notaData?.jumlah_tip).toLocaleString(
-                  "id-ID"
-                ) - nilaiPoin.toLocaleString("id-ID")}
+                {getValueOrDefault(
+                  notaData?.jumlah_tip + nilaiPoin
+                ).toLocaleString("id-ID")}
               </Text>
             </View>
 

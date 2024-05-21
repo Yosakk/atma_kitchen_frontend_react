@@ -35,14 +35,14 @@ function PembayaranBerhasil() {
   };
 
 
-  const handleCetakNota = () => {
-    // saveDataToLocalStorage();
-    // setShowPDF(true);
-    setTimeout(() => {
-      // Open a new tab with the same path
-      window.open(`/pembayaran/cetaknotaPDF/${id}?pointsUsed=${pointsUsed}`, "_blank");
-    }, 200);
-  };
+  // const handleCetakNota = () => {
+  //   // saveDataToLocalStorage();
+  //   // setShowPDF(true);
+  //   setTimeout(() => {
+  //     // Open a new tab with the same path
+  //     window.open(`/pembayaran/cetaknotaPDF/${id}?pointsUsed=${pointsUsed}`, "_blank");
+  //   }, 200);
+  // };
 
   return (
     <>
@@ -59,7 +59,7 @@ function PembayaranBerhasil() {
               <div className="text-center mt-4">
                 <h2 className="text-xl font-bold">Pembayaran Berhasil</h2>
                 <p>Silahkan Tunggu Konfirmasi Pembayaran Dari Admin </p>
-                <p>Points Used: {pointsUsed}</p>
+                {/* <p>Points Used: {pointsUsed}</p> */}
               </div>
               {!showPDF && (
                 <div className="w-full flex justify-center mt-4">
@@ -72,16 +72,16 @@ function PembayaranBerhasil() {
 
             <div className="w-1/2 flex flex-col items-center justify-center px-4">
               <CetakNota/>
-              {!showPDF && (
-                <div className="w-full flex justify-center mt-4">
+              
+                {/* <div className="w-full flex justify-center mt-4">
                   <Button
                     className="w-full"
                     onClick={handleCetakNota}
                   >
                     Cetak Nota
                   </Button>
-                </div>
-              )}
+                </div> */}
+              
             </div>
           </div>
         </div>

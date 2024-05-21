@@ -80,34 +80,53 @@ function KeranjangComponents() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Filter and map produk_id and jumlah for normal products
     const produk_id = products
       .filter((product) => product.id_produk)
       .map((product) => product.id_produk);
 
+    const jumlah = products
+      .filter((product) => product.id_produk)
+      .map((product) => product.quantity);
+
+    // Filter and map produk_hampers_id and jumlah_produk_hampers for hampers
     const produk_hampers_id = products
       .filter((product) => product.id_produk_hampers)
       .map((product) => product.id_produk_hampers);
 
-    const jumlah = products
-      .filter((product) => product.id_produk)
-      .map((product) => product.quantity);
     const jumlah_produk_hampers = products
       .filter((product) => product.id_produk_hampers)
       .map((product) => product.quantity);
 
     const jenis_produk = kategori.map((kategori) => kategori);
     const jenis_pengiriman = selectedDeliveryType;
+
     console.log(jumlah);
     console.log("ini jumlah produk hampers", jumlah_produk_hampers);
 
+    // Create the finalFormData object and only add non-empty arrays
     const finalFormData = {
       ...formData,
       jenis_pengiriman,
-      produk_id: produk_id.length > 0 ? produk_id : null,
-      jumlah: jumlah.length > 0 ? jumlah : null,
-      
       jenis_produk,
     };
+
+    if (produk_id.length > 0) {
+      finalFormData.produk_id = produk_id;
+    }
+
+    if (jumlah.length > 0) {
+      finalFormData.jumlah = jumlah;
+    }
+
+    if (produk_hampers_id.length > 0) {
+      finalFormData.produk_hampers_id = produk_hampers_id;
+    }
+
+    if (jumlah_produk_hampers.length > 0) {
+      finalFormData.jumlah_produk_hampers = jumlah_produk_hampers;
+    }
 
     console.log(finalFormData);
 
@@ -131,6 +150,7 @@ function KeranjangComponents() {
         toast.error("Transaksi Produk gagal!");
       });
   };
+
 
   useEffect(() => {
     const status = checkCategory(kategori);
@@ -211,14 +231,14 @@ function KeranjangComponents() {
     }
   };
 
-  const total = products.reduce(
-    (acc, product) => acc + product.harga_produk * product.quantity,
-    0
-  );
-  const totalhampers = products.reduce(
-    (acc, product) => acc + product.harga_produk_hampers * product.quantity,
-    0
-  );
+  const total = products.reduce((acc, product) => {
+    if (product.id_produk_hampers) {
+      return acc + product.harga_produk_hampers * product.quantity;
+    } else {
+      return acc + product.harga_produk * product.quantity;
+    }
+  }, 0);
+  
   const totalProducts = products.reduce(
     (acc, product) => acc + product.quantity,
     0
@@ -345,14 +365,14 @@ function KeranjangComponents() {
                         </button>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        Rp{" "}
-                        {product.id_produk_hampers
+                        Rp
+                        {product.id_produk
                           ? (
-                              product.harga_produk_hampers * product.quantity
-                            ).toLocaleString()
+                            product.harga_produk * product.quantity
+                          ).toLocaleString()
                           : (
-                              product.harga_produk * product.quantity
-                            ).toLocaleString()}{" "}
+                            product.harga_produk_hampers * product.quantity
+                          ).toLocaleString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <Button
@@ -407,8 +427,8 @@ function KeranjangComponents() {
                   categoryStatus === "Pre-Order"
                     ? 2
                     : categoryStatus === "Ready Stock"
-                    ? 0
-                    : 0
+                      ? 0
+                      : 0
                 )}
                 className="mt-1 block w-full"
               />

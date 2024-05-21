@@ -30,6 +30,14 @@ function CetakNota() {
       setIsLoading(false);
     }
   };
+  const handleCetakNota = () => {
+    // saveDataToLocalStorage();
+    // setShowPDF(true);
+    setTimeout(() => {
+      // Open a new tab with the same path
+      window.open(`/nota/cetaknotaPDF/${id}`, "_blank");
+    }, 200);
+  };
 
   return (
     <div className="container mx-auto max-w-screen-xl px-4">
@@ -53,7 +61,8 @@ function CetakNota() {
                 <strong>Tanggal pesan:</strong> {notaData.tanggal_transaksi}
               </p>
               <p className="text-sm">
-                <strong>Lunas pada:</strong> {notaData.pembayaran.tanggal_pembayaran}
+                <strong>Lunas pada:</strong>{" "}
+                {notaData.pembayaran.tanggal_pembayaran}
               </p>
               <p className="text-sm">
                 <strong>Tanggal ambil:</strong> {notaData.tanggal_pengambilan}
@@ -146,7 +155,8 @@ function CetakNota() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm">
-                <strong>Poin dari pesanan ini:</strong> {notaData.pembayaran.poin_reward}
+                <strong>Poin dari pesanan ini:</strong>{" "}
+                {notaData.pembayaran.poin_reward}
               </p>
               <p className="text-sm">
                 <strong>Total poin customer:</strong> {notaData.user.poin}
@@ -155,25 +165,33 @@ function CetakNota() {
             <div>
               <div>
                 <p className="text-sm">
-                  <strong>Potongan {pointsUsed} poin:</strong> -{nilaiPoin.toLocaleString("id-ID")}
+                  <strong>Potongan {pointsUsed} poin:</strong>
+                  {nilaiPoin > 0
+                    ? `- ${nilaiPoin.toLocaleString("id-ID")}`
+                    : nilaiPoin}
                 </p>
-                
+
                 <p className="text-sm">
                   <strong>Biaya Pengiriman:</strong>
                   Rp.{notaData.biaya_pengiriman.toLocaleString("id-ID")}
                 </p>
                 <p className="text-sm">
-                  <strong>Total Pembayaran:</strong> Rp.{notaData.total_pembayaran.toLocaleString("id-ID") - nilaiPoin.toLocaleString("id-ID")}
+                  <strong>Total Transaksi:</strong> Rp.{" "}
+                  {(
+                    notaData.total_pembayaran + notaData.biaya_pengiriman - nilaiPoin
+                  ).toLocaleString("id-ID")}
                 </p>
               </div>
             </div>
           </div>
 
           <div className="text-center mt-6">
-            {/* <Button color="indigo" ripple="light"className="w-full"
-                    onClick={handleCetakNota}>
-              Cetak Nota
-            </Button> */}
+          <Button
+                    className="w-full"
+                    onClick={handleCetakNota}
+                  >
+                    Cetak Nota
+                  </Button>
           </div>
         </div>
       )}

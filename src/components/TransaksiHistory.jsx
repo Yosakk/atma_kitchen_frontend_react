@@ -52,8 +52,6 @@ const TABS = [
   },
 ];
 
-
-
 const TransaksiHistory = () => {
   let { id } = useParams();
   console.log("masuk history", id);
@@ -78,13 +76,30 @@ const TransaksiHistory = () => {
         tanggalAmbil: item.transaksi.tanggal_pengambilan,
         status: item.transaksi.status_transaksi,
         produk: {
-          nama: (item.id_produk ? item.produk.nama_produk : null) || (item.id_produk_hampers ? item.produk_hampers.nama_produk_hampers : "Produk Tidak Ditemukan"),
-          jumlahProduk: (item.jumlah_produk) || (item.jumlah_produk_hampers),
-          deskripsi: (item.produk ? item.produk.deskripsi_produk : null) || (item.produk_hampers ? item.produk_hampers.deskripsi_produk_hampers : null),
-          kategori: (item.produk ? item.produk.kategori_produk : null) || ("Hampers"),
-          gambar: (item.produk ? item.produk.gambar_produk : null) || (item.produk_hampers ? item.produk_hampers.gambar_produk_hampers : null),
-          harga: (item.produk ? item.produk.harga_produk : null) || (item.produk_hampers ? item.produk_hampers.harga_produk_hampers : null),
-          jenisProduk: item.jenis_produk
+          nama:
+            (item.id_produk ? item.produk.nama_produk : null) ||
+            (item.id_produk_hampers
+              ? item.produk_hampers.nama_produk_hampers
+              : "Produk Tidak Ditemukan"),
+          jumlahProduk: item.jumlah_produk || item.jumlah_produk_hampers,
+          deskripsi:
+            (item.produk ? item.produk.deskripsi_produk : null) ||
+            (item.produk_hampers
+              ? item.produk_hampers.deskripsi_produk_hampers
+              : null),
+          kategori:
+            (item.produk ? item.produk.kategori_produk : null) || "Hampers",
+          gambar:
+            (item.produk ? item.produk.gambar_produk : null) ||
+            (item.produk_hampers
+              ? item.produk_hampers.gambar_produk_hampers
+              : null),
+          harga:
+            (item.produk ? item.produk.harga_produk : null) ||
+            (item.produk_hampers
+              ? item.produk_hampers.harga_produk_hampers
+              : null),
+          jenisProduk: item.jenis_produk,
         },
         total: item.transaksi.total_pembayaran,
         ongkir: item.transaksi.biaya_pengiriman,
@@ -111,13 +126,13 @@ const TransaksiHistory = () => {
   const filteredData =
     selectedTab === "Semua"
       ? historyData.filter((item) =>
-        item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
-      )
-      : historyData.filter(
-        (item) =>
-          item.status === selectedTab &&
           item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
-      );
+        )
+      : historyData.filter(
+          (item) =>
+            item.status === selectedTab &&
+            item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
+        );
 
   const groupedData = groupBy(filteredData, "id");
   const totalPages = Math.ceil(Object.keys(groupedData).length / itemsPerPage);
@@ -233,16 +248,16 @@ const TransactionCard = ({ groupKey, items }) => {
               firstItem.status === "Selesai"
                 ? "green"
                 : firstItem.status === "Ditolak"
-                  ? "amber"
-                  : firstItem.status === "Diterima"
-                    ? "blue"
-                    : firstItem.status === "-"
-                      ? "purple"
-                      : firstItem.status === "Belum Dibayar"
-                        ? "purple"
-                        : firstItem.status === "Sudah Dibayar"
-                          ? "lightBlue"
-                          : "red"
+                ? "amber"
+                : firstItem.status === "Diterima"
+                ? "blue"
+                : firstItem.status === "-"
+                ? "purple"
+                : firstItem.status === "Belum Dibayar"
+                ? "purple"
+                : firstItem.status === "Sudah Dibayar"
+                ? "lightBlue"
+                : "red"
             }
           />
         </Typography>
@@ -261,7 +276,11 @@ const TransactionCard = ({ groupKey, items }) => {
               <Typography variant="h5" color="blue-gray" className="mb-2 mr-3">
                 {item.produk.nama}
               </Typography>
-              <Typography variant="paragraph" color="blue-gray" className="mb-2 mr-2">
+              <Typography
+                variant="paragraph"
+                color="blue-gray"
+                className="mb-2 mr-2"
+              >
                 x {item.produk.jumlahProduk}
               </Typography>
               <Typography variant="paragraph" color="gray" className="mb-2">
@@ -278,18 +297,22 @@ const TransactionCard = ({ groupKey, items }) => {
                   item.produk.kategori === "Cake"
                     ? "green"
                     : item.produk.kategori === "Roti"
-                      ? "amber"
-                      : item.produk.kategori === "Minuman"
-                        ? "blue"
-                        : item.produk.kategori === "Titipan"
-                          ? "purple"
-                          : "red"
+                    ? "amber"
+                    : item.produk.kategori === "Minuman"
+                    ? "blue"
+                    : item.produk.kategori === "Titipan"
+                    ? "purple"
+                    : "red"
                 }
               />
             </div>
           </div>
           <div className="flex justify-end col-span-6 md:col-span-2">
-            <Typography variant="paragraph" color="blue-gray" className="mb-2 flex items-center">
+            <Typography
+              variant="paragraph"
+              color="blue-gray"
+              className="mb-2 flex items-center"
+            >
               Rp {(item.produk.harga || 0) * (item.produk.jumlahProduk || 0)}
             </Typography>
           </div>
@@ -328,24 +351,16 @@ const TransactionCard = ({ groupKey, items }) => {
           </Link>
         </div>
       )}
-      {firstItem.status === "Sudah Dibayar" && (
-        <div className="flex justify-end items-center mt-4">
-          <Link to={`/nota/${groupKey}`}>
-            <Button variant="filled" color="lightBlue">
-              Cetak Nota
-            </Button>
-          </Link>
-        </div>
-      )}
-      {firstItem.status === "Pembayaran Valid" && (
-        <div className="flex justify-end items-center mt-4">
-          <Link to={`/nota/${groupKey}`}>
-            <Button variant="filled" color="lightBlue">
-              Cetak Nota
-            </Button>
-          </Link>
-        </div>
-      )}
+      {firstItem.status !== "Belum Dibayar" &&
+        firstItem.status !== "-" && (
+          <div className="flex justify-end items-center mt-4">
+            <Link to={`/nota/${groupKey}`}>
+              <Button variant="filled" color="lightBlue">
+                Cetak Nota
+              </Button>
+            </Link>
+          </div>
+        )}
 
       {/* <div className="flex justify-end">
                 <Typography variant="paragraph" color="blue-gray" className="mb-2 col-span-2 flex justify-center items-center">
