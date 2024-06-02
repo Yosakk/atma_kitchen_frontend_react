@@ -8,40 +8,20 @@ import {
   CardBody,
   CardFooter,
   Button,
-  Tabs,
-  TabsHeader,
-  Tab,
-  Dialog,
-  DialogHeader,
-  DialogBody,
-  DialogFooter
 } from "@material-tailwind/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useParams, Link } from "react-router-dom";
 import { showAllTransaksiHistoryCustomer } from "../../../api/customer/TransaksiApi";
 import { getImage } from "../../../api";
 
-const TABS = [
-  {
-    label: "Sudah Dibayar",
-    value: "Sudah Dibayar",
-  },
-  {
-    label: "Telat Bayar",
-    value: "Telat Bayar",
-  },
-];
-
-const ReadKonfirmasiPembayaran = () => {
+const ReadPesananDiproses = () => {
   let { id } = useParams();
   console.log("masuk history", id);
-  const [selectedTab, setSelectedTab] = useState("Sudah Dibayar");
+
   const [historyData, setHistoryData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchValue, setSearchValue] = useState("");
-  const [acceptModalOpen, setAcceptModalOpen] = useState(false);
-  const [currentTransactionId, setCurrentTransactionId] = useState(null);
   const itemsPerPage = 5;
 
   const fetchData = async () => {
@@ -49,8 +29,7 @@ const ReadKonfirmasiPembayaran = () => {
       console.log("masuk fetch", id);
       const response = await showAllTransaksiHistoryCustomer();
       const filteredData = response.data.filter(
-        (item) =>
-          item.transaksi && item.transaksi.status_transaksi === selectedTab
+        (item) => item.transaksi && item.transaksi.status_transaksi === "Diproses"
       );
       const mappedData = filteredData.map((item) => ({
         id: item.transaksi.id_transaksi,
@@ -58,37 +37,25 @@ const ReadKonfirmasiPembayaran = () => {
         tanggalAmbil: item.transaksi.tanggal_pengambilan,
         status: item.transaksi.status_transaksi,
         produk: {
-          nama:
-            (item.id_produk ? item.produk.nama_produk : null) ||
-            (item.id_produk_hampers
-              ? item.produk_hampers.nama_produk_hampers
-              : "Produk Tidak Ditemukan"),
-          jumlahProduk: item.jumlah_produk || item.jumlah_produk_hampers,
-          deskripsi:
-            (item.produk ? item.produk.deskripsi_produk : null) ||
-            (item.produk_hampers
-              ? item.produk_hampers.deskripsi_produk_hampers
-              : null),
-          kategori:
-            (item.produk ? item.produk.kategori_produk : null) || "Hampers",
-          gambar:
-            (item.produk ? item.produk.gambar_produk : null) ||
-            (item.produk_hampers
-              ? item.produk_hampers.gambar_produk_hampers
-              : null),
-          harga:
-            (item.produk ? item.produk.harga_produk : null) ||
-            (item.produk_hampers
-              ? item.produk_hampers.harga_produk_hampers
-              : null),
-          jenisProduk: item.jenis_produk,
+          nama: (item.id_produk ? item.produk.nama_produk : null) || (item.id_produk_hampers ? item.produk_hampers.nama_produk_hampers : "Produk Tidak Ditemukan"),
+          jumlahProduk: (item.jumlah_produk) || (item.jumlah_produk_hampers),
+          deskripsi: (item.produk ? item.produk.deskripsi_produk : null) || (item.produk_hampers ? item.produk_hampers.deskripsi_produk_hampers : null),
+          kategori: (item.produk ? item.produk.kategori_produk : null) || ("Hampers"),
+          gambar: (item.produk ? item.produk.gambar_produk : null) || (item.produk_hampers ? item.produk_hampers.gambar_produk_hampers : null),
+          harga: (item.produk ? item.produk.harga_produk : null) || (item.produk_hampers ? item.produk_hampers.harga_produk_hampers : null),
+          jenisProduk: item.jenis_produk
         },
         ongkir: item.transaksi.biaya_pengiriman,
         total: item.transaksi.total_pembayaran,
         nomorNota: item.transaksi.nomor_nota,
+        statusPengiriman: item.transaksi.jenis_pengiriman
+
+        
+        
       }));
       setHistoryData(mappedData);
       setIsLoading(false);
+      
     } catch (error) {
       console.error("Error fetching data:", error);
       setIsLoading(false);
@@ -97,7 +64,7 @@ const ReadKonfirmasiPembayaran = () => {
 
   useEffect(() => {
     fetchData();
-  }, [selectedTab]);
+  }, []);
 
   const handleClickPrevious = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
@@ -105,13 +72,6 @@ const ReadKonfirmasiPembayaran = () => {
 
   const handleClickNext = () => {
     setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
-  };
-
-  const handleConfirmTelatBayar = async () => {
-    // Handle the "Telat Bayar" action here, e.g., update the transaction status in your database.
-    console.log("Transaction marked as Telat Bayar:", currentTransactionId);
-    // Close the modal after handling the action.
-    setAcceptModalOpen(false);
   };
 
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -130,25 +90,9 @@ const ReadKonfirmasiPembayaran = () => {
         <div className="mb-8 flex items-center justify-between gap-8">
           <div>
             <Typography variant="h5" color="blue-gray">
-              Konfirmasi Pembayaran Pesanan
+              Pesanan Diproses
             </Typography>
           </div>
-        </div>
-        <div className="mb-8 flex items-center justify-between gap-8">
-          <Tabs value={selectedTab} className="w-full overflow-x-auto">
-            <TabsHeader>
-              {TABS.map(({ label, value }) => (
-                <Tab
-                  key={value}
-                  value={value}
-                  active={selectedTab === value}
-                  onClick={() => setSelectedTab(value)}
-                >
-                  &nbsp;&nbsp;&nbsp;{label}&nbsp;&nbsp;&nbsp;
-                </Tab>
-              ))}
-            </TabsHeader>
-          </Tabs>
         </div>
         <div className="w-full md:w-72">
           <Input
@@ -169,8 +113,6 @@ const ReadKonfirmasiPembayaran = () => {
                 key={index}
                 groupKey={groupKey}
                 items={groupedData[groupKey]}
-                setCurrentTransactionId={setCurrentTransactionId}
-                setAcceptModalOpen={setAcceptModalOpen}
               />
             ))}
         </CardBody>
@@ -198,32 +140,11 @@ const ReadKonfirmasiPembayaran = () => {
           </Button>
         </div>
       </CardFooter>
-
-      {/* Modal for confirming "Telat Bayar" */}
-      <Dialog open={acceptModalOpen} handler={setAcceptModalOpen}>
-        <DialogHeader>Konfirmasi Telat Bayar</DialogHeader>
-        <DialogBody>
-          Apakah anda yakin menyatakan pesanan ini Telat Dibayar?
-        </DialogBody>
-        <DialogFooter>
-          <Button variant="text" color="red" onClick={() => setAcceptModalOpen(false)}>
-            Cancel
-          </Button>
-          <Button variant="gradient" color="green" onClick={handleConfirmTelatBayar}>
-            Confirm
-          </Button>
-        </DialogFooter>
-      </Dialog>
     </Card>
   );
 };
 
-const TransactionCard = ({
-  groupKey,
-  items,
-  setCurrentTransactionId,
-  setAcceptModalOpen
-}) => {
+const TransactionCard = ({ groupKey, items }) => {
   const [expanded, setExpanded] = useState(false);
   const firstItem = items[0];
 
@@ -251,7 +172,11 @@ const TransactionCard = ({
             size="sm"
             variant="ghost"
             value={firstItem.status}
-            color={firstItem.status === "Sudah Dibayar" ? "green" : "red"}
+            color={
+              firstItem.status === "Sudah Dibayar"
+                ? "green"
+                : "red"
+            }
           />
         </Typography>
       </div>
@@ -265,15 +190,11 @@ const TransactionCard = ({
             />
           </div>
           <div className="col-span-3">
-            <div className="flex items-center">
+          <div className="flex items-center">
               <Typography variant="h5" color="blue-gray" className="mb-2 mr-3">
                 {item.produk.nama}
               </Typography>
-              <Typography
-                variant="paragraph"
-                color="blue-gray"
-                className="mb-2 mr-2"
-              >
+              <Typography variant="paragraph" color="blue-gray" className="mb-2 mr-2">
                 x {item.produk.jumlahProduk}
               </Typography>
               <Typography variant="paragraph" color="gray" className="mb-2">
@@ -291,12 +212,12 @@ const TransactionCard = ({
                   item.produk.kategori === "Cake"
                     ? "green"
                     : item.produk.kategori === "Roti"
-                    ? "amber"
-                    : item.produk.kategori === "Minuman"
-                    ? "blue"
-                    : item.produk.kategori === "Titipan"
-                    ? "purple"
-                    : "red"
+                      ? "amber"
+                      : item.produk.kategori === "Minuman"
+                        ? "blue"
+                        : item.produk.kategori === "Titipan"
+                          ? "purple"
+                          : "red"
                 }
               />
             </div>
@@ -323,46 +244,52 @@ const TransactionCard = ({
             {expanded ? "Lihat Lebih Sedikit" : "Lihat Lebih Banyak"}
           </Button>
         </div>
-        <div className="mt-4">
-          <Typography
-            variant="paragraph"
-            color="blue-gray"
-            className="mb-2 ml-auto"
-          >
-            Ongkos Kirim: Rp {firstItem.ongkir}
-          </Typography>
-          <Typography variant="h6" color="black" className="mb-2 ml-auto">
-            Total Belanja: Rp {firstItem.total + firstItem.ongkir}
-          </Typography>
+        <div>
+          <div className="mt-4 flex justify-end">
+            <div>
+              <Typography
+                variant="paragraph"
+                color="blue-gray"
+                className="mb-2"
+              >
+                Ongkos Kirim: Rp {firstItem.ongkir}
+              </Typography>
+            </div>
+          </div>
+          <div className="grid grid-cols-2">
+            <Typography variant="h6" color="black" className="mb-2">
+              Total Belanja: Rp {firstItem.total}
+              <span className="ml-3">||</span>
+            </Typography>
+            <Typography variant="h6" color="black" className="mb-2 justify-end">
+              Total Pembayaran: Rp {firstItem.total + firstItem.ongkir}
+            </Typography>
+          </div>
         </div>
       </div>
+
       <div className="flex justify-end items-center mt-4">
-        {firstItem.status === "Sudah Dibayar" && (
-          <div className="flex justify-end items-center mt-4 gap-4">
-            {/* <Button
-              variant="filled"
-              size="sm"
-              color="red"
-              onClick={() => {
-                setCurrentTransactionId(groupKey); // Set the current transaction ID
-                setAcceptModalOpen(true); // Open the accept modal
-              }}
-            >
-              Telat Bayar
-            </Button> */}
-            <Link to={`/admin/konfirmasi/add/${groupKey}`}>
-              <Button variant="filled" size="sm" color="blue">
-                Konfirmasi
-              </Button>
-            </Link>
-          </div>
+        {/* Jika jenis pengiriman adalah 'antar', tampilkan tombol "Kirim Pesanan" */}
+        {firstItem.statusPengiriman === "Diantar" ? (
+          <Link to={`/admin/konfirmasi/add/${groupKey}`}>
+            <Button variant="filled" size="sm" color="blue">
+              Kirim Pesanan
+            </Button>
+          </Link>
+        ) : (
+          // Jika jenis pengiriman adalah 'pickup', tampilkan tombol "Selesai"
+          <Link to={`/admin/konfirmasi/add/${groupKey}`}>
+            <Button variant="filled" size="sm" color="green">
+              Siap Di Pickup
+            </Button>
+          </Link>
         )}
       </div>
     </div>
   );
 };
 
-export default ReadKonfirmasiPembayaran;
+export default ReadPesananDiproses;
 
 function groupBy(array, key) {
   return array.reduce((result, currentValue) => {

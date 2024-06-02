@@ -6,7 +6,7 @@ const websiteViewsChart = {
   series: [
     {
       name: "Views",
-      data: [50, 20, 10, 22, 50, 10, 40],
+      data: [100, 20, 10, 22, 50, 10, 40],
     },
   ],
   options: {
@@ -104,27 +104,285 @@ const completedTasksChart = {
   ],
 };
 
+const penjualanBulananChart = {
+  type: "line",
+  height: 220,
+  series: [
+    {
+      name: "Penjualan",
+      data: [50, 40, 300, 320, 500, 350, 200, 230, 500],
+    },
+  ],
+  options: {
+    ...chartsConfig,
+    colors: ["#388e3c"],
+    stroke: {
+      lineCap: "round",
+    },
+    markers: {
+      size: 5,
+    },
+    xaxis: {
+      ...chartsConfig.xaxis,
+      categories: [
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ],
+    },
+  },
+};
+const penjualanBulanansChart = {
+  ...penjualanBulananChart,
+  series: [
+    {
+      name: "Penjualan",
+      data: [50, 402, 300, 220, 500, 250, 400, 230, 500],
+    },
+  ],
+};
+
+const PenjualanProdukChart = {
+  type: "bar",
+  height: 220,
+  series: [
+    {
+      name: "Views",
+      data: [100, 20, 100, 22, 50, 10, 40],
+    },
+  ],
+  options: {
+    ...chartsConfig,
+    colors: "#388e3c",
+    plotOptions: {
+      bar: {
+        columnWidth: "16%",
+        borderRadius: 5,
+      },
+    },
+    xaxis: {
+      ...chartsConfig.xaxis,
+      categories: ["M", "T", "W", "T", "F", "S", "S"],
+    },
+  },
+};
+const stokBahanBakuChart = {
+  type: "bar",
+  height: 220,
+  series: [
+    {
+      name: "Views",
+      data: [100, 20, 100, 22, 50, 10, 40],
+    },
+  ],
+  options: {
+    ...chartsConfig,
+    colors: "#388e3c",
+    plotOptions: {
+      bar: {
+        columnWidth: "16%",
+        borderRadius: 5,
+      },
+    },
+    xaxis: {
+      ...chartsConfig.xaxis,
+      categories: ["M", "T", "W", "T", "F", "S", "S"],
+    },
+  },
+};
+const penggunaanBahanBakuChart = {
+  type: "bar",
+  height: 220,
+  series: [
+    {
+      name: "Views",
+      data: [100, 20, 100, 22, 50, 10, 40],
+    },
+  ],
+  options: {
+    ...chartsConfig,
+    colors: "#388e3c",
+    plotOptions: {
+      bar: {
+        columnWidth: "16%",
+        borderRadius: 5,
+      },
+    },
+    xaxis: {
+      ...chartsConfig.xaxis,
+      categories: ["M", "T", "W", "T", "F", "S", "S"],
+    },
+  },
+};
+
+const presensiChart = {
+  type: "line",
+  height: 220,
+  series: [
+    {
+      name: "Sales",
+      data: [50, 40, 300, 320, 500, 350, 200, 230, 500],
+    },
+  ],
+  options: {
+    ...chartsConfig,
+    colors: ["#388e3c"],
+    stroke: {
+      lineCap: "round",
+    },
+    markers: {
+      size: 5,
+    },
+    xaxis: {
+      ...chartsConfig.xaxis,
+      categories: [
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ],
+    },
+  },
+};
+const presensisChart = {
+  ...presensiChart,
+  series: [
+    {
+      name: "Tasks",
+      data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
+    },
+  ],
+};
+
+const pemasukanChart = {
+  type: "line",
+  height: 220,
+  series: [
+    {
+      name: "Sales",
+      data: [50, 40, 300, 320, 500, 350, 200, 230, 500],
+    },
+  ],
+  options: {
+    ...chartsConfig,
+    colors: ["#0288d1"],
+    stroke: {
+      lineCap: "round",
+    },
+    markers: {
+      size: 5,
+    },
+    xaxis: {
+      ...chartsConfig.xaxis,
+      categories: [
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ],
+    },
+  },
+};
+const penitipChart = {
+  type: "line",
+  height: 220,
+  series: [
+    {
+      name: "Sales",
+      data: [50, 40, 300, 320, 500, 350, 200, 230, 500],
+    },
+  ],
+  options: {
+    ...chartsConfig,
+    colors: ["#0288d1"],
+    stroke: {
+      lineCap: "round",
+    },
+    markers: {
+      size: 5,
+    },
+    xaxis: {
+      ...chartsConfig.xaxis,
+      categories: [
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ],
+    },
+  },
+};
+
 export const statisticsChartsData = [
   {
     color: "white",
-    title: "Website View",
-    description: "Last Campaign Performance",
-    footer: "campaign sent 2 days ago",
-    chart: websiteViewsChart,
-  },
-  {
-    color: "white",
-    title: "Daily Sales",
-    description: "15% increase in today sales",
-    footer: "updated 4 min ago",
-    chart: dailySalesChart,
-  },
-  {
-    color: "white",
-    title: "Completed Tasks",
-    description: "Last Campaign Performance",
+    title: "Penjualan Bulanan",
+    description: "Laporan penjualan bulanan secara keseluruhan",
     footer: "just updated",
-    chart: completedTasksChart,
+    chart: penjualanBulanansChart,
+  },
+  {
+    color: "white",
+    title: "Penjualan Produk",
+    description: "Laporan penjualan bulanan per Produk",
+    footer: "campaign sent 2 days ago",
+    chart: PenjualanProdukChart,
+  },
+  {
+    color: "white",
+    title: "Stok Bahan Baku",
+    description: "Stok Bahan Baku",
+    footer: "updated 4 min ago",
+    chart: stokBahanBakuChart,
+  },
+  {
+    color: "white",
+    title: "Penggunaan Bahan Baku",
+    description: "Penggunaan Bahan Baku",
+    footer: "just updated",
+    chart: penggunaanBahanBakuChart,
+  },
+  {
+    color: "white",
+    title: "Presensi Pegawai",
+    description: "Laporan Presensi Pegawai",
+    footer: "campaign sent 2 days ago",
+    chart: presensisChart,
+  },
+  {
+    color: "white",
+    title: "Pemasukan Dan Pengeluaran",
+    description: "Laporan Pemasukan dan Pengeluaran",
+    footer: "updated 4 min ago",
+    chart: pemasukanChart,
+  },
+  {
+    color: "white",
+    title: "Transaksi Penitip",
+    description: "Transaksi Penitip",
+    footer: "updated 4 min ago",
+    chart: penitipChart,
   },
 ];
 

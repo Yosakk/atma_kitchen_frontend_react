@@ -296,7 +296,7 @@ const NavbarLogin = () => {
 
   return (
     <Navbar
-      className="mx-auto max-w-full border-none rounded-none px-4 py-2 fixed top-0 z-50 "
+      className="mx-auto max-w-full border-none rounded-none px-4 py-2 sticky top-0 z-50 "
       style={{ backgroundColor: "#232323" }}
     >
       <div className="flex items-center justify-between text-white">

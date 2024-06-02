@@ -33,6 +33,8 @@ const ReadPesananCustomer = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchValue, setSearchValue] = useState("");
+  const [currentTransactionId, setCurrentTransactionId] = useState(null); // New state to hold current transaction ID
+  const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false); // State for the accept modal
   const itemsPerPage = 5;
   const refresh = useRefresh(historyData);
 
@@ -119,7 +121,7 @@ const ReadPesananCustomer = () => {
           {Object.keys(groupedData)
             .slice(startIndex, endIndex)
             .map((groupKey, index) => (
-              <TransactionCard key={index} groupKey={groupKey} items={groupedData[groupKey]} />
+              <TransactionCard key={index} groupKey={groupKey} items={groupedData[groupKey]} setCurrentTransactionId={setCurrentTransactionId} setIsAcceptModalOpen={setIsAcceptModalOpen} />
             ))}
         </CardBody>
       )}
@@ -136,11 +138,31 @@ const ReadPesananCustomer = () => {
           </Button>
         </div>
       </CardFooter>
+
+      {/* Accept Modal */}
+      <Dialog open={isAcceptModalOpen} handler={() => setIsAcceptModalOpen(!isAcceptModalOpen)}>
+        <DialogHeader>Konfirmasi Telat Bayar</DialogHeader>
+        <DialogBody divider>
+          Apakah Anda yakin ingin menandai transaksi ini sebagai telat bayar?
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="text" color="red" onClick={() => setIsAcceptModalOpen(!isAcceptModalOpen)} className="mr-1">
+            Batalkan
+          </Button>
+          <Button variant="filled" color="green" onClick={() => {
+            // You can handle the action here
+            console.log("Transaksi Telat Bayar:", currentTransactionId);
+            setIsAcceptModalOpen(!isAcceptModalOpen);
+          }}>
+            Ya
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </Card>
   );
 };
 
-const TransactionCard = ({ groupKey, items }) => {
+const TransactionCard = ({ groupKey, items, setCurrentTransactionId, setIsAcceptModalOpen }) => {
   const [expanded, setExpanded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useReducer(formReducer, {});
@@ -265,7 +287,20 @@ const TransactionCard = ({ groupKey, items }) => {
           </Typography>
         </div>
       </div>
-      <div className="flex justify-end items-center mt-4">
+      <div className="flex justify-end items-center mt-4 gap-4 ">
+        {firstItem.status === "Belum Bayar" && (
+          <Button
+            variant="filled"
+            size="sm"
+            color="red"
+            onClick={() => {
+              setCurrentTransactionId(groupKey); // Set the current transaction ID
+              setIsAcceptModalOpen(true); // Open the accept modal
+            }}
+          >
+            Telat Bayar
+          </Button>
+        )}
         <Button variant="filled" size="sm" color="blue" onClick={toggleModal}>
           Input Jarak
         </Button>

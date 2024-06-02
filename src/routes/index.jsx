@@ -63,6 +63,10 @@ import CetakNota from "../pages/customer/CetakNota";
 import CheckoutPage from "../pages/customer/CheckoutPage";
 import PembayaranBerhasil from "../pages/customer/PembayaranBerhasil";
 import CetakNotaPDF from "../pages/customer/CetakNotaPDF";
+import ReadPemakaianBahanBaku from "../pages/mo/pencatatan/readPemakaianBahanBaku";
+import ReadPesananDiproses from "../pages/admin/pesanan/readPesananDiproses";
+import ReadPengajuanPenarikanSaldo from "../pages/admin/saldo/readPengajuanTarikSaldo";
+import ReadPenjualanBulanan from "../pages/laporan/readPenjualanBulanan";
 
 
 
@@ -156,6 +160,14 @@ const router = createBrowserRouter([
         path : "/admin/konfirmasi/add/:id",
         element : <AddKonfirmasiPembayaran />
       },
+      {
+        path : "/admin/pesananDiproses/read",
+        element : <ReadPesananDiproses />
+      },
+      {
+        path : "/admin/saldo/read",
+        element : <ReadPengajuanPenarikanSaldo />
+      },
       
       
     ]
@@ -227,6 +239,10 @@ const router = createBrowserRouter([
       {
         path : "/mo/konfirmasi/pesanan/read",
         element : <ReadKonfirmasiPesanan />
+      },
+      {
+        path : "/mo/pencatatanPemakaianBahanBaku/read",
+        element : <ReadPemakaianBahanBaku />
       },                    
       
     ]
@@ -322,6 +338,10 @@ const router = createBrowserRouter([
       {
         path: "/pembayaran/cetaknotaPDF/:id",
         element: <CetakNotaPDF />
+      },
+      {
+        path: "/penjualanBulanan",
+        element: <ReadPenjualanBulanan />
       },
     ],
   },

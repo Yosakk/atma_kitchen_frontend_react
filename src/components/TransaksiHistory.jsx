@@ -47,8 +47,20 @@ const TABS = [
     value: "Ditolak",
   },
   {
+    label: "Diproses",
+    value: "Diproses",
+  },
+  {
+    label: "Dikirim",
+    value: "Dikirim",
+  },
+  {
     label: "Selesai",
     value: "Selesai",
+  },
+  {
+    label: "Dibatalkan",
+    value: "Telat Bayar",
   },
 ];
 
@@ -75,6 +87,7 @@ const TransaksiHistory = () => {
         tanggal: item.transaksi.tanggal_transaksi,
         tanggalAmbil: item.transaksi.tanggal_pengambilan,
         status: item.transaksi.status_transaksi,
+        jenisPengiriman: item.transaksi.jenis_pengiriman,
         produk: {
           nama:
             (item.id_produk ? item.produk.nama_produk : null) ||
@@ -132,7 +145,7 @@ const TransaksiHistory = () => {
           (item) =>
             item.status === selectedTab &&
             item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
-        );
+        ); 
 
   const groupedData = groupBy(filteredData, "id");
   const totalPages = Math.ceil(Object.keys(groupedData).length / itemsPerPage);
@@ -150,8 +163,8 @@ const TransaksiHistory = () => {
             </Typography>
           </div>
         </div>
-        <div className="flex flex-col items-center justify-between gap-4 md:flex-row ">
-          <Tabs value={selectedTab} className="w-full overflow-x-auto">
+        <div className="flex items-center gap-4 md:flex-row">
+          <Tabs value={selectedTab} className="w-full overflow-x-auto mb-10 md:flex-col">
             <TabsHeader>
               {TABS.map(({ label, value }) => (
                 <Tab
@@ -165,7 +178,9 @@ const TransaksiHistory = () => {
               ))}
             </TabsHeader>
           </Tabs>
-          <div className="w-full md:w-72">
+        </div>
+        
+          <div className="w-full md:w-72 flex justify-end">
             <Input
               label="Search"
               icon={<MagnifyingGlassIcon className="h-5 w-5" />}
@@ -173,7 +188,6 @@ const TransaksiHistory = () => {
               onChange={(e) => setSearchValue(e.target.value)}
             />
           </div>
-        </div>
       </CardHeader>
 
       {!isLoading && (
@@ -243,21 +257,18 @@ const TransactionCard = ({ groupKey, items }) => {
           <Chip
             size="sm"
             variant="ghost"
-            value={firstItem.status}
+            value={firstItem.status === "Dikirim" ? 
+              (firstItem.jenisPengiriman === "Pickup" ? "Pickup" : "Diantar")
+              : firstItem.status
+            }
             color={
-              firstItem.status === "Selesai"
-                ? "green"
-                : firstItem.status === "Ditolak"
-                ? "amber"
-                : firstItem.status === "Diterima"
-                ? "blue"
-                : firstItem.status === "-"
-                ? "purple"
-                : firstItem.status === "Belum Dibayar"
-                ? "purple"
-                : firstItem.status === "Sudah Dibayar"
-                ? "lightBlue"
-                : "red"
+              firstItem.status === "Selesai" ? "green" :
+              firstItem.status === "Ditolak" ? "amber" :
+              firstItem.status === "Diterima" ? "blue" :
+              firstItem.status === "-" ? "purple" :
+              firstItem.status === "Belum Dibayar" ? "purple" :
+              firstItem.status === "Sudah Dibayar" ? "lightBlue" :
+              "red"
             }
           />
         </Typography>
@@ -352,6 +363,8 @@ const TransactionCard = ({ groupKey, items }) => {
         </div>
       )}
       {firstItem.status !== "Belum Dibayar" &&
+      firstItem.status !== "Ditolak" &&
+      firstItem.status !== "Telat Bayar" &&
         firstItem.status !== "-" && (
           <div className="flex justify-end items-center mt-4">
             <Link to={`/nota/${groupKey}`}>
@@ -359,6 +372,15 @@ const TransactionCard = ({ groupKey, items }) => {
                 Cetak Nota
               </Button>
             </Link>
+          </div>
+        )}
+        {firstItem.status === "Dikirim" && (
+          <div className="flex justify-end items-center mt-4">
+            {/* <Link to={`/nota/${groupKey}`}> */}
+              <Button variant="filled" color="blue">
+                Selesai
+              </Button>
+            {/* </Link> */}
           </div>
         )}
 

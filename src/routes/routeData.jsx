@@ -13,6 +13,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBox } from "@fortawesome/free-solid-svg-icons";
+import { BanknotesIcon } from "@heroicons/react/24/outline";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -133,6 +134,35 @@ export const routes = [
             icon: <RectangleStackIcon {...icon} />,
             name: "read Konfirmasi",
             path: "/admin/konfirmasi/read",
+          },
+        ],
+      },
+      {
+        icon: <ClipboardDocumentListIcon {...icon} />,
+        name: "Pesanan Diproses",
+        path: "/admin/pesananDiproses/read",
+        pages: [
+          {
+            icon: <RectangleStackIcon {...icon} />,
+            name: "Pesanan Diproses",
+            path: "/admin/pesananDiproses/read",
+          },
+        ],
+      },
+      {
+        icon: <BanknotesIcon {...icon} />,
+        name: "Penarikan Saldo",
+        path: "/admin/saldo/read",
+        pages: [
+          {
+            icon: <RectangleStackIcon {...icon} />,
+            name: "readsaldo",
+            path: "/admin/saldo/add",
+          },
+          {
+            icon: <RectangleStackIcon {...icon} />,
+            name: "editsaldo",
+            path: "/admin/saldo/edit",
           },
         ],
       },

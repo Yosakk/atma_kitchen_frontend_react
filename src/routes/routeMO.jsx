@@ -11,7 +11,7 @@ import {
   ClipboardDocumentListIcon,
 } from "@heroicons/react/24/solid";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBox, faUserTie } from '@fortawesome/free-solid-svg-icons';
+import { faBasketShopping, faBox, faUserTie } from '@fortawesome/free-solid-svg-icons';
 
   const icon = {
     className: "w-5 h-5 text-inherit",
@@ -62,7 +62,7 @@ import { faBox, faUserTie } from '@fortawesome/free-solid-svg-icons';
           ],
         },
         {
-          icon: <FontAwesomeIcon icon={faBox} {...icon} />,
+          icon: <FontAwesomeIcon icon={faBasketShopping} {...icon} />,
           name: "Pembelian Bahan Baku",
           path: "/mo/pencatatanPembelianBahanBaku/read",
           pages: [
@@ -75,6 +75,23 @@ import { faBox, faUserTie } from '@fortawesome/free-solid-svg-icons';
               icon: <RectangleStackIcon {...icon} />,
               name: "editpencatatanPembelianBahanBaku",
               path: "/mo/pencatatanPembelianBahanBaku/edit",
+            },
+          ],
+        },
+        {
+          icon: <FontAwesomeIcon icon={faBox} {...icon} />,
+          name: "Pemakaian Bahan Baku",
+          path: "/mo/pencatatanPemakaianBahanBaku/read",
+          pages: [
+            {
+              icon: <RectangleStackIcon {...icon} />,
+              name: "addPencatatanPemakaianBahanBaku",
+              path: "/mo/pencatatanPemakaianBahanBaku/add",
+            },
+            {
+              icon: <RectangleStackIcon {...icon} />,
+              name: "editPencatatanPemakaianBahanBaku",
+              path: "/mo/pencatatanPemakaianBahanBaku/edit",
             },
           ],
         },

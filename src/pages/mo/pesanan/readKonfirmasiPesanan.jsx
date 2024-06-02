@@ -12,18 +12,36 @@ import {
   DialogHeader,
   DialogBody,
   DialogFooter,
+  Tabs,
+  Tab,
+  TabsHeader,
+  Checkbox,
 } from "@material-tailwind/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { useParams, Link } from "react-router-dom";
-import { showAllTransaksiHistoryCustomer, editStatusTransaksiMO } from "../../../api/customer/TransaksiApi";
+import { useParams } from "react-router-dom";
+import {
+  showAllTransaksiHistoryCustomer,
+  editStatusTransaksiMO,
+} from "../../../api/customer/TransaksiApi";
 import { getImage } from "../../../api";
-import AlertAnimation from '../../../assets/images/AlertAnimation.json';
-import Lottie from 'lottie-react';
+import AlertAnimation from "../../../assets/images/AlertAnimation.json";
+import Lottie from "lottie-react";
+
+const TABS = [
+  {
+    label: "Valid",
+    value: "Pembayaran Valid",
+  },
+  {
+    label: "Diterima",
+    value: "Diterima",
+  },
+];
 
 const ReadKonfirmasiPesanan = () => {
   let { id } = useParams();
   console.log("masuk history", id);
-
+  const [selectedTab, setSelectedTab] = useState("Pembayaran Valid");
   const [historyData, setHistoryData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,6 +50,10 @@ const ReadKonfirmasiPesanan = () => {
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [currentTransactionId, setCurrentTransactionId] = useState(null);
   const [acceptError, setAcceptError] = useState("");
+  const [prosesError, setProsesError] = useState("");
+  const [prosesModalOpen, setProsesModalOpen] = useState(false);
+  const [selectedTransactions, setSelectedTransactions] = useState([]);
+
   const itemsPerPage = 5;
 
   const fetchData = async () => {
@@ -39,7 +61,8 @@ const ReadKonfirmasiPesanan = () => {
       console.log("masuk fetch", id);
       const response = await showAllTransaksiHistoryCustomer();
       const filteredData = response.data.filter(
-        (item) => item.transaksi.status_transaksi === "Pembayaran Valid"
+        (item) =>
+          item.transaksi && item.transaksi.status_transaksi === selectedTab
       );
       const mappedData = filteredData.map((item) => ({
         id: item.transaksi.id_transaksi,
@@ -48,13 +71,30 @@ const ReadKonfirmasiPesanan = () => {
         tanggalAmbil: item.transaksi.tanggal_pengambilan,
         status: item.transaksi.status_transaksi,
         produk: {
-          nama: (item.id_produk ? item.produk.nama_produk : null) || (item.id_produk_hampers ? item.produk_hampers.nama_produk_hampers : "Produk Tidak Ditemukan"),
-          jumlahProduk: (item.jumlah_produk) || (item.jumlah_produk_hampers),
-          deskripsi: (item.produk ? item.produk.deskripsi_produk : null) || (item.produk_hampers ? item.produk_hampers.deskripsi_produk_hampers : null),
-          kategori: (item.produk ? item.produk.kategori_produk : null) || ("Hampers"),
-          gambar: (item.produk ? item.produk.gambar_produk : null) || (item.produk_hampers ? item.produk_hampers.gambar_produk_hampers : null),
-          harga: (item.produk ? item.produk.harga_produk : null) || (item.produk_hampers ? item.produk_hampers.harga_produk_hampers : null),
-          jenisProduk: item.jenis_produk
+          nama:
+            (item.id_produk ? item.produk.nama_produk : null) ||
+            (item.id_produk_hampers
+              ? item.produk_hampers.nama_produk_hampers
+              : "Produk Tidak Ditemukan"),
+          jumlahProduk: item.jumlah_produk || item.jumlah_produk_hampers,
+          deskripsi:
+            (item.produk ? item.produk.deskripsi_produk : null) ||
+            (item.produk_hampers
+              ? item.produk_hampers.deskripsi_produk_hampers
+              : null),
+          kategori:
+            (item.produk ? item.produk.kategori_produk : null) || "Hampers",
+          gambar:
+            (item.produk ? item.produk.gambar_produk : null) ||
+            (item.produk_hampers
+              ? item.produk_hampers.gambar_produk_hampers
+              : null),
+          harga:
+            (item.produk ? item.produk.harga_produk : null) ||
+            (item.produk_hampers
+              ? item.produk_hampers.harga_produk_hampers
+              : null),
+          jenisProduk: item.jenis_produk,
         },
         ongkir: item.transaksi.biaya_pengiriman,
         total: item.transaksi.total_pembayaran,
@@ -69,7 +109,7 @@ const ReadKonfirmasiPesanan = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [selectedTab]);
 
   const handleClickPrevious = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
@@ -90,7 +130,9 @@ const ReadKonfirmasiPesanan = () => {
   const totalPages = Math.ceil(Object.keys(groupedData).length / itemsPerPage);
 
   const handleAccept = () => {
-    editStatusTransaksiMO(currentTransactionId, { status_transaksi: "Diterima" })
+    editStatusTransaksiMO(currentTransactionId, {
+      status_transaksi: "Diterima",
+    })
       .then((res) => {
         console.log(res);
         setAcceptModalOpen(false);
@@ -112,7 +154,9 @@ const ReadKonfirmasiPesanan = () => {
               <Typography variant="paragraph">
                 {bahan_baku_kurang.map((bb, index) => (
                   <div key={index} className="ml-3">
-                    {`${index + 1}. ${bb.nama_bahan} (Diminta: ${bb.jumlah_diminta}, Stok: ${bb.stok_tercukupi})`}
+                    {`${index + 1}. ${bb.nama_bahan} (Diminta: ${
+                      bb.jumlah_diminta
+                    }, Stok: ${bb.stok_tercukupi})`}
                   </div>
                 ))}
               </Typography>
@@ -135,6 +179,25 @@ const ReadKonfirmasiPesanan = () => {
         console.error("Error updating transaction status:", error);
       });
   };
+  const handleProses = () => {
+    // logic proses
+  };
+  const handleCheckboxChange = (e, transactionId) => {
+    const { checked } = e.target;
+    if (checked) {
+      setSelectedTransactions((prevSelected) => [
+        ...prevSelected,
+        transactionId,
+      ]);
+    } else {
+      setSelectedTransactions((prevSelected) =>
+        prevSelected.filter((id) => id !== transactionId)
+      );
+    }
+  };
+  const handleAcceptSelectedTransactions = () => {
+    console.log("ID transaksi yang dipilih:", selectedTransactions);
+  };
 
   return (
     <Card className="h-full w-full">
@@ -146,13 +209,47 @@ const ReadKonfirmasiPesanan = () => {
             </Typography>
           </div>
         </div>
-        <div className="w-full md:w-72">
-          <Input
-            label="Search"
-            icon={<MagnifyingGlassIcon className="h-5 w-5" />}
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
+        <div className="mb-8 flex items-center justify-between gap-8">
+          <Tabs value={selectedTab} className="w-full overflow-x-auto">
+            <TabsHeader>
+              {TABS.map(({ label, value }) => (
+                <Tab
+                  key={value}
+                  value={value}
+                  active={selectedTab === value}
+                  onClick={() => setSelectedTab(value)}
+                >
+                  &nbsp;&nbsp;&nbsp;{label}&nbsp;&nbsp;&nbsp;
+                </Tab>
+              ))}
+            </TabsHeader>
+          </Tabs>
+        </div>
+
+        <div className="mb-8 flex items-center gap-4">
+          <div className="relative">
+            <Input
+              label="Search"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+            <MagnifyingGlassIcon className="h-5 w-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
+          {selectedTab === "Diterima" && (
+            <Button
+              variant="filled"
+              size="sm"
+              color="blue"
+              onClick={() => {
+                // setCurrentTransactionId(groupKey); // Set the current transaction ID
+                setProsesModalOpen(true);
+                handleAcceptSelectedTransactions(); // Open the accept modal
+              }}
+              className="ml-auto"
+            >
+              Proses Transaksi
+            </Button>
+          )}
         </div>
       </CardHeader>
 
@@ -166,8 +263,11 @@ const ReadKonfirmasiPesanan = () => {
                 groupKey={groupKey}
                 items={groupedData[groupKey]}
                 setAcceptModalOpen={setAcceptModalOpen}
+                setProsesModalOpen={setProsesModalOpen}
                 setRejectModalOpen={setRejectModalOpen}
                 setCurrentTransactionId={setCurrentTransactionId}
+                selectedTransactions={selectedTransactions}
+                handleCheckboxChange={handleCheckboxChange}
               />
             ))}
         </CardBody>
@@ -211,7 +311,11 @@ const ReadKonfirmasiPesanan = () => {
           )}
         </DialogBody>
         <DialogFooter>
-          <Button color="red" className="mr-2" onClick={() => setAcceptModalOpen(false)}>
+          <Button
+            color="red"
+            className="mr-2"
+            onClick={() => setAcceptModalOpen(false)}
+          >
             Batal
           </Button>
           <Button color="blue" onClick={handleAccept}>
@@ -227,11 +331,13 @@ const ReadKonfirmasiPesanan = () => {
         className="w-[400px]"
       >
         <DialogHeader>Menolak Pesanan</DialogHeader>
-        <DialogBody>
-          Apakah Anda yakin ingin menolak pesanan ini?
-        </DialogBody>
+        <DialogBody>Apakah Anda yakin ingin menolak pesanan ini?</DialogBody>
         <DialogFooter>
-          <Button color="red" className="mr-2" onClick={() => setRejectModalOpen(false)}>
+          <Button
+            color="red"
+            className="mr-2"
+            onClick={() => setRejectModalOpen(false)}
+          >
             Batal
           </Button>
           <Button color="blue" onClick={handleReject}>
@@ -239,11 +345,47 @@ const ReadKonfirmasiPesanan = () => {
           </Button>
         </DialogFooter>
       </Dialog>
+      {/* Modal untuk memproses pesanan */}
+      <Dialog
+        open={prosesModalOpen}
+        onClose={() => setProsesModalOpen(false)}
+        className="w-[400px]"
+      >
+        <DialogHeader>Melakukan Proses Pesanan</DialogHeader>
+        <DialogBody>
+          {prosesError ? (
+            <Typography color="red">{prosesError}</Typography>
+          ) : (
+            "Apakah Anda yakin ingin Memproses pesanan ini?"
+          )}
+        </DialogBody>
+        <DialogFooter>
+          <Button
+            color="red"
+            className="mr-2"
+            onClick={() => setProsesModalOpen(false)}
+          >
+            Batal
+          </Button>
+          <Button color="blue" onClick={handleProses}>
+            Proses
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </Card>
   );
 };
 
-const TransactionCard = ({ groupKey, items, setAcceptModalOpen, setRejectModalOpen, setCurrentTransactionId }) => {
+const TransactionCard = ({
+  groupKey,
+  items,
+  setAcceptModalOpen,
+  setProsesModalOpen,
+  setRejectModalOpen,
+  setCurrentTransactionId,
+  selectedTransactions,
+  handleCheckboxChange,
+}) => {
   const [expanded, setExpanded] = useState(false);
   const firstItem = items[0];
 
@@ -251,9 +393,16 @@ const TransactionCard = ({ groupKey, items, setAcceptModalOpen, setRejectModalOp
     return isNaN(value) ? 0 : Number(value);
   };
 
-
   return (
     <div className="border p-3 rounded-lg mb-4">
+      {firstItem.status === "Diterima" && (
+        <div className="flex justify-end items-center mt-4">
+          <Checkbox
+            checked={selectedTransactions.includes(groupKey)}
+            onChange={(e) => handleCheckboxChange(e, groupKey)}
+          />
+        </div>
+      )}
       <div className="flex justify-between">
         <Typography variant="h6" color="black" className="mb-4">
           ID Transaksi: {groupKey}
@@ -276,16 +425,12 @@ const TransactionCard = ({ groupKey, items, setAcceptModalOpen, setRejectModalOp
             size="sm"
             variant="ghost"
             value={firstItem.status}
-            color={
-              firstItem.status === "Pembayaran Valid"
-                ? "teal"
-                : "red"
-            }
+            color={firstItem.status === "Pembayaran Valid" ? "teal" : "red"}
           />
         </Typography>
       </div>
+      
       {items.slice(0, expanded ? items.length : 1).map((item, idx) => (
-
         <div key={idx} className="grid grid-cols-6 border-b border-t pt-4 pb-4">
           <div className="mx-auto col-span-3 md:col-span-1 flex justify-center items-center">
             <img
@@ -299,7 +444,11 @@ const TransactionCard = ({ groupKey, items, setAcceptModalOpen, setRejectModalOp
               <Typography variant="h5" color="blue-gray" className="mb-2 mr-3">
                 {item.produk.nama}
               </Typography>
-              <Typography variant="paragraph" color="blue-gray" className="mb-2 mr-2">
+              <Typography
+                variant="paragraph"
+                color="blue-gray"
+                className="mb-2 mr-2"
+              >
                 x {item.produk.jumlahProduk}
               </Typography>
               <Typography variant="paragraph" color="gray" className="mb-2">
@@ -316,12 +465,12 @@ const TransactionCard = ({ groupKey, items, setAcceptModalOpen, setRejectModalOp
                   item.produk.kategori === "Cake"
                     ? "green"
                     : item.produk.kategori === "Roti"
-                      ? "amber"
-                      : item.produk.kategori === "Minuman"
-                        ? "blue"
-                        : item.produk.kategori === "Titipan"
-                          ? "purple"
-                          : "red"
+                    ? "amber"
+                    : item.produk.kategori === "Minuman"
+                    ? "blue"
+                    : item.produk.kategori === "Titipan"
+                    ? "purple"
+                    : "red"
                 }
               />
             </div>
@@ -351,15 +500,19 @@ const TransactionCard = ({ groupKey, items, setAcceptModalOpen, setRejectModalOp
         <div>
           <div className="mt-4 flex justify-end">
             <div>
-              <Typography variant="paragraph" color="blue-gray" className="mb-2">
+              <Typography
+                variant="paragraph"
+                color="blue-gray"
+                className="mb-2"
+              >
                 Ongkos Kirim: Rp {firstItem.ongkir}
               </Typography>
             </div>
-
           </div>
           <div className="grid grid-cols-2">
             <Typography variant="h6" color="black" className="mb-2">
-              Total Belanja: Rp {firstItem.total} <span className="ml-3">||</span>
+              Total Belanja: Rp {firstItem.total}{" "}
+              <span className="ml-3">||</span>
             </Typography>
             <Typography variant="h6" color="black" className="mb-2 justify-end">
               Total Pembayaran: Rp {firstItem.total + firstItem.ongkir}
@@ -367,33 +520,35 @@ const TransactionCard = ({ groupKey, items, setAcceptModalOpen, setRejectModalOp
           </div>
         </div>
       </div>
-      <div className="flex justify-end items-center mt-4">
-        <Button
-          variant="filled"
-          size="sm"
-          color="red"
-          className="mr-2"
-          onClick={() => {
-            setCurrentTransactionId(groupKey); // Set the current transaction ID
-            setRejectModalOpen(true); // Open the reject modal
-          }}
-        >
-          Tolak
-        </Button>
+      {firstItem.status === "Pembayaran Valid" && (
+        <div className="flex justify-end items-center mt-4">
+          <Button
+            variant="filled"
+            size="sm"
+            color="red"
+            className="mr-2"
+            onClick={() => {
+              setCurrentTransactionId(groupKey); // Set the current transaction ID
+              setRejectModalOpen(true); // Open the reject modal
+            }}
+          >
+            Tolak
+          </Button>
 
-        {/* Tombol "Terima" untuk membuka modal */}
-        <Button
-          variant="filled"
-          size="sm"
-          color="blue"
-          onClick={() => {
-            setCurrentTransactionId(groupKey); // Set the current transaction ID
-            setAcceptModalOpen(true); // Open the accept modal
-          }}
-        >
-          Terima
-        </Button>
-      </div>
+          {/* Tombol "Terima" untuk membuka modal */}
+          <Button
+            variant="filled"
+            size="sm"
+            color="blue"
+            onClick={() => {
+              setCurrentTransactionId(groupKey); // Set the current transaction ID
+              setAcceptModalOpen(true); // Open the accept modal
+            }}
+          >
+            Terima
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
