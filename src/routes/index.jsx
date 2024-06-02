@@ -67,6 +67,9 @@ import ReadPemakaianBahanBaku from "../pages/mo/pencatatan/readPemakaianBahanBak
 import ReadPesananDiproses from "../pages/admin/pesanan/readPesananDiproses";
 import ReadPengajuanPenarikanSaldo from "../pages/admin/saldo/readPengajuanTarikSaldo";
 import ReadPenjualanBulanan from "../pages/laporan/readPenjualanBulanan";
+import CetakPenjualanBulanan from "../pages/laporan/cetakPenjualanBulanan";
+import ReadPenjualanProduk from "../pages/laporan/readPenjualanProduk";
+import ReadPenggunaanBahanBaku from "../pages/laporan/readPenggunaanBahanBaku";
 
 
 
@@ -342,6 +345,18 @@ const router = createBrowserRouter([
       {
         path: "/penjualanBulanan",
         element: <ReadPenjualanBulanan />
+      },
+      // {
+      //   path: "/penjualanBulanan/view/:year",
+      //   element: <CetakPenjualanBulanan />
+      // },
+      {
+        path: "/penjualanProduk",
+        element: <ReadPenjualanProduk />
+      },
+      {
+        path: "/penggunaanBahanBaku",
+        element: <ReadPenggunaanBahanBaku />
       },
     ],
   },

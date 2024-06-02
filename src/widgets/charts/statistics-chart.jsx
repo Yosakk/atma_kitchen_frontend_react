@@ -26,7 +26,7 @@ export function StatisticsChart({ color, chart, title, description, footer }) {
           navigate("/stokBahanBaku");
           break;
         case "Penggunaan Bahan Baku":
-          navigate("/PenggunaanBahanBaku");
+          navigate("/penggunaanBahanBaku");
           break;
         case "Presensi Pegawai":
           navigate("/presensiPegawai");
@@ -52,7 +52,7 @@ export function StatisticsChart({ color, chart, title, description, footer }) {
         shadow={false}
         className="mb-4"
       >
-        <Chart {...chart} />
+        {/* <Chart {...chart} /> */}
       </CardHeader>
       <CardBody className="px-6 pt-0 pb-6">
         <Typography variant="h6" color="blue-gray" className="mb-2">

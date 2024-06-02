@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import ReactApexChart from 'react-apexcharts';
+import ReactApexChart from "react-apexcharts";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -12,11 +12,12 @@ import {
   Button,
 } from "@material-tailwind/react";
 import { PDFViewer, PDFDownloadLink } from "@react-pdf/renderer";
-import { generateLaporanBulanan } from "../../api/admin/LaporanApi";
-import CetakPenjualanBulanan from "../laporan/cetakPenjualanBulanan";
+import { generateLaporanBulananProduk } from "../../api/admin/LaporanApi";
+import CetakPenjualanBulananProduk from "./cetakPenjualanBulananProduk";
 
-const ReadPenjualanBulanan = () => {
+const ReadPenjualanProduk = () => {
   const [year, setYear] = useState(new Date().getFullYear());
+  const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [salesReport, setSalesReport] = useState([]);
   const [totalSales, setTotalSales] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,14 +25,19 @@ const ReadPenjualanBulanan = () => {
 
   useEffect(() => {
     fetchSalesReport();
-  }, [year]);
+  }, [year, month]);
 
   const fetchSalesReport = async () => {
     setIsLoading(true);
     try {
-      const response = await generateLaporanBulanan({ tahun: year });
-      setSalesReport(response.laporan_bulanan);
-      setTotalSales(response.total_akhir_penjualan);
+      const response = await generateLaporanBulananProduk({
+        tahun: year,
+        bulan: month,
+      });
+      const { laporan_bulanan_per_produk, total_penjualan_semua_produk } =
+        response;
+      setSalesReport(laporan_bulanan_per_produk);
+      setTotalSales(total_penjualan_semua_produk);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching sales report:", error);
@@ -47,9 +53,10 @@ const ReadPenjualanBulanan = () => {
   const handleClosePDFViewer = () => {
     setShowPDFViewer(false);
   };
+
   const chartOptions = {
     chart: {
-      type: 'line',
+      type: "line",
       height: 350,
       toolbar: {
         show: true,
@@ -61,55 +68,55 @@ const ReadPenjualanBulanan = () => {
           zoomout: true,
           pan: false,
           reset: true | '<img src="/static/icons/reset.png" width="20">',
-          customIcons: []
+          customIcons: [],
         },
-        autoSelected: 'zoom' 
+        autoSelected: "zoom",
       },
       animations: {
         enabled: true,
-        easing: 'easeinout',
+        easing: "easeinout",
         speed: 800,
         animateGradually: {
           enabled: true,
-          delay: 150
+          delay: 150,
         },
         dynamicAnimation: {
           enabled: true,
-          speed: 350
-        }
-      }
+          speed: 350,
+        },
+      },
     },
     dataLabels: {
-      enabled: false
+      enabled: false,
     },
     stroke: {
-      curve: 'straight',
+      curve: "straight",
       width: 2,
-      lineCap: 'round',
+      lineCap: "round",
     },
     fill: {
-      type: 'gradient',
+      type: "gradient",
       gradient: {
-        shade: 'dark',
-        gradientToColors: ['#FDD835', '#F44336'], // Anda dapat menyesuaikan warna gradient
+        shade: "dark",
+        gradientToColors: ["#FDD835", "#F44336"],
         shadeIntensity: 0.5,
-        type: 'horizontal',
+        type: "horizontal",
         opacityFrom: 0.7,
         opacityTo: 0.9,
-        stops: [0, 100]
-      }
+        stops: [0, 100],
+      },
     },
     markers: {
       size: 4,
-      colors: ['#FFC107'],
-      strokeColor: '#FFA000',
+      colors: ["#FFC107"],
+      strokeColor: "#FFA000",
       strokeWidth: 2,
       hover: {
         size: 7,
-      }
+      },
     },
     tooltip: {
-      theme: 'dark',
+      theme: "dark",
       y: {
         formatter: (value) => `Rp ${value.toLocaleString()}`,
         title: {
@@ -118,30 +125,47 @@ const ReadPenjualanBulanan = () => {
       },
     },
     xaxis: {
-      categories: salesReport.map(data => data.bulan),
-      type: 'category',
+      categories: salesReport.map((data) => data.nama),
+      type: "category",
       labels: {
         rotate: -45,
         rotateAlways: true,
-      }
+      },
     },
     yaxis: {
       title: {
-        text: 'Total Penjualan (Rp)',
-      }
+        text: "Total Penjualan (Rp)",
+      },
     },
     colors: ["#388e3c"],
   };
-  
-  const series = [{
-    name: 'Penjualan',
-    data: salesReport.map(data => data.total_penjualan)
-  }];
-  
+
+  const series = [
+    {
+      name: "Penjualan",
+      data: salesReport.map((data) => data.total_penjualan),
+    },
+  ];
+  const getMonthName = (month) => {
+    const monthNames = [
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
+    ];
+    return monthNames[month - 1];
+  };
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
-      
       <Card>
         <CardHeader
           variant="gradient"
@@ -149,9 +173,9 @@ const ReadPenjualanBulanan = () => {
           className="mb-8 p-6 flex justify-between items-center"
         >
           <Typography variant="h6" color="white">
-            Laporan Penjualan Bulanan
+            Laporan Penjualan Bulanan Produk
           </Typography>
-          <div className="flex items-center">
+          <div className="flex items-center gap-4">
             <Input
               type="number"
               color="white"
@@ -161,6 +185,15 @@ const ReadPenjualanBulanan = () => {
               placeholder="Year"
               label="Tahun"
             />
+            <Input
+              type="number"
+              color="white"
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+              className="mr-4"
+              placeholder="Month"
+              label="Bulan"
+            />
           </div>
         </CardHeader>
         <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
@@ -168,8 +201,13 @@ const ReadPenjualanBulanan = () => {
             <Typography className="text-center">Loading...</Typography>
           ) : (
             <>
-            <div className="my-4">
-                <ReactApexChart options={chartOptions} series={series} type="line" height={350} />
+              <div className="my-4">
+                <ReactApexChart
+                  options={chartOptions}
+                  series={series}
+                  type="line"
+                  height={350}
+                />
               </div>
               <div className="flex flex-col md:flex-row justify-end items-center gap-4 p-4">
                 <Button
@@ -195,13 +233,14 @@ const ReadPenjualanBulanan = () => {
                 >
                   <PDFDownloadLink
                     document={
-                      <CetakPenjualanBulanan
+                      <CetakPenjualanBulananProduk
                         year={year}
+                        month={month}
                         salesReport={salesReport}
                         totalSales={totalSales}
                       />
                     }
-                    fileName={`Laporan_Penjualan_Bulanan_${year}.pdf`}
+                    fileName={`Laporan_Penjualan_Bulanan_Produk_${getMonthName(month)}_${year}.pdf`}
                   >
                     {({ loading }) =>
                       loading ? "Loading document..." : "Download PDF"
@@ -226,8 +265,9 @@ const ReadPenjualanBulanan = () => {
                     </Button>
                   </div>
                   <PDFViewer width="100%" height="600px">
-                    <CetakPenjualanBulanan
+                    <CetakPenjualanBulananProduk
                       year={year}
+                      month={month}
                       salesReport={salesReport}
                       totalSales={totalSales}
                     />
@@ -237,7 +277,7 @@ const ReadPenjualanBulanan = () => {
                 <table className="w-full min-w-[640px] table-auto mt-4">
                   <thead>
                     <tr>
-                      {["Bulan", "Total Transaksi", "Total Penjualan"].map(
+                      {["Nama Produk", "Total Jumlah", "Total Penjualan"].map(
                         (el) => (
                           <th
                             key={el}
@@ -266,7 +306,7 @@ const ReadPenjualanBulanan = () => {
                       </tr>
                     ) : (
                       salesReport.map(
-                        ({ bulan, total_transaksi, total_penjualan }, key) => {
+                        ({ nama, total_jumlah, total_penjualan }, key) => {
                           const className = `py-3 px-5 ${
                             key === salesReport.length - 1
                               ? ""
@@ -274,18 +314,18 @@ const ReadPenjualanBulanan = () => {
                           }`;
 
                           return (
-                            <tr key={bulan}>
+                            <tr key={nama}>
                               <td className={className}>
                                 <Typography
                                   variant="small"
                                   className="text-[11px] font-semibold text-blue-gray-600"
                                 >
-                                  {bulan}
+                                  {nama}
                                 </Typography>
                               </td>
                               <td className={className}>
                                 <Typography className="text-xs font-semibold text-blue-gray-600">
-                                  {total_transaksi}
+                                  {total_jumlah}
                                 </Typography>
                               </td>
                               <td className={className}>
@@ -303,12 +343,10 @@ const ReadPenjualanBulanan = () => {
               )}
               <div className="mt-4">
                 <Typography className="text-right text-lg font-semibold ml-auto mr-10">
-                  Total Penjualan Tahun {year}:{" "}
+                  Total Penjualan Bulan {getMonthName(month)} Tahun {year} : {" "}
                   {totalSales.toLocaleString("id-ID")}
                 </Typography>
               </div>
-
-              
             </>
           )}
         </CardBody>
@@ -318,4 +356,4 @@ const ReadPenjualanBulanan = () => {
   );
 };
 
-export default ReadPenjualanBulanan;
+export default ReadPenjualanProduk;
