@@ -164,7 +164,7 @@ const ReadPenjualanProduk = () => {
   };
 
   return (
-    <div className="mt-12 mb-8 flex flex-col gap-12">
+    <div className="mt-12 mb-8 flex flex-col gap-12 mr-10 ml-10">
       <Card>
         <CardHeader
           variant="gradient"
@@ -206,6 +206,7 @@ const ReadPenjualanProduk = () => {
                   series={series}
                   type="bar"
                   height={350}
+                  className="mr-10 ml-10"
                 />
               </div>
               <div className="flex flex-col md:flex-row justify-end items-center gap-4 p-4">

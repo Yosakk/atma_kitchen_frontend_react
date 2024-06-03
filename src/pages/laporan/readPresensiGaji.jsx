@@ -125,7 +125,7 @@ const ReadPresensiGaji = () => {
   ];
 
   return (
-    <div className="mt-12 mb-8 flex flex-col gap-12">
+    <div className="mt-12 mb-8 flex flex-col gap-12 mr-10 ml-10">
       <Card>
         <CardHeader
           variant="gradient"
@@ -235,6 +235,7 @@ const ReadPresensiGaji = () => {
                       series={series}
                       type="bar"
                       height={350}
+                      className="mr-10 ml-10"
                     />
                   </div>
                   <table className="w-full min-w-[640px] table-auto mt-4">

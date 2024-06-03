@@ -128,7 +128,7 @@ const chartOptions = {
 
 
   return (
-    <div className="mt-12 mb-8 flex flex-col gap-12 mx-10">
+    <div className="mt-12 mb-8 flex flex-col gap-12 mx-10 mr-10 ml-10">
       <Card>
         <CardHeader
           variant="gradient"
@@ -234,7 +234,7 @@ const chartOptions = {
                 </div>
               ) : (
                 <>
-                  <Chart options={chartOptions} series={chartOptions.series} type="bar" height={350} />
+                  <Chart options={chartOptions} series={chartOptions.series} type="bar" height={350} className="mr-10 ml-10"/>
 
                 
                   <table className="w-full min-w-[640px] table-auto mt-4">
