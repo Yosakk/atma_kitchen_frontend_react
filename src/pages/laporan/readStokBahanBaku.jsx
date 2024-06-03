@@ -2,22 +2,13 @@ import React, { useState, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  Typography,
-  Button,
-  Input,
-} from "@material-tailwind/react";
+import { Card, CardHeader, CardBody, Typography, Button, Input } from "@material-tailwind/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { generateLaporanStokBahanBaku } from "../../api/admin/LaporanApi";
-import {
-  PDFViewer,
-  PDFDownloadLink,
-} from "@react-pdf/renderer";
+import { PDFViewer, PDFDownloadLink } from "@react-pdf/renderer";
 import CetakStokBahanBaku from "./cetakStokBahanBaku";
+import ReactApexChart from "react-apexcharts";  // Import ReactApexChart
 
 const ReadBahanBaku = () => {
   const [searchValue, setSearchValue] = useState("");
@@ -66,6 +57,44 @@ const ReadBahanBaku = () => {
   const totalPages = Math.ceil(bahanBakuTableData.length / itemsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const chartOptions = {
+    chart: {
+      type: "bar",
+      height: 350,
+      toolbar: {
+        show: true,
+      },
+    },
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        columnWidth: "55%",
+        endingShape: "rounded",
+      },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    xaxis: {
+      categories: bahanBakuTableData.map((data) => data.nama),
+    },
+    yaxis: {
+      title: {
+        text: "Stok",
+      },
+    },
+    fill: {
+      opacity: 1,
+    },
+  };
+
+  const series = [
+    {
+      name: "Stok",
+      data: bahanBakuTableData.map((data) => data.stok),
+    },
+  ];
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
@@ -146,65 +175,73 @@ const ReadBahanBaku = () => {
                   </PDFViewer>
                 </div>
               ) : (
-                <table className="w-full min-w-[640px] table-auto">
-                  <thead>
-                    <tr>
-                      {["Nama Bahan Baku", "Stok"].map((el) => (
-                        <th
-                          key={el}
-                          className="border-b border-blue-gray-50 py-3 px-5 text-left"
-                        >
-                          <Typography
-                            variant="small"
-                            className="text-[11px] font-bold uppercase text-blue-gray-400"
-                          >
-                            {el}
-                          </Typography>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentItems.length === 0 ? (
-                      <tr>
-                        <td
-                          className="p-10 text-center text-xs font-semibold text-blue-gray-600"
-                          colSpan="3"
-                        >
-                          Data Tidak Ditemukan
-                        </td>
-                      </tr>
-                    ) : (
-                      currentItems.map(
-                        ({ id_bahan_baku, nama, stok, satuan }, key) => {
-                          const className = `py-3 px-5 ${
-                            key === currentItems.length - 1
-                              ? ""
-                              : "border-b border-blue-gray-50"
-                          }`;
-                          return (
-                            <tr key={id_bahan_baku}>
-                              <td className={className}>
-                                <Typography
-                                  variant="small"
-                                  className="text-[11px] font-semibold text-blue-gray-600"
-                                >
-                                  {nama}
-                                </Typography>
-                              </td>
-                              <td className={className}>
-                                <Typography className="text-xs font-semibold text-blue-gray-600">
-                                  {stok} {satuan}
-                                </Typography>
-                              </td>
-                            </tr>
-                          );
-                        }
-                      )
-                    )}
-                  </tbody>
-                </table>
+                <div className="my-4">
+                  <ReactApexChart
+                    options={chartOptions}
+                    series={series}
+                    type="bar"
+                    height={350}
+                  />
+                </div>
               )}
+              <table className="w-full min-w-[640px] table-auto">
+                <thead>
+                  <tr>
+                    {["Nama Bahan Baku", "Stok"].map((el) => (
+                      <th
+                        key={el}
+                        className="border-b border-blue-gray-50 py-3 px-5 text-left"
+                      >
+                        <Typography
+                          variant="small"
+                          className="text-[11px] font-bold uppercase text-blue-gray-400"
+                        >
+                          {el}
+                        </Typography>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentItems.length === 0 ? (
+                    <tr>
+                      <td
+                        className="p-10 text-center text-xs font-semibold text-blue-gray-600"
+                        colSpan="3"
+                      >
+                        Data Tidak Ditemukan
+                      </td>
+                    </tr>
+                  ) : (
+                    currentItems.map(
+                      ({ id_bahan_baku, nama, stok, satuan }, key) => {
+                        const className = `py-3 px-5 ${
+                          key === currentItems.length - 1
+                            ? ""
+                            : "border-b border-blue-gray-50"
+                        }`;
+                        return (
+                          <tr key={id_bahan_baku}>
+                            <td className={className}>
+                              <Typography
+                                variant="small"
+                                className="text-[11px] font-semibold text-blue-gray-600"
+                              >
+                                {nama}
+                              </Typography>
+                            </td>
+                            <td className={className}>
+                              <Typography className="text-xs font-semibold text-blue-gray-600">
+                                {stok} {satuan}
+                              </Typography>
+                            </td>
+                          </tr>
+                        );
+                      }
+                    )
+                  )}
+                </tbody>
+              </table>
             </>
           )}
           <div className="mt-4 flex justify-end">

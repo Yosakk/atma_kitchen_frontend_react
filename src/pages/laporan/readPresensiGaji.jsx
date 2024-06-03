@@ -10,6 +10,7 @@ import {
   Input,
   Button,
 } from "@material-tailwind/react";
+import ReactApexChart from "react-apexcharts";
 import { generateLaporanPresensiPegawai } from "../../api/admin/LaporanApi";
 import CetakPresensiGaji from "./cetakPresensiGaji";
 
@@ -77,6 +78,51 @@ const ReadPresensiGaji = () => {
     ];
     return monthNames[month - 1];
   };
+
+  const chartOptions = {
+    chart: {
+      type: "bar",
+      height: 350,
+    },
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        columnWidth: "55%",
+        endingShape: "rounded",
+      },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    xaxis: {
+      categories: presensiData.map((data) => data.nama_pegawai),
+    },
+    yaxis: {
+      title: {
+        text: "Jumlah",
+      },
+    },
+    fill: {
+      opacity: 1,
+    },
+    colors: ["#00E396", "#FF4560"],
+    legend: {
+      position: "top",
+      horizontalAlign: "left",
+      offsetX: 40,
+    },
+  };
+
+  const series = [
+    {
+      name: "Jumlah Hadir",
+      data: presensiData.map((data) => data.jumlah_hadir),
+    },
+    {
+      name: "Jumlah Alpa",
+      data: presensiData.map((data) => data.jumlah_alpa),
+    },
+  ];
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
@@ -182,92 +228,102 @@ const ReadPresensiGaji = () => {
                   </PDFViewer>
                 </div>
               ) : (
-                <table className="w-full min-w-[640px] table-auto mt-4">
-                  <thead>
-                    <tr>
-                      {[
-                        "Nama Pegawai",
-                        "Jumlah Hadir",
-                        "Jumlah Alpa",
-                        "Honor Harian",
-                        "Bonus Rajin",
-                        "Total Honor",
-                      ].map((el) => (
-                        <th
-                          key={el}
-                          className="border-b border-blue-gray-50 py-3 px-5 text-left"
-                        >
-                          <Typography
-                            variant="small"
-                            className="text-[11px] font-bold uppercase text-blue-gray-400"
-                          >
-                            {el}
-                          </Typography>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {presensiData.length > 0 ? (
-                      presensiData.map((item, key) => {
-                        const className = `py-3 px-5 ${
-                          key === presensiData.length - 1
-                            ? ""
-                            : "border-b border-blue-gray-50"
-                        }`;
-
-                        return (
-                          <tr key={item.nama_pegawai}>
-                            <td className={className}>
-                              <Typography
-                                variant="small"
-                                className="text-[11px] font-semibold text-blue-gray-600"
-                              >
-                                {item.nama_pegawai}
-                              </Typography>
-                            </td>
-                            <td className={className}>
-                              <Typography className="text-xs font-semibold text-blue-gray-600">
-                                {item.jumlah_hadir}
-                              </Typography>
-                            </td>
-                            <td className={className}>
-                              <Typography className="text-xs font-semibold text-blue-gray-600">
-                                {item.jumlah_alpa}
-                              </Typography>
-                            </td>
-                            <td className={className}>
-                              <Typography className="text-xs font-semibold text-blue-gray-600">
-                                {item.honor_harian.toLocaleString("id-ID")}
-                              </Typography>
-                            </td>
-                            <td className={className}>
-                              <Typography className="text-xs font-semibold text-blue-gray-600">
-                                {item.bonus_rajin
-                                  ? item.bonus_rajin.toLocaleString("id-ID")
-                                  : "-"}
-                              </Typography>
-                            </td>
-                            <td className={className}>
-                              <Typography className="text-xs font-semibold text-blue-gray-600">
-                                {item.total_honor.toLocaleString("id-ID")}
-                              </Typography>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    ) : (
+                <>
+                  <div className="my-4">
+                    <ReactApexChart
+                      options={chartOptions}
+                      series={series}
+                      type="bar"
+                      height={350}
+                    />
+                  </div>
+                  <table className="w-full min-w-[640px] table-auto mt-4">
+                    <thead>
                       <tr>
-                        <td
-                          className="p-10 text-center text-xs font-semibold text-blue-gray-600"
-                          colSpan="6"
-                        >
-                          Data Tidak Ditemukan
-                        </td>
+                        {[
+                          "Nama Pegawai",
+                          "Jumlah Hadir",
+                          "Jumlah Alpa",
+                          "Honor Harian",
+                          "Bonus Rajin",
+                          "Total Honor",
+                        ].map((el) => (
+                          <th
+                            key={el}
+                            className="border-b border-blue-gray-50 py-3 px-5 text-left"
+                          >
+                            <Typography
+                              variant="small"
+                              className="text-[11px] font-bold uppercase text-blue-gray-400"
+                            >
+                              {el}
+                            </Typography>
+                          </th>
+                        ))}
                       </tr>
-                    )}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {presensiData.length > 0 ? (
+                        presensiData.map((item, key) => {
+                          const className = `py-3 px-5 ${
+                            key === presensiData.length - 1
+                              ? ""
+                              : "border-b border-blue-gray-50"
+                          }`;
+
+                          return (
+                            <tr key={item.nama_pegawai}>
+                              <td className={className}>
+                                <Typography
+                                  variant="small"
+                                  className="text-[11px] font-semibold text-blue-gray-600"
+                                >
+                                  {item.nama_pegawai}
+                                </Typography>
+                              </td>
+                              <td className={className}>
+                                <Typography className="text-xs font-semibold text-blue-gray-600">
+                                  {item.jumlah_hadir}
+                                </Typography>
+                              </td>
+                              <td className={className}>
+                                <Typography className="text-xs font-semibold text-blue-gray-600">
+                                  {item.jumlah_alpa}
+                                </Typography>
+                              </td>
+                              <td className={className}>
+                                <Typography className="text-xs font-semibold text-blue-gray-600">
+                                  {item.honor_harian.toLocaleString("id-ID")}
+                                </Typography>
+                              </td>
+                              <td className={className}>
+                                <Typography className="text-xs font-semibold text-blue-gray-600">
+                                  {item.bonus_rajin
+                                    ? item.bonus_rajin.toLocaleString("id-ID")
+                                    : "-"}
+                                </Typography>
+                              </td>
+                              <td className={className}>
+                                <Typography className="text-xs font-semibold text-blue-gray-600">
+                                  {item.total_honor.toLocaleString("id-ID")}
+                                </Typography>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      ) : (
+                        <tr>
+                          <td
+                            className="p-10 text-center text-xs font-semibold text-blue-gray-600"
+                            colSpan="6"
+                          >
+                            Data Tidak Ditemukan
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </>
               )}
             </>
           )}

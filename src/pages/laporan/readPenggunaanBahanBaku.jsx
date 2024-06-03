@@ -10,9 +10,9 @@ import {
   Input,
   Button,
 } from "@material-tailwind/react";
+import ReactApexChart from "react-apexcharts";
 import { generateLaporanPenggunaanBahanBaku } from "../../api/admin/LaporanApi";
 import CetakPenggunaanBahan from "./cetakPenggunaanBahan";
-
 
 // Function to format date to yyyy-mm-dd
 const formatDate = (date) => {
@@ -74,6 +74,44 @@ const ReadPenggunaanBahanBaku = () => {
   const handleClosePDFViewer = () => {
     setShowPDFViewer(false);
   };
+
+  const chartOptions = {
+    chart: {
+      type: "bar",
+      height: 350,
+      toolbar: {
+        show: true,
+      },
+    },
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        columnWidth: "55%",
+        endingShape: "rounded",
+      },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    xaxis: {
+      categories: penggunaanBahanData.map((data) => data.nama_bahan_baku),
+    },
+    yaxis: {
+      title: {
+        text: "Jumlah Penggunaan",
+      },
+    },
+    fill: {
+      opacity: 1,
+    },
+  };
+
+  const series = [
+    {
+      name: "Jumlah Penggunaan",
+      data: penggunaanBahanData.map((data) => data.total_jumlah_pemakaian),
+    },
+  ];
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12 mx-10">
@@ -177,72 +215,78 @@ const ReadPenggunaanBahanBaku = () => {
                   </PDFViewer>
                 </div>
               ) : (
-                <table className="w-full min-w-[640px] table-auto mt-4">
-                  <thead>
-                    <tr>
-                      {[
-                        "Nama Bahan",
-                        "Satuan",
-                        "Digunakan",
-                      ].map((el) => (
-                        <th
-                          key={el}
-                          className="border-b border-blue-gray-50 py-3 px-5 text-left"
-                        >
-                          <Typography
-                            variant="small"
-                            className="text-[11px] font-bold uppercase text-blue-gray-400"
-                          >
-                            {el}
-                          </Typography>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {penggunaanBahanData.length > 0 ? (
-                      penggunaanBahanData.map((item, key) => {
-                        const className = `py-3 px-5 ${
-                          key === penggunaanBahanData.length - 1
-                            ? ""
-                            : "border-b border-blue-gray-50"
-                        }`;
-
-                        return (
-                          <tr key={item.nama_bahan_baku}>
-                            <td className={className}>
-                              <Typography
-                                variant="small"
-                                className="text-[11px] font-semibold text-blue-gray-600"
-                              >
-                                {item.nama_bahan_baku}
-                              </Typography>
-                            </td>
-                            <td className={className}>
-                              <Typography className="text-xs font-semibold text-blue-gray-600">
-                                {item.satuan_bahan_baku}
-                              </Typography>
-                            </td>
-                            <td className={className}>
-                              <Typography className="text-xs font-semibold text-blue-gray-600">
-                                {item.total_jumlah_pemakaian}
-                              </Typography>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    ) : (
+                <>
+                  <div className="my-4">
+                    <ReactApexChart
+                      options={chartOptions}
+                      series={series}
+                      type="bar"
+                      height={350}
+                    />
+                  </div>
+                  <table className="w-full min-w-[640px] table-auto mt-4">
+                    <thead>
                       <tr>
-                        <td
-                          className="p-10 text-center text-xs font-semibold text-blue-gray-600"
-                          colSpan="3"
-                        >
-                          Data Tidak Ditemukan
-                        </td>
+                        {["Nama Bahan", "Satuan", "Digunakan"].map((el) => (
+                          <th
+                            key={el}
+                            className="border-b border-blue-gray-50 py-3 px-5 text-left"
+                          >
+                            <Typography
+                              variant="small"
+                              className="text-[11px] font-bold uppercase text-blue-gray-400"
+                            >
+                              {el}
+                            </Typography>
+                          </th>
+                        ))}
                       </tr>
-                    )}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {penggunaanBahanData.length > 0 ? (
+                        penggunaanBahanData.map((item, key) => {
+                          const className = `py-3 px-5 ${
+                            key === penggunaanBahanData.length - 1
+                              ? ""
+                              : "border-b border-blue-gray-50"
+                          }`;
+
+                          return (
+                            <tr key={item.nama_bahan_baku}>
+                              <td className={className}>
+                                <Typography
+                                  variant="small"
+                                  className="text-[11px] font-semibold text-blue-gray-600"
+                                >
+                                  {item.nama_bahan_baku}
+                                </Typography>
+                              </td>
+                              <td className={className}>
+                                <Typography className="text-xs font-semibold text-blue-gray-600">
+                                  {item.satuan_bahan_baku}
+                                </Typography>
+                              </td>
+                              <td className={className}>
+                                <Typography className="text-xs font-semibold text-blue-gray-600">
+                                  {item.total_jumlah_pemakaian}
+                                </Typography>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      ) : (
+                        <tr>
+                          <td
+                            className="p-10 text-center text-xs font-semibold text-blue-gray-600"
+                            colSpan="3"
+                          >
+                            Data Tidak Ditemukan
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </>
               )}
             </>
           )}

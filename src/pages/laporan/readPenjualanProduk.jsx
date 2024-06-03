@@ -204,7 +204,7 @@ const ReadPenjualanProduk = () => {
                 <ReactApexChart
                   options={chartOptions}
                   series={series}
-                  type="line"
+                  type="bar"
                   height={350}
                 />
               </div>

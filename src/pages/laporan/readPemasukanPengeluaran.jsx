@@ -12,12 +12,15 @@ import {
 } from "@material-tailwind/react";
 import { generateLaporanPemasukan } from "../../api/admin/LaporanApi";
 import CetakPemasukanPengeluaran from "../laporan/cetakPemasukanPengeluaran";
+import Chart from "react-apexcharts";
 
 const ReadPemasukanPengeluaran = () => {
   const [year, setYear] = useState(new Date().getFullYear());
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [salesReport, setSalesReport] = useState([]);
+  const [salesTotal, setSalesTotal] = useState(0);
   const [expensesReport, setExpensesReport] = useState([]);
+  const [expensesTotal, setExpensesTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [showPDFViewer, setShowPDFViewer] = useState(false);
 
@@ -38,11 +41,19 @@ const ReadPemasukanPengeluaran = () => {
         { nama: "Penjualan", total: pemasukan.total_penjualan },
         { nama: "Tip", total: pemasukan.total_tip },
       ]);
-      const formattedExpenses = Object.entries(pengeluaran.rekap).map(([nama, jumlah]) => ({
-        nama,
-        total: jumlah,
-      }));
+      const formattedExpenses = Object.entries(pengeluaran.rekap).map(
+        ([nama, jumlah]) => ({
+          nama,
+          total: jumlah,
+        })
+      );
+      setSalesTotal(pemasukan.total_penjualan + pemasukan.total_tip);
+      const totalPengeluaran = Object.values(pengeluaran.rekap).reduce(
+        (acc, jumlah) => acc + jumlah,
+        0
+      );
       setExpensesReport(formattedExpenses);
+      setExpensesTotal(totalPengeluaran);
 
       setIsLoading(false);
     } catch (error) {
@@ -51,6 +62,7 @@ const ReadPemasukanPengeluaran = () => {
       setIsLoading(false);
     }
   };
+
 
   const handleViewPDF = () => {
     setShowPDFViewer(true);
@@ -77,6 +89,43 @@ const ReadPemasukanPengeluaran = () => {
     ];
     return monthNames[month - 1];
   };
+
+// Data for ApexChart
+const chartOptions = {
+  chart: {
+    type: "bar",
+    height: 350,
+  },
+  stroke: {
+    curve: "smooth",
+  },
+  series: [
+    {
+      name: "Pemasukan",
+      data: [salesTotal],
+    },
+    {
+      name: "Pengeluaran",
+      data: [expensesTotal],
+    },
+  ],
+  colors: ["#008FFB", "#FF4560"],
+  xaxis: {
+    categories: ["Total"],
+  },
+  legend: {
+    position: "top",
+  },
+  plotOptions: {
+    bar: {
+      horizontal: false,
+      columnWidth: "25%", // bar width in percent
+      endingShape: "rounded",
+    },
+  },
+};
+
+
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12 mx-10">
@@ -184,104 +233,112 @@ const ReadPemasukanPengeluaran = () => {
                   </PDFViewer>
                 </div>
               ) : (
-                <table className="w-full min-w-[640px] table-auto mt-4">
-                  <thead>
-                    <tr>
-                      {["Nama", "Pengeluaran", "Pemasukan"].map((el) => (
-                        <th
-                          key={el}
-                          className="border-b border-blue-gray-50 py-3 px-5 text-left"
-                        >
-                          <Typography
-                            variant="small"
-                            className="text-[11px] font-bold uppercase text-blue-gray-400"
+                <>
+                  <Chart options={chartOptions} series={chartOptions.series} type="bar" height={350} />
+
+                
+                  <table className="w-full min-w-[640px] table-auto mt-4">
+                    <thead>
+                      <tr>
+                        {["Nama", "Pengeluaran", "Pemasukan"].map((el) => (
+                          <th
+                            key={el}
+                            className="border-b border-blue-gray-50 py-3 px-5 text-left"
                           >
-                            {el}
-                          </Typography>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {salesReport.length === 0 ? (
-                      <tr>
-                        <td
-                          className="p-10 text-center text-xs font-semibold text-blue-gray-600"
-                          colSpan="3"
-                        >
-                          Data Tidak Ditemukan
-                        </td>
+                            <Typography
+                              variant="small"
+                              className="text-[11px] font-bold uppercase text-blue-gray-400"
+                            >
+                              {el}
+                            </Typography>
+                          </th>
+                        ))}
                       </tr>
-                    ) : (
-                      salesReport.map(({ nama, total }, key) => {
-                        const className = `py-3 px-5 ${
-                          key === salesReport.length - 1
-                            ? ""
-                            : "border-b border-blue-gray-50"
-                        }`;
+                    </thead>
+                    <tbody>
+                      {salesReport.length === 0 ? (
+                        <tr>
+                          <td
+                            className="p-10 text-center text-xs font-semibold text-blue-gray-600"
+                            colSpan="3"
+                          >
+                            Data Tidak Ditemukan
+                          </td>
+                        </tr>
+                      ) : (
+                        salesReport.map(({ nama, total }, key) => {
+                          const className = `py-3 px-5 ${
+                            key === salesReport.length - 1
+                              ? ""
+                              : "border-b border-blue-gray-50"
+                          }`;
 
-                        return (
-                          <tr key={nama}>
-                            <td className={className}>
-                              <Typography
-                                variant="small"
-                                className="text-[11px] font-semibold text-blue-gray-600"
-                              >
-                                {nama}
-                              </Typography>
-                            </td>
-                            <td className={className}></td>
-                            <td className={className}>
-                              <Typography className="text-xs font-semibold text-blue-gray-600">
-                                {total.toLocaleString("id-ID")}
-                              </Typography>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                  <tbody>
-                    {expensesReport.length === 0 ? (
-                      <tr>
-                        <td
-                          className="p-10 text-center text-xs font-semibold text-blue-gray-600"
-                          colSpan="3"
-                        >
-                          Data Pengeluaran Tidak Ditemukan
-                        </td>
-                      </tr>
-                    ) : (
-                      expensesReport.map(({ nama, total }, key) => {
-                        const className = `py-3 px-5 ${
-                          key === expensesReport.length - 1
-                            ? ""
-                            : "border-b border-blue-gray-50"
-                        }`;
+                          return (
+                            <tr key={nama}>
+                              <td className={className}>
+                                <Typography
+                                  variant="small"
+                                  className="text-[11px] font-semibold text-blue-gray-600"
+                                >
+                                  {nama}
+                                </Typography>
+                              </td>
+                              <td className={className}></td>
+                              <td className={className}>
+                                <Typography className="text-xs font-semibold text-blue-gray-600">
+                                  {total.toLocaleString("id-ID")}
+                                </Typography>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                    <tbody>
+                      {expensesReport.length === 0 ? (
+                        <tr>
+                          <td
+                            className="p-10 text-center text-xs font-semibold text-blue-gray-600"
+                            colSpan="3"
+                          >
+                            Data Pengeluaran Tidak Ditemukan
+                          </td>
+                        </tr>
+                      ) : (
+                        expensesReport.map(({ nama, total }, key) => {
+                          const className = `py-3 px-5 ${
+                            key === expensesReport.length - 1
+                              ? ""
+                              : "border-b border-blue-gray-50"
+                          }`;
 
-                        return (
-                          <tr key={nama}>
-                            <td className={className}>
-                              <Typography
-                                variant="small"
-                                className="text-[11px] font-semibold text-blue-gray-600"
-                              >
-                                {nama}
-                              </Typography>
-                            </td>
-                            <td className={className}>
-                              <Typography className="text-xs font-semibold text-blue-gray-600">
-                                {total.toLocaleString("id-ID")}
-                              </Typography>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
+                          return (
+                            <tr key={nama}>
+                              <td className={className}>
+                                <Typography
+                                  variant="small"
+                                  className="text-[11px] font-semibold text-blue-gray-600"
+                                >
+                                  {nama}
+                                </Typography>
+                              </td>
+                              <td className={className}>
+                                <Typography className="text-xs font-semibold text-blue-gray-600">
+                                  {total.toLocaleString("id-ID")}
+                                </Typography>
+                              </td>
+                              <td className={className}></td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </>
               )}
-              <div className="mt-4">
+            </>
+          )}
+          <div className="mt-4">
                 <Typography className="text-right text-lg font-semibold ml-auto mr-10">
                   Total Penjualan Bulan {getMonthName(month)} Tahun {year} :{" "}
                   {salesReport.reduce((acc, item) => acc + item.total, 0).toLocaleString("id-ID")}
@@ -291,8 +348,6 @@ const ReadPemasukanPengeluaran = () => {
                   {expensesReport.reduce((acc, item) => acc + item.total, 0).toLocaleString("id-ID")}
                 </Typography>
               </div>
-            </>
-          )}
         </CardBody>
       </Card>
       <ToastContainer />
