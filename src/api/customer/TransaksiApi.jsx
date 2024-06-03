@@ -126,5 +126,54 @@ export const showDataNota = async (id) => {
     } catch (error) {
         throw error.response.data;
     }
-
 };
+
+export const pesananDiproses = async (data) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.post("/edit/status/pemesanan/diproses/MO", data, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        });
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+}
+
+export const pesananCustomer = async (data, id) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.put(`/finishTransaksi/pickup/${id}`, data, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        });
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+}
+
+export const statusPesananTelat = async (data, id) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.put(`/cancelOrder/telatBayar/${id}`, data, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        });
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+}
+
+

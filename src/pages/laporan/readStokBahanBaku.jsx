@@ -12,58 +12,40 @@ import {
 } from "@material-tailwind/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { generateLaporanPenggunaanBahanBaku } from "../../api/admin/LaporanApi";
+import { generateLaporanStokBahanBaku } from "../../api/admin/LaporanApi";
 import {
   PDFViewer,
   PDFDownloadLink,
 } from "@react-pdf/renderer";
 import CetakStokBahanBaku from "./cetakStokBahanBaku";
 
-const ReadPenggunaanBahanBaku = () => {
+const ReadBahanBaku = () => {
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [bahanBakuData, setBahanBakuData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showPDFViewer, setShowPDFViewer] = useState(false);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
-    // Set startDate to yesterday
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    setStartDate(yesterday.toISOString().split('T')[0]);
-
-    // Set endDate to today
-    const today = new Date();
-    setEndDate(today.toISOString().split('T')[0]);
-
-    fetchData(); // Fetch data with default dates
-  }, [startDate,endDate]);
+    fetchData();
+  }, []);
 
   const fetchData = async () => {
     try {
-      setIsLoading(true); // Set loading state to true before fetching
-      const response = await generateLaporanPenggunaanBahanBaku({
-        tanggal_awal: startDate,
-        tanggal_akhir: endDate,
-      });
+      const response = await generateLaporanStokBahanBaku();
       setBahanBakuData(response.data);
-      setIsLoading(false); // Set loading state to false after fetching
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
-      setIsLoading(false); // Set loading state to false if there's an error
-      // You can handle the error here, e.g., show a toast message
-      toast.error("Failed to fetch data. Please try again later.");
+      setIsLoading(false);
     }
   };
-  
 
   const bahanBakuTableData = bahanBakuData.map((item) => ({
-    // id_bahan_baku: item.id_bahan_baku,
+    id_bahan_baku: item.id_bahan_baku,
     nama: item.nama_bahan_baku,
-    stok: item.total_jumlah_pemakaian,
+    stok: item.stok_bahan_baku,
     satuan: item.satuan_bahan_baku,
   }));
 
@@ -94,25 +76,16 @@ const ReadPenggunaanBahanBaku = () => {
           className="mb-8 p-6 flex justify-between items-center"
         >
           <Typography variant="h6" color="white">
-            Penggunaan Bahan Baku
+            Stok Bahan Baku
           </Typography>
         </CardHeader>
         <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
           <div className="ml-auto mt-1 mb-4 mr-4 w-56 flex justify-end items-center">
-            <div className="flex gap-4">
-              <Input
-                label="Start Date"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-              <Input
-                label="End Date"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </div>
+            <Input
+              label="Search"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
             <div className="flex flex-col md:flex-row justify-end items-center gap-4 p-4">
               {showPDFViewer && (
                 <div className="">
@@ -162,7 +135,6 @@ const ReadPenggunaanBahanBaku = () => {
               </Button>
             </div>
           </div>
-          
           {isLoading ? (
             <Typography className="text-center">Loading...</Typography>
           ) : (
@@ -273,4 +245,4 @@ const ReadPenggunaanBahanBaku = () => {
   );
 };
 
-export default ReadPenggunaanBahanBaku;
+export default ReadBahanBaku;

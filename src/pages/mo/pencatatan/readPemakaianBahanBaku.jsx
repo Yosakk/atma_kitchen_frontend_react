@@ -14,8 +14,8 @@ import {
 } from "@material-tailwind/react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { showDataPembelianBahanBaku } from "../../../api/mo/PembelianBahanBakuApi";
 import { showDataBahanBaku } from "../../../api/admin/BahanBakuApi";
+import { showPemakaianBahanBaku } from "../../../api/mo/PemakaianBahanBaku";
 
 const ReadPemakaianBahanBaku = () => {
   const [searchValue, setSearchValue] = useState("");
@@ -32,7 +32,7 @@ const ReadPemakaianBahanBaku = () => {
 
   const fetchData = async () => {
     try {
-      const response = await showDataPembelianBahanBaku();
+      const response = await showPemakaianBahanBaku();
       setPemakaianBahanData(response.data);
       setIsLoading(false);
     } catch (error) {
@@ -66,9 +66,8 @@ const ReadPemakaianBahanBaku = () => {
   const pemakaianBahanBakuTableData = pemakaianBahanData.map((item) => ({
     id_pembelian_bahan: item.id_pembelian_bahan,
     namaBahanBaku: getBahanBakuName(item.id_bahan_baku),
-    jumlahPembelian: item.jumlah_pembelian,
-    hargaBeli: item.harga_beli,
-    tanggalBeli: item.tanggal_beli,
+    jumlahPemakaian: item.jumlah_pemakaian,
+    tanggalPemakaian: item.tanggal_pemakaian,
     satuan: getBahanBakuSatuan(item.id_bahan_baku),
   }));
 
@@ -88,6 +87,33 @@ const ReadPemakaianBahanBaku = () => {
   );
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const renderPageNumbers = () => {
+    const pageNumbers = [];
+    const maxPageLimit = 5;
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(startPage + maxPageLimit - 1, totalPages);
+  
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+  
+    return pageNumbers.map((number, index) => (
+      <button
+        key={index}
+        onClick={() => paginate(number)}
+        className={`${
+          currentPage === number
+            ? "bg-blue-500 text-white"
+            : number === "..."
+            ? "text-gray-500"
+            : "bg-white text-gray-700"
+        } px-3 py-1 border border-gray-300 text-sm font-medium`}
+      >
+        {number}
+      </button>
+    ));
+  };
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
@@ -116,7 +142,6 @@ const ReadPemakaianBahanBaku = () => {
                   "Nama Bahan Baku",
                   "Jumlah Pemakaian",
                   "Satuan",
-                  "Harga Beli",
                   "Tanggal Pemakaian",
                   "",
                 ].map((el) => (
@@ -150,18 +175,16 @@ const ReadPemakaianBahanBaku = () => {
                     {
                       id_pembelian_bahan,
                       namaBahanBaku,
-                      jumlahPembelian,
-                      hargaBeli,
-                      tanggalBeli,
+                      jumlahPemakaian,
+                      tanggalPemakaian,
                       satuan,
                     },
                     key
                   ) => {
-                    const className = `py-3 px-5 ${
-                      key === currentItems.length - 1
-                        ? ""
-                        : "border-b border-blue-gray-50"
-                    }`;
+                    const className = `py-3 px-5 ${key === currentItems.length - 1
+                      ? ""
+                      : "border-b border-blue-gray-50"
+                      }`;
 
                     return (
                       <tr key={id_pembelian_bahan}>
@@ -172,7 +195,7 @@ const ReadPemakaianBahanBaku = () => {
                         </td>
                         <td className={className}>
                           <Typography className="text-xs font-semibold text-blue-gray-600">
-                            {jumlahPembelian}
+                            {jumlahPemakaian}
                           </Typography>
                         </td>
                         <td className={className}>
@@ -182,12 +205,7 @@ const ReadPemakaianBahanBaku = () => {
                         </td>
                         <td className={className}>
                           <Typography className="text-xs font-semibold text-blue-gray-600">
-                            {hargaBeli}
-                          </Typography>
-                        </td>
-                        <td className={className}>
-                          <Typography className="text-xs font-semibold text-blue-gray-600">
-                            {tanggalBeli}
+                            {tanggalPemakaian}
                           </Typography>
                         </td>
                       </tr>
@@ -206,19 +224,7 @@ const ReadPemakaianBahanBaku = () => {
               >
                 Previous
               </button>
-              {[...Array(totalPages)].map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => paginate(index + 1)}
-                  className={`${
-                    currentPage === index + 1
-                      ? "bg-blue-500 text-white"
-                      : "bg-white text-gray-700"
-                  } px-3 py-1 border border-gray-300 text-sm font-medium`}
-                >
-                  {index + 1}
-                </button>
-              ))}
+              {renderPageNumbers()}
               <button
                 onClick={() => paginate(currentPage + 1)}
                 disabled={currentPage === totalPages}

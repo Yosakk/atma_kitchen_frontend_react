@@ -3,7 +3,7 @@ import { Typography } from "@material-tailwind/react";
 
 const LabelKeranjang = () => {
   return (
-    <div className="w-full bg-[#FFC655] md:px-8 flex flex-col items-center justify-center pt-20 pb-10">
+    <div className="w-full bg-[#FFC655] md:px-8 flex flex-col items-center justify-center pb-10">
       <div className="flex flex-col items-center justify-center px-4 pt-5 sm:flex-row sm:justify-between">
         <Typography
           variant="h1"

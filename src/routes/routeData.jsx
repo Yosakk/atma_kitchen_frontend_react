@@ -150,6 +150,18 @@ export const routes = [
         ],
       },
       {
+        icon: <ClipboardDocumentListIcon {...icon} />,
+        name: "Pesanan Dikirim",
+        path: "/admin/pesananDikirim/read",
+        pages: [
+          {
+            icon: <RectangleStackIcon {...icon} />,
+            name: "Pesanan Dikirim",
+            path: "/admin/pesananDikirim/read",
+          },
+        ],
+      },
+      {
         icon: <BanknotesIcon {...icon} />,
         name: "Penarikan Saldo",
         path: "/admin/saldo/read",

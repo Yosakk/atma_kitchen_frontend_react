@@ -172,6 +172,22 @@ const ReadPenjualanBulanan = () => {
                 <ReactApexChart options={chartOptions} series={series} type="line" height={350} />
               </div>
               <div className="flex flex-col md:flex-row justify-end items-center gap-4 p-4">
+              {showPDFViewer && (
+                  <div className="">
+                  <Button
+                    color="red"
+                    buttonType="filled"
+                    rounded={false}
+                    block={false}
+                    iconOnly={false}
+                    ripple="light"
+                    className="py-2 px-4 mr-10"
+                    onClick={handleClosePDFViewer}
+                  >
+                    Close PDF
+                  </Button>
+                </div>
+              )}
                 <Button
                   color="green"
                   buttonType="filled"
@@ -208,23 +224,12 @@ const ReadPenjualanBulanan = () => {
                     }
                   </PDFDownloadLink>
                 </Button>
+              
+                
               </div>
               {showPDFViewer ? (
                 <div className="relative">
-                  <div className="absolute top-0 right-0 m-4">
-                    <Button
-                      color="red"
-                      buttonType="filled"
-                      rounded={false}
-                      block={false}
-                      iconOnly={false}
-                      ripple="light"
-                      className="py-2 px-4"
-                      onClick={handleClosePDFViewer}
-                    >
-                      Close PDF
-                    </Button>
-                  </div>
+                  
                   <PDFViewer width="100%" height="600px">
                     <CetakPenjualanBulanan
                       year={year}
@@ -232,6 +237,7 @@ const ReadPenjualanBulanan = () => {
                       totalSales={totalSales}
                     />
                   </PDFViewer>
+                  
                 </div>
               ) : (
                 <table className="w-full min-w-[640px] table-auto mt-4">

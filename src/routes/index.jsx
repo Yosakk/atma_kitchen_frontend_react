@@ -70,6 +70,10 @@ import ReadPenjualanBulanan from "../pages/laporan/readPenjualanBulanan";
 import CetakPenjualanBulanan from "../pages/laporan/cetakPenjualanBulanan";
 import ReadPenjualanProduk from "../pages/laporan/readPenjualanProduk";
 import ReadPenggunaanBahanBaku from "../pages/laporan/readPenggunaanBahanBaku";
+import ReadStokBahanBaku from "../pages/laporan/readStokBahanBaku";
+import ReadPemasukanPengeluaran from "../pages/laporan/readPemasukanPengeluaran";
+import ReadPresensiGaji from "../pages/laporan/readPresensiGaji";
+import ReadPesananDikirim from "../pages/admin/pesanan/readPesananDikirim";
 
 
 
@@ -103,10 +107,6 @@ const router = createBrowserRouter([
         path : "/admin/produk/edit",
         element : <EditProduk/>
       },
-      // {
-      //   path : "/admin/hampers/read",
-      //   element : <ReadHampers />
-      // },
       {
         path : "/admin/hampers/add",
         element : <AddHampers/>
@@ -166,6 +166,10 @@ const router = createBrowserRouter([
       {
         path : "/admin/pesananDiproses/read",
         element : <ReadPesananDiproses />
+      },
+      {
+        path : "/admin/pesananDikirim/read",
+        element : <ReadPesananDikirim />
       },
       {
         path : "/admin/saldo/read",
@@ -355,8 +359,20 @@ const router = createBrowserRouter([
         element: <ReadPenjualanProduk />
       },
       {
+        path: "/pemasukanPengeluaran",
+        element: <ReadPemasukanPengeluaran />
+      },
+      {
         path: "/penggunaanBahanBaku",
         element: <ReadPenggunaanBahanBaku />
+      },
+      {
+        path: "/stokBahanBaku",
+        element: <ReadStokBahanBaku />
+      },
+      {
+        path: "/presensiPegawai",
+        element: <ReadPresensiGaji/>
       },
     ],
   },

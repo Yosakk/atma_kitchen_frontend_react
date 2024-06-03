@@ -90,13 +90,13 @@ const CetakPenjualanBulananProduk = ({ year, month, salesReport, totalSales }) =
           <View style={styles.tableRow} key={index}>
             <Text style={styles.tableCol}>{item.nama}</Text>
             <Text style={styles.tableCol}>{item.total_jumlah}</Text>
-            <Text style={styles.tableCol}>{item.harga.toLocaleString('id-ID')}</Text>
-            <Text style={styles.tableCol}>{item.total_penjualan.toLocaleString('id-ID')}</Text>
+            <Text style={styles.tableCol}>{item.harga}</Text>
+            <Text style={styles.tableCol}>{item.total_penjualan}</Text>
           </View>
         ))}
         <View style={styles.tableRow}>
           <Text style={styles.tableColMerged}>Total</Text>
-          <Text style={styles.tableCol}>{totalSales.toLocaleString('id-ID')}</Text>
+          <Text style={styles.tableCol}>{totalSales}</Text>
         </View>
       </View>
     </Page>

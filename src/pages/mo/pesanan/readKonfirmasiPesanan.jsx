@@ -22,10 +22,14 @@ import { useParams } from "react-router-dom";
 import {
   showAllTransaksiHistoryCustomer,
   editStatusTransaksiMO,
+  pesananDiproses
 } from "../../../api/customer/TransaksiApi";
 import { getImage } from "../../../api";
 import AlertAnimation from "../../../assets/images/AlertAnimation.json";
+import Proses from "../../../assets/images/Proses.json";
 import Lottie from "lottie-react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const TABS = [
   {
@@ -51,6 +55,7 @@ const ReadKonfirmasiPesanan = () => {
   const [currentTransactionId, setCurrentTransactionId] = useState(null);
   const [acceptError, setAcceptError] = useState("");
   const [prosesError, setProsesError] = useState("");
+  const [successProcess, setSuccessProcess] = useState("");
   const [prosesModalOpen, setProsesModalOpen] = useState(false);
   const [selectedTransactions, setSelectedTransactions] = useState([]);
 
@@ -154,9 +159,8 @@ const ReadKonfirmasiPesanan = () => {
               <Typography variant="paragraph">
                 {bahan_baku_kurang.map((bb, index) => (
                   <div key={index} className="ml-3">
-                    {`${index + 1}. ${bb.nama_bahan} (Diminta: ${
-                      bb.jumlah_diminta
-                    }, Stok: ${bb.stok_tercukupi})`}
+                    {`${index + 1}. ${bb.nama_bahan} (Diminta: ${bb.jumlah_diminta
+                      }, Stok: ${bb.stok_tercukupi})`}
                   </div>
                 ))}
               </Typography>
@@ -179,9 +183,70 @@ const ReadKonfirmasiPesanan = () => {
         console.error("Error updating transaction status:", error);
       });
   };
+
   const handleProses = () => {
-    // logic proses
+    pesananDiproses({ id_transaksi: selectedTransactions, status_transaksi: "Diproses" })
+      .then((res) => {
+        console.log(res);
+        const { message, bahan_baku_terpakai } = res;
+
+        if (Array.isArray(bahan_baku_terpakai)) {
+          console.log("cek", bahan_baku_terpakai);
+          const successMessage = (
+            <>
+              <Lottie
+                animationData={Proses}
+                style={{ width: 200, height: 200 }}
+                className="mx-auto"
+              />
+              <Typography variant="h5">{`${message}:`}</Typography>
+              <Typography variant="paragraph">
+                {bahan_baku_terpakai.map((bb, index) => (
+                  <div key={index} className="ml-3">
+                    {`${index + 1}. ${bb.nama_bahan} (Diminta: ${bb.jumlah_diminta}, Stok: ${bb.stok_tercukupi})`}
+                  </div>
+                ))}
+              </Typography>
+            </>
+          );
+          setSuccessProcess(successMessage);
+        } else {
+          setSuccessProcess(message);
+        }
+        setAcceptError("");
+        fetchData();
+        toast.success("Pesanan Berhasil Diproses");
+      })
+      .catch((error) => {
+        console.error("Error updating transaction status:", error);
+        const { message, data } = error;
+        if (Array.isArray(data)) {
+          setProsesError(
+            <>
+              <Lottie
+                animationData={AlertAnimation}
+                style={{ width: 200, height: 200 }}
+                className="mx-auto"
+              />
+              <Typography variant="h5">{`${message}:`}</Typography>
+              <Typography variant="paragraph">
+                {data.map((bb, index) => (
+                  <div key={index} className="ml-3">
+                    {`${index + 1}. ${bb.nama_bahan} (Diminta: ${bb.jumlah_diminta
+                      }, Stok: ${bb.stok_tercukupi})`}
+                  </div>
+                ))}
+              </Typography>
+            </>
+          );
+        } else {
+          setProsesError(message);
+        }
+        setSuccessProcess("");
+        toast.success("Pesanan Gagal Diproses");
+      })
   };
+
   const handleCheckboxChange = (e, transactionId) => {
     const { checked } = e.target;
     if (checked) {
@@ -355,23 +420,36 @@ const ReadKonfirmasiPesanan = () => {
         <DialogBody>
           {prosesError ? (
             <Typography color="red">{prosesError}</Typography>
+          ) : successProcess ? (
+            <Typography color="green">{successProcess}</Typography>
           ) : (
             "Apakah Anda yakin ingin Memproses pesanan ini?"
           )}
         </DialogBody>
         <DialogFooter>
-          <Button
-            color="red"
-            className="mr-2"
-            onClick={() => setProsesModalOpen(false)}
-          >
-            Batal
-          </Button>
-          <Button color="blue" onClick={handleProses}>
-            Proses
-          </Button>
+
+          {successProcess ? (
+            <Button color="blue" onClick={() => setProsesModalOpen(false)}>
+              Close
+            </Button>
+          ) : (
+            <>
+              <Button
+                color="red"
+                className="mr-2"
+                onClick={() => setProsesModalOpen(false)}
+              >
+                Batal
+              </Button>
+              <Button color="blue" onClick={handleProses}>
+                Proses
+              </Button>
+            </>
+          )}
+
         </DialogFooter>
       </Dialog>
+      <ToastContainer />
     </Card>
   );
 };
@@ -429,7 +507,7 @@ const TransactionCard = ({
           />
         </Typography>
       </div>
-      
+
       {items.slice(0, expanded ? items.length : 1).map((item, idx) => (
         <div key={idx} className="grid grid-cols-6 border-b border-t pt-4 pb-4">
           <div className="mx-auto col-span-3 md:col-span-1 flex justify-center items-center">
@@ -465,12 +543,12 @@ const TransactionCard = ({
                   item.produk.kategori === "Cake"
                     ? "green"
                     : item.produk.kategori === "Roti"
-                    ? "amber"
-                    : item.produk.kategori === "Minuman"
-                    ? "blue"
-                    : item.produk.kategori === "Titipan"
-                    ? "purple"
-                    : "red"
+                      ? "amber"
+                      : item.produk.kategori === "Minuman"
+                        ? "blue"
+                        : item.produk.kategori === "Titipan"
+                          ? "purple"
+                          : "red"
                 }
               />
             </div>

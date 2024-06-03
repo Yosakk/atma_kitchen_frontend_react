@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import ReactApexChart from "react-apexcharts";
+import { PDFViewer, PDFDownloadLink } from "@react-pdf/renderer";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -10,37 +10,44 @@ import {
   Input,
   Button,
 } from "@material-tailwind/react";
-import { PDFViewer, PDFDownloadLink } from "@react-pdf/renderer";
-import { generateLaporanBulananProduk } from "../../api/admin/LaporanApi";
-import CetakPenjualanBulananProduk from "./cetakPenjualanBulananProduk";
+import { generateLaporanPemasukan } from "../../api/admin/LaporanApi";
+import CetakPemasukanPengeluaran from "../laporan/cetakPemasukanPengeluaran";
 
-const ReadPenjualanProduk = () => {
+const ReadPemasukanPengeluaran = () => {
   const [year, setYear] = useState(new Date().getFullYear());
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [salesReport, setSalesReport] = useState([]);
-  const [totalSales, setTotalSales] = useState(0);
+  const [expensesReport, setExpensesReport] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showPDFViewer, setShowPDFViewer] = useState(false);
 
   useEffect(() => {
-    fetchSalesReport();
+    fetchReportData();
   }, [year, month]);
 
-  const fetchSalesReport = async () => {
+  const fetchReportData = async () => {
     setIsLoading(true);
     try {
-      const response = await generateLaporanBulananProduk({
+      const response = await generateLaporanPemasukan({
         tahun: year,
         bulan: month,
       });
-      const { laporan_bulanan_per_produk, total_penjualan_semua_produk } =
-        response;
-      setSalesReport(laporan_bulanan_per_produk);
-      setTotalSales(total_penjualan_semua_produk);
+      const { pemasukan, pengeluaran } = response.data;
+
+      setSalesReport([
+        { nama: "Penjualan", total: pemasukan.total_penjualan },
+        { nama: "Tip", total: pemasukan.total_tip },
+      ]);
+      const formattedExpenses = Object.entries(pengeluaran.rekap).map(([nama, jumlah]) => ({
+        nama,
+        total: jumlah,
+      }));
+      setExpensesReport(formattedExpenses);
+
       setIsLoading(false);
     } catch (error) {
-      console.error("Error fetching sales report:", error);
-      toast.error("Gagal Mengambil Laporan Penjualan");
+      console.error("Error fetching report data:", error);
+      toast.error("Failed to fetch sales report");
       setIsLoading(false);
     }
   };
@@ -53,98 +60,6 @@ const ReadPenjualanProduk = () => {
     setShowPDFViewer(false);
   };
 
-  const chartOptions = {
-    chart: {
-      type: "line",
-      height: 350,
-      toolbar: {
-        show: true,
-        tools: {
-          download: true,
-          selection: true,
-          zoom: true,
-          zoomin: true,
-          zoomout: true,
-          pan: false,
-          reset: true | '<img src="/static/icons/reset.png" width="20">',
-          customIcons: [],
-        },
-        autoSelected: "zoom",
-      },
-      animations: {
-        enabled: true,
-        easing: "easeinout",
-        speed: 800,
-        animateGradually: {
-          enabled: true,
-          delay: 150,
-        },
-        dynamicAnimation: {
-          enabled: true,
-          speed: 350,
-        },
-      },
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    stroke: {
-      curve: "straight",
-      width: 2,
-      lineCap: "round",
-    },
-    fill: {
-      type: "gradient",
-      gradient: {
-        shade: "dark",
-        gradientToColors: ["#FDD835", "#F44336"],
-        shadeIntensity: 0.5,
-        type: "horizontal",
-        opacityFrom: 0.7,
-        opacityTo: 0.9,
-        stops: [0, 100],
-      },
-    },
-    markers: {
-      size: 4,
-      colors: ["#FFC107"],
-      strokeColor: "#FFA000",
-      strokeWidth: 2,
-      hover: {
-        size: 7,
-      },
-    },
-    tooltip: {
-      theme: "dark",
-      y: {
-        formatter: (value) => `Rp ${value.toLocaleString()}`,
-        title: {
-          formatter: (seriesName) => seriesName,
-        },
-      },
-    },
-    xaxis: {
-      categories: salesReport.map((data) => data.nama),
-      type: "category",
-      labels: {
-        rotate: -45,
-        rotateAlways: true,
-      },
-    },
-    yaxis: {
-      title: {
-        text: "Total Penjualan (Rp)",
-      },
-    },
-    colors: ["#388e3c"],
-  };
-
-  const series = [
-    {
-      name: "Penjualan",
-      data: salesReport.map((data) => data.total_penjualan),
-    },
-  ];
   const getMonthName = (month) => {
     const monthNames = [
       "Januari",
@@ -172,7 +87,7 @@ const ReadPenjualanProduk = () => {
           className="mb-8 p-6 flex justify-between items-center"
         >
           <Typography variant="h6" color="white">
-            Laporan Penjualan Bulanan Produk
+            Laporan Pemasukan dan Pengeluaran
           </Typography>
           <div className="flex items-center gap-4">
             <Input
@@ -200,14 +115,6 @@ const ReadPenjualanProduk = () => {
             <Typography className="text-center">Loading...</Typography>
           ) : (
             <>
-              <div className="my-4">
-                <ReactApexChart
-                  options={chartOptions}
-                  series={series}
-                  type="line"
-                  height={350}
-                />
-              </div>
               <div className="flex flex-col md:flex-row justify-end items-center gap-4 p-4">
                 {showPDFViewer && (
                   <div className="">
@@ -248,14 +155,14 @@ const ReadPenjualanProduk = () => {
                 >
                   <PDFDownloadLink
                     document={
-                      <CetakPenjualanBulananProduk
+                      <CetakPemasukanPengeluaran
                         year={year}
                         month={month}
                         salesReport={salesReport}
-                        totalSales={totalSales}
+                        expensesReport={expensesReport}
                       />
                     }
-                    fileName={`Laporan_Penjualan_Bulanan_Produk_${getMonthName(
+                    fileName={`Laporan_Pemasukan_Pengeluaran_${getMonthName(
                       month
                     )}_${year}.pdf`}
                   >
@@ -268,11 +175,11 @@ const ReadPenjualanProduk = () => {
               {showPDFViewer ? (
                 <div className="relative">
                   <PDFViewer width="100%" height="600px">
-                    <CetakPenjualanBulananProduk
+                    <CetakPemasukanPengeluaran
                       year={year}
                       month={month}
                       salesReport={salesReport}
-                      totalSales={totalSales}
+                      expensesReport={expensesReport}
                     />
                   </PDFViewer>
                 </div>
@@ -280,21 +187,19 @@ const ReadPenjualanProduk = () => {
                 <table className="w-full min-w-[640px] table-auto mt-4">
                   <thead>
                     <tr>
-                      {["Nama Produk", "Total Jumlah", "Total Penjualan"].map(
-                        (el) => (
-                          <th
-                            key={el}
-                            className="border-b border-blue-gray-50 py-3 px-5 text-left"
+                      {["Nama", "Pengeluaran", "Pemasukan"].map((el) => (
+                        <th
+                          key={el}
+                          className="border-b border-blue-gray-50 py-3 px-5 text-left"
+                        >
+                          <Typography
+                            variant="small"
+                            className="text-[11px] font-bold uppercase text-blue-gray-400"
                           >
-                            <Typography
-                              variant="small"
-                              className="text-[11px] font-bold uppercase text-blue-gray-400"
-                            >
-                              {el}
-                            </Typography>
-                          </th>
-                        )
-                      )}
+                            {el}
+                          </Typography>
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
@@ -308,38 +213,70 @@ const ReadPenjualanProduk = () => {
                         </td>
                       </tr>
                     ) : (
-                      salesReport.map(
-                        ({ nama, total_jumlah, total_penjualan }, key) => {
-                          const className = `py-3 px-5 ${
-                            key === salesReport.length - 1
-                              ? ""
-                              : "border-b border-blue-gray-50"
-                          }`;
+                      salesReport.map(({ nama, total }, key) => {
+                        const className = `py-3 px-5 ${
+                          key === salesReport.length - 1
+                            ? ""
+                            : "border-b border-blue-gray-50"
+                        }`;
 
-                          return (
-                            <tr key={nama}>
-                              <td className={className}>
-                                <Typography
-                                  variant="small"
-                                  className="text-[11px] font-semibold text-blue-gray-600"
-                                >
-                                  {nama}
-                                </Typography>
-                              </td>
-                              <td className={className}>
-                                <Typography className="text-xs font-semibold text-blue-gray-600">
-                                  {total_jumlah}
-                                </Typography>
-                              </td>
-                              <td className={className}>
-                                <Typography className="text-xs font-semibold text-blue-gray-600">
-                                  {total_penjualan.toLocaleString("id-ID")}
-                                </Typography>
-                              </td>
-                            </tr>
-                          );
-                        }
-                      )
+                        return (
+                          <tr key={nama}>
+                            <td className={className}>
+                              <Typography
+                                variant="small"
+                                className="text-[11px] font-semibold text-blue-gray-600"
+                              >
+                                {nama}
+                              </Typography>
+                            </td>
+                            <td className={className}></td>
+                            <td className={className}>
+                              <Typography className="text-xs font-semibold text-blue-gray-600">
+                                {total.toLocaleString("id-ID")}
+                              </Typography>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                  <tbody>
+                    {expensesReport.length === 0 ? (
+                      <tr>
+                        <td
+                          className="p-10 text-center text-xs font-semibold text-blue-gray-600"
+                          colSpan="3"
+                        >
+                          Data Pengeluaran Tidak Ditemukan
+                        </td>
+                      </tr>
+                    ) : (
+                      expensesReport.map(({ nama, total }, key) => {
+                        const className = `py-3 px-5 ${
+                          key === expensesReport.length - 1
+                            ? ""
+                            : "border-b border-blue-gray-50"
+                        }`;
+
+                        return (
+                          <tr key={nama}>
+                            <td className={className}>
+                              <Typography
+                                variant="small"
+                                className="text-[11px] font-semibold text-blue-gray-600"
+                              >
+                                {nama}
+                              </Typography>
+                            </td>
+                            <td className={className}>
+                              <Typography className="text-xs font-semibold text-blue-gray-600">
+                                {total.toLocaleString("id-ID")}
+                              </Typography>
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
@@ -347,7 +284,11 @@ const ReadPenjualanProduk = () => {
               <div className="mt-4">
                 <Typography className="text-right text-lg font-semibold ml-auto mr-10">
                   Total Penjualan Bulan {getMonthName(month)} Tahun {year} :{" "}
-                  {totalSales.toLocaleString("id-ID")}
+                  {salesReport.reduce((acc, item) => acc + item.total, 0).toLocaleString("id-ID")}
+                </Typography>
+                <Typography className="text-right text-lg font-semibold ml-auto mr-10">
+                  Total Pengeluaran Bulan {getMonthName(month)} Tahun {year} :{" "}
+                  {expensesReport.reduce((acc, item) => acc + item.total, 0).toLocaleString("id-ID")}
                 </Typography>
               </div>
             </>
@@ -359,4 +300,4 @@ const ReadPenjualanProduk = () => {
   );
 };
 
-export default ReadPenjualanProduk;
+export default ReadPemasukanPengeluaran;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardHeader,
@@ -16,52 +16,23 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useParams, Link } from "react-router-dom";
 import { showTransaksiHistoryCustomer } from "../api/customer/TransaksiApi";
 import { getImage } from "../api";
+import { pesananCustomer } from "../api/customer/TransaksiApi";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const TABS = [
-  {
-    label: "Semua",
-    value: "Semua",
-  },
-  {
-    label: "Menunggu",
-    value: "-",
-  },
-  {
-    label: "Bayar",
-    value: "Belum Dibayar",
-  },
-  {
-    label: "Terbayar",
-    value: "Sudah Dibayar",
-  },
-  {
-    label: "Valid",
-    value: "Pembayaran Valid",
-  },
-  {
-    label: "Diterima",
-    value: "Diterima",
-  },
-  {
-    label: "Ditolak",
-    value: "Ditolak",
-  },
-  {
-    label: "Diproses",
-    value: "Diproses",
-  },
-  {
-    label: "Dikirim",
-    value: "Dikirim",
-  },
-  {
-    label: "Selesai",
-    value: "Selesai",
-  },
-  {
-    label: "Dibatalkan",
-    value: "Telat Bayar",
-  },
+  { label: "Semua", value: "Semua" },
+  { label: "Menunggu", value: "-" },
+  { label: "Bayar", value: "Belum Dibayar" },
+  { label: "Terbayar", value: "Sudah Dibayar" },
+  { label: "Valid", value: "Pembayaran Valid" },
+  { label: "Diterima", value: "Diterima" },
+  { label: "Ditolak", value: "Ditolak" },
+  { label: "Diproses", value: "Diproses" },
+  { label: "Dikirim", value: "Dikirim" }, // Custom filter
+  { label: "Dipickup", value: "Sudah di-pickup" },
+  { label: "Selesai", value: "Selesai" },
+  { label: "Dibatalkan", value: "Telat Bayar" },
 ];
 
 const TransaksiHistory = () => {
@@ -125,6 +96,18 @@ const TransaksiHistory = () => {
     }
   };
 
+  const updateStatus = async (id, newStatus) => {
+    console.log("ini idnya", id);
+    try {
+      await pesananCustomer({ status_transaksi: newStatus }, id);
+      fetchData();
+      toast.success("Status transaksi berhasil diubah");
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast.error("Status transaksi gagal diubah");
+    }
+  };
+
   const handleClickPrevious = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
   };
@@ -139,13 +122,19 @@ const TransaksiHistory = () => {
   const filteredData =
     selectedTab === "Semua"
       ? historyData.filter((item) =>
-          item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
+        item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
+      )
+      : selectedTab === "Dikirim"
+        ? historyData.filter(
+          (item) =>
+            (item.status === "Sedang dikirim kurir" || item.status === "Siap di-pickup") &&
+            item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
         )
-      : historyData.filter(
+        : historyData.filter(
           (item) =>
             item.status === selectedTab &&
             item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
-        ); 
+        );
 
   const groupedData = groupBy(filteredData, "id");
   const totalPages = Math.ceil(Object.keys(groupedData).length / itemsPerPage);
@@ -179,15 +168,15 @@ const TransaksiHistory = () => {
             </TabsHeader>
           </Tabs>
         </div>
-        
-          <div className="w-full md:w-72 flex justify-end">
-            <Input
-              label="Search"
-              icon={<MagnifyingGlassIcon className="h-5 w-5" />}
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-            />
-          </div>
+
+        <div className="w-full md:w-72 flex justify-end">
+          <Input
+            label="Search"
+            icon={<MagnifyingGlassIcon className="h-5 w-5" />}
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+          />
+        </div>
       </CardHeader>
 
       {!isLoading && (
@@ -199,6 +188,7 @@ const TransaksiHistory = () => {
                 key={index}
                 groupKey={groupKey}
                 items={groupedData[groupKey]}
+                updateStatus={updateStatus}
               />
             ))}
         </CardBody>
@@ -226,11 +216,12 @@ const TransaksiHistory = () => {
           </Button>
         </div>
       </CardFooter>
+      <ToastContainer />
     </Card>
   );
 };
 
-const TransactionCard = ({ groupKey, items }) => {
+const TransactionCard = ({ groupKey, items, updateStatus }) => {
   const [expanded, setExpanded] = useState(false);
   const firstItem = items[0];
 
@@ -257,18 +248,20 @@ const TransactionCard = ({ groupKey, items }) => {
           <Chip
             size="sm"
             variant="ghost"
-            value={firstItem.status === "Dikirim" ? 
+            value={firstItem.status === "Dikirim" ?
               (firstItem.jenisPengiriman === "Pickup" ? "Pickup" : "Diantar")
               : firstItem.status
             }
             color={
               firstItem.status === "Selesai" ? "green" :
-              firstItem.status === "Ditolak" ? "amber" :
-              firstItem.status === "Diterima" ? "blue" :
-              firstItem.status === "-" ? "purple" :
-              firstItem.status === "Belum Dibayar" ? "purple" :
-              firstItem.status === "Sudah Dibayar" ? "lightBlue" :
-              "red"
+                firstItem.status === "Sudah di-pickup" ? "amber" :
+                  firstItem.status === "Diterima" ? "blue" :
+                    firstItem.status === "-" ? "purple" :
+                      firstItem.status === "Belum Dibayar" ? "purple" :
+                        firstItem.status === "Sudah Dibayar" ? "lightBlue" :
+                          firstItem.status === "Sedang dikirim kurir" ? "indigo" :
+                            firstItem.status === "Siap di-pickup" ? "teal" :
+                              "red"
             }
           />
         </Typography>
@@ -308,12 +301,12 @@ const TransactionCard = ({ groupKey, items }) => {
                   item.produk.kategori === "Cake"
                     ? "green"
                     : item.produk.kategori === "Roti"
-                    ? "amber"
-                    : item.produk.kategori === "Minuman"
-                    ? "blue"
-                    : item.produk.kategori === "Titipan"
-                    ? "purple"
-                    : "red"
+                      ? "amber"
+                      : item.produk.kategori === "Minuman"
+                        ? "blue"
+                        : item.produk.kategori === "Titipan"
+                          ? "purple"
+                          : "red"
                 }
               />
             </div>
@@ -362,33 +355,34 @@ const TransactionCard = ({ groupKey, items }) => {
           </Link>
         </div>
       )}
-      {firstItem.status !== "Belum Dibayar" &&
-      firstItem.status !== "Ditolak" &&
-      firstItem.status !== "Telat Bayar" &&
-        firstItem.status !== "-" && (
+      <div className="flex justify-end gap-2">
+        {firstItem.status !== "Belum Dibayar" &&
+          firstItem.status !== "Ditolak" &&
+          firstItem.status !== "Telat Bayar" &&
+          firstItem.status !== "-" && (
+            <div className="flex justify-end items-center mt-4">
+              <Link to={`/nota/${groupKey}`}>
+                <Button variant="filled" color="lightBlue">
+                  Cetak Nota
+                </Button>
+              </Link>
+            </div>
+          )}
+        {firstItem.status === "Sedang dikirim kurir" && (
           <div className="flex justify-end items-center mt-4">
-            <Link to={`/nota/${groupKey}`}>
-              <Button variant="filled" color="lightBlue">
-                Cetak Nota
-              </Button>
-            </Link>
+            <Button variant="filled" color="blue" onClick={() => updateStatus(firstItem.id, "Sudah dipickup")}>
+              Sudah Dipickup
+            </Button>
           </div>
         )}
-        {firstItem.status === "Dikirim" && (
+        {firstItem.status === "Sudah di-pickup" && (
           <div className="flex justify-end items-center mt-4">
-            {/* <Link to={`/nota/${groupKey}`}> */}
-              <Button variant="filled" color="blue">
-                Selesai
-              </Button>
-            {/* </Link> */}
+            <Button variant="filled" color="blue" onClick={() => updateStatus(firstItem.id, "Selesai")}>
+              Selesai
+            </Button>
           </div>
         )}
-
-      {/* <div className="flex justify-end">
-                <Typography variant="paragraph" color="blue-gray" className="mb-2 col-span-2 flex justify-center items-center">
-                    Total : {firstItem.total}
-                </Typography>
-            </div> */}
+      </div>
     </div>
   );
 };

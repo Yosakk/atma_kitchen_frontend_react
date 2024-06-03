@@ -73,7 +73,7 @@ const ProfilePage = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen pt-20">
+        <div className="flex flex-col min-h-screen">
             <NavbarLogin />
             <div className="flex-grow flex justify-center">
                 <div className="border w-full  m-10 p-2 pt-6 pb-6 rounded-lg bg-white shadow-md " >
