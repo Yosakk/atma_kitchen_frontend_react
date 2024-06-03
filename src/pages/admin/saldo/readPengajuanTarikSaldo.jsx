@@ -22,6 +22,7 @@ import {
   showDataBahanBaku,
   deleteBahanBaku,
 } from "../../../api/admin/BahanBakuApi";
+import { showPenarikanSaldo, storePenarikanSaldo } from "../../../api/admin/PenarikanSaldoApi";
 
 const ReadPengajuanPenarikanSaldo = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,7 +31,7 @@ const ReadPengajuanPenarikanSaldo = () => {
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
-  const [bahanBakuData, setBahanBakuData] = useState([]);
+  const [penarikanSaldo, setPenarikanSaldo] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -39,8 +40,9 @@ const ReadPengajuanPenarikanSaldo = () => {
 
   const fetchData = async () => {
     try {
-      const response = await showDataBahanBaku();
-      setBahanBakuData(response.data);
+      const response = await showPenarikanSaldo();
+      const filteredData = response.data.filter(item => item.status_withdraw === 'Pending');
+      setPenarikanSaldo(filteredData);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -67,33 +69,41 @@ const ReadPengajuanPenarikanSaldo = () => {
     setIsModalAccOpen(false);
   };
 
-  const handleDelete = async () => {
-    if (!selectedWD) {
-      console.error("No bahan baku selected");
-      return;
-    }
-
-    console.log(selectedWD.id_bahan_baku);
-
+  const acceptWithdraw = async () => {
+    console.log("id", selectedWD.id_withdraw);
     try {
-      await deleteBahanBaku(selectedWD.id_bahan_baku); // Panggil deleteBahanBaku
-      fetchData();
-      console.log("Delete", selectedWD);
-      closeModal();
-      toast.success(`Berhasil menghapus ${selectedWD?.nama}`);
+      const response = await storePenarikanSaldo({status_withdraw: 'Approved'}, selectedWD.id_withdraw);
+      console.log(response);
+      toast.success("Berhasil Menerima Pengajuan Withdraw");
+      fetchData(); 
+      closeModalAcc();
     } catch (error) {
-      console.error("Error deleting bahan baku:", error);
-      toast.error("Gagal Menghapus Bahan Baku");
+      console.error("Error accepting withdraw:", error);
+      toast.error("Gagal Menerima Pengajuan Withdraw");
     }
   };
+  
+  const declinedWithdraw = async () => {
+    try {
+      const response = await storePenarikanSaldo({status_withdraw: 'Declined'}, selectedWD.id_withdraw,);
+      console.log(response);
+      toast.success("Berhasil Menolak Pengajuan Withdraw");
+      fetchData();
+      closeModalAcc();
+    } catch (error) {
+      console.error("Error declining withdraw:", error);
+      toast.error("Gagal Menolak Pengajuan Withdraw");
+    }
+  };
+  
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const bahanBakuTableData = bahanBakuData.map((item) => ({
-    id_bahan_baku: item.id_bahan_baku,
-    nama: item.nama_bahan_baku,
-    jumlahWD: item.stok_bahan_baku,
-    tanggal: item.satuan_bahan_baku,
+  const bahanBakuTableData = penarikanSaldo.map((item) => ({
+    id_withdraw: item.id_withdraw,
+    nama: item.pelanggan.user.nama_user,
+    jumlahWD: item.jumlah_withdraw,
+    tanggal: item.tanggal_withdraw,
   }));
   const currentItems = bahanBakuTableData
     .filter((item) =>
@@ -160,15 +170,14 @@ const ReadPengajuanPenarikanSaldo = () => {
                 </tr>
               ) : (
                 currentItems.map(
-                  ({ id_bahan_baku, nama, jumlahWD, tanggal }, key) => {
-                    const className = `py-3 px-5 ${
-                      key === currentItems.length - 1
+                  ({ id_withdraw, nama, jumlahWD, tanggal }, key) => {
+                    const className = `py-3 px-5 ${key === currentItems.length - 1
                         ? ""
                         : "border-b border-blue-gray-50"
-                    }`;
+                      }`;
 
                     return (
-                      <tr key={id_bahan_baku}>
+                      <tr key={id_withdraw}>
                         <td className={className}>
                           <Typography
                             variant="small"
@@ -193,7 +202,7 @@ const ReadPengajuanPenarikanSaldo = () => {
                               to=""
                               onClick={() =>
                                 openModalAcc({
-                                  id_bahan_baku,
+                                  id_withdraw,
                                   nama,
                                   jumlahWD,
                                   tanggal,
@@ -213,7 +222,7 @@ const ReadPengajuanPenarikanSaldo = () => {
                               className="inline-block bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
                               onClick={() =>
                                 openModal({
-                                  id_bahan_baku,
+                                  id_withdraw,
                                   nama,
                                   jumlahWD,
                                   tanggal,
@@ -248,11 +257,10 @@ const ReadPengajuanPenarikanSaldo = () => {
                 <button
                   key={index}
                   onClick={() => paginate(index + 1)}
-                  className={`${
-                    currentPage === index + 1
+                  className={`${currentPage === index + 1
                       ? "bg-blue-500 text-white"
                       : "bg-white text-gray-700"
-                  } px-3 py-1 border border-gray-300 text-sm font-medium`}
+                    } px-3 py-1 border border-gray-300 text-sm font-medium`}
                 >
                   {index + 1}
                 </button>
@@ -287,7 +295,7 @@ const ReadPengajuanPenarikanSaldo = () => {
               </button>
               <button
                 className="px-4 py-2 bg-red-500 text-white rounded-md"
-                // onClick={handleDelete}
+                onClick={declinedWithdraw}
               >
                 Yakin
               </button>
@@ -315,7 +323,7 @@ const ReadPengajuanPenarikanSaldo = () => {
               </button>
               <button
                 className="px-4 py-2 bg-blue-500 text-white rounded-md"
-                // onClick={handleDelete}
+                onClick={acceptWithdraw}
               >
                 Yakin
               </button>

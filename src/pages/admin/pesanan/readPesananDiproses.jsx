@@ -13,6 +13,9 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useParams, Link } from "react-router-dom";
 import { showAllTransaksiHistoryCustomer } from "../../../api/customer/TransaksiApi";
 import { getImage } from "../../../api";
+import { editStatusTransaksiAdmin } from "../../../api/customer/TransaksiApi";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ReadPesananDiproses = () => {
   let { id } = useParams();
@@ -49,13 +52,10 @@ const ReadPesananDiproses = () => {
         total: item.transaksi.total_pembayaran,
         nomorNota: item.transaksi.nomor_nota,
         statusPengiriman: item.transaksi.jenis_pengiriman
-
-        
-        
       }));
       setHistoryData(mappedData);
       setIsLoading(false);
-      
+
     } catch (error) {
       console.error("Error fetching data:", error);
       setIsLoading(false);
@@ -65,6 +65,19 @@ const ReadPesananDiproses = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const editStatusByAdmin = async (idTransaksi, newStatus) => {
+    try {
+      const response = await editStatusTransaksiAdmin(idTransaksi, { status_transaksi: newStatus });
+      console.log("Status transaksi berhasil diubah:", response);
+      toast.success("Status transaksi berhasil diubah");
+      fetchData();
+    } catch (error) {
+      console.error("Error mengubah status transaksi:", error);
+      toast.error("Gagal mengubah status transaksi");
+    }
+  };
+  
 
   const handleClickPrevious = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
@@ -113,6 +126,7 @@ const ReadPesananDiproses = () => {
                 key={index}
                 groupKey={groupKey}
                 items={groupedData[groupKey]}
+                editStatusByAdmin={editStatusByAdmin} // Pass editStatusByAdmin as a prop
               />
             ))}
         </CardBody>
@@ -140,11 +154,12 @@ const ReadPesananDiproses = () => {
           </Button>
         </div>
       </CardFooter>
+      <ToastContainer />
     </Card>
   );
 };
 
-const TransactionCard = ({ groupKey, items }) => {
+const TransactionCard = ({ groupKey, items, editStatusByAdmin }) => {
   const [expanded, setExpanded] = useState(false);
   const firstItem = items[0];
 
@@ -190,7 +205,7 @@ const TransactionCard = ({ groupKey, items }) => {
             />
           </div>
           <div className="col-span-3">
-          <div className="flex items-center">
+            <div className="flex items-center">
               <Typography variant="h5" color="blue-gray" className="mb-2 mr-3">
                 {item.produk.nama}
               </Typography>
@@ -271,18 +286,24 @@ const TransactionCard = ({ groupKey, items }) => {
       <div className="flex justify-end items-center mt-4">
         {/* Jika jenis pengiriman adalah 'antar', tampilkan tombol "Kirim Pesanan" */}
         {firstItem.statusPengiriman === "Diantar" ? (
-          <Link to={`/admin/konfirmasi/add/${groupKey}`}>
-            <Button variant="filled" size="sm" color="blue">
-              Kirim Pesanan
-            </Button>
-          </Link>
+          <Button
+            variant="filled"
+            size="sm"
+            color="blue"
+            onClick={() => editStatusByAdmin(firstItem.id, "Siap di-pickup")}
+          >
+            Kirim Pesanan
+          </Button>
         ) : (
           // Jika jenis pengiriman adalah 'pickup', tampilkan tombol "Selesai"
-          <Link to={`/admin/konfirmasi/add/${groupKey}`}>
-            <Button variant="filled" size="sm" color="green">
-              Siap Di Pickup
-            </Button>
-          </Link>
+          <Button
+            variant="filled"
+            size="sm"
+            color="green"
+            onClick={() => editStatusByAdmin(firstItem.id, "Sedang dikirim kurir")}
+          >
+            Siap Di Pickup
+          </Button>
         )}
       </div>
     </div>

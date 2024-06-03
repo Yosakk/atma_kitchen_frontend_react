@@ -18,10 +18,16 @@ import {
 } from "@material-tailwind/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useParams, Link } from "react-router-dom";
-import { showAllTransaksiHistoryCustomer } from "../../../api/customer/TransaksiApi";
+import { showAllTransaksiHistoryCustomer, statusPesananTelat } from "../../../api/customer/TransaksiApi"; // Updated import
 import { getImage } from "../../../api";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const TABS = [
+  {
+    label: "Belum Bayar",
+    value: "Belum Bayar",
+  },
   {
     label: "Sudah Dibayar",
     value: "Sudah Dibayar",
@@ -108,9 +114,7 @@ const ReadKonfirmasiPembayaran = () => {
   };
 
   const handleConfirmTelatBayar = async () => {
-    // Handle the "Telat Bayar" action here, e.g., update the transaction status in your database.
     console.log("Transaction marked as Telat Bayar:", currentTransactionId);
-    // Close the modal after handling the action.
     setAcceptModalOpen(false);
   };
 
@@ -123,6 +127,17 @@ const ReadKonfirmasiPembayaran = () => {
 
   const groupedData = groupBy(filteredData, "id");
   const totalPages = Math.ceil(Object.keys(groupedData).length / itemsPerPage);
+
+  const updateStatus = async (transactionId, status) => {
+    try {
+      await statusPesananTelat({ status_transaksi: status }, transactionId);
+      fetchData(); // Refresh data
+      toast.success("Status transaksi berhasil diubah");
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast.error("Status transaksi gagal diubah");
+    }
+  };
 
   return (
     <Card className="h-full w-full">
@@ -171,6 +186,7 @@ const ReadKonfirmasiPembayaran = () => {
                 items={groupedData[groupKey]}
                 setCurrentTransactionId={setCurrentTransactionId}
                 setAcceptModalOpen={setAcceptModalOpen}
+                updateStatus={updateStatus} // Pass updateStatus function as prop
               />
             ))}
         </CardBody>
@@ -214,6 +230,7 @@ const ReadKonfirmasiPembayaran = () => {
           </Button>
         </DialogFooter>
       </Dialog>
+      <ToastContainer />
     </Card>
   );
 };
@@ -222,7 +239,8 @@ const TransactionCard = ({
   groupKey,
   items,
   setCurrentTransactionId,
-  setAcceptModalOpen
+  setAcceptModalOpen,
+  updateStatus // Accept updateStatus function as prop
 }) => {
   const [expanded, setExpanded] = useState(false);
   const firstItem = items[0];
@@ -291,12 +309,12 @@ const TransactionCard = ({
                   item.produk.kategori === "Cake"
                     ? "green"
                     : item.produk.kategori === "Roti"
-                    ? "amber"
-                    : item.produk.kategori === "Minuman"
-                    ? "blue"
-                    : item.produk.kategori === "Titipan"
-                    ? "purple"
-                    : "red"
+                      ? "amber"
+                      : item.produk.kategori === "Minuman"
+                        ? "blue"
+                        : item.produk.kategori === "Titipan"
+                          ? "purple"
+                          : "red"
                 }
               />
             </div>
@@ -336,25 +354,25 @@ const TransactionCard = ({
           </Typography>
         </div>
       </div>
-      <div className="flex justify-end items-center mt-4">
+      <div className="flex justify-end items-center">
         {firstItem.status === "Sudah Dibayar" && (
           <div className="flex justify-end items-center mt-4 gap-4">
-            {/* <Button
-              variant="filled"
-              size="sm"
-              color="red"
-              onClick={() => {
-                setCurrentTransactionId(groupKey); // Set the current transaction ID
-                setAcceptModalOpen(true); // Open the accept modal
-              }}
-            >
-              Telat Bayar
-            </Button> */}
             <Link to={`/admin/konfirmasi/add/${groupKey}`}>
               <Button variant="filled" size="sm" color="blue">
                 Konfirmasi
               </Button>
             </Link>
+          </div>
+        )}
+        {firstItem.status === "Belum Bayar" && (
+          <div className="flex justify-end items-center mt-4">
+            <Button
+              variant="filled"
+              color="blue"
+              onClick={() => updateStatus(firstItem.id, "Telat Bayar")} // Use updateStatus function
+            >
+              Telat Bayar
+            </Button>
           </div>
         )}
       </div>
