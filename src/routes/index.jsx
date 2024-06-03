@@ -74,6 +74,7 @@ import ReadStokBahanBaku from "../pages/laporan/readStokBahanBaku";
 import ReadPemasukanPengeluaran from "../pages/laporan/readPemasukanPengeluaran";
 import ReadPresensiGaji from "../pages/laporan/readPresensiGaji";
 import ReadPesananDikirim from "../pages/admin/pesanan/readPesananDikirim";
+import ReadKomisiPenitip from "../pages/laporan/readKomisiPenitip";
 
 
 
@@ -373,6 +374,10 @@ const router = createBrowserRouter([
       {
         path: "/presensiPegawai",
         element: <ReadPresensiGaji/>
+      },
+      {
+        path: "/transaksiPenitip",
+        element: <ReadKomisiPenitip/>
       },
     ],
   },

@@ -60,6 +60,10 @@ const LoginPage = () => {
                 sessionStorage.setItem("isLogin", true);
                 sessionStorage.setItem("user", JSON.stringify(res.data));
                 setIsLoggedIn(true);
+
+                // Menyimpan peran pengguna dalam penyimpanan sesi
+                sessionStorage.setItem("userRole", res.user.pegawai.jabatan);
+                console.log("ini role nya", res.user.pegawai.jabatan);
                 if (res.user.role === "Pelanggan") {
                     console.log("Masuk Sebagai Pelanggan");
                     navigate(`/home`);

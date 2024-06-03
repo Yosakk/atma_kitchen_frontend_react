@@ -1,92 +1,82 @@
-import React, { useState, useEffect } from "react";
-import { ToastContainer, toast } from "react-toastify";
+import React, { useState, useEffect, useCallback } from "react";
+import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Link } from "react-router-dom";
 import {
   Card,
   CardHeader,
   CardBody,
   Typography,
-  Button,
   Input,
+  Button,
 } from "@material-tailwind/react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { generateLaporanPenggunaanBahanBaku } from "../../api/admin/LaporanApi";
-import {
-  PDFViewer,
-  PDFDownloadLink,
-} from "@react-pdf/renderer";
-import CetakStokBahanBaku from "./cetakStokBahanBaku";
+import CetakPenggunaanBahan from "./cetakPenggunaanBahan";
+
+
+// Function to format date to yyyy-mm-dd
+const formatDate = (date) => {
+  const d = new Date(date);
+  let month = "" + (d.getMonth() + 1);
+  let day = "" + d.getDate();
+  const year = d.getFullYear();
+
+  if (month.length < 2) month = "0" + month;
+  if (day.length < 2) day = "0" + day;
+
+  return [year, month, day].join("-");
+};
+
+// Get today's date and yesterday's date
+const today = new Date();
+const yesterday = new Date(today);
+yesterday.setDate(yesterday.getDate() - 1);
 
 const ReadPenggunaanBahanBaku = () => {
-  const [searchValue, setSearchValue] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
-  const [bahanBakuData, setBahanBakuData] = useState([]);
+  const [tanggalAwal, setTanggalAwal] = useState(formatDate(yesterday));
+  const [tanggalAkhir, setTanggalAkhir] = useState(formatDate(today));
   const [isLoading, setIsLoading] = useState(true);
   const [showPDFViewer, setShowPDFViewer] = useState(false);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [penggunaanBahanData, setPenggunaanBahanData] = useState([]);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await generateLaporanPenggunaanBahanBaku({
+        tanggal_awal: tanggalAwal,
+        tanggal_akhir: tanggalAkhir,
+      });
+      setPenggunaanBahanData(response.laporan_penggunaan_bahan_baku);
+      setIsLoading(false);
+    } catch (error) {
+      setPenggunaanBahanData([]);
+      console.error("Error fetching data:", error);
+      setIsLoading(false);
+    }
+  }, [tanggalAwal, tanggalAkhir]);
 
   useEffect(() => {
-    // Set startDate to yesterday
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    setStartDate(yesterday.toISOString().split('T')[0]);
+    fetchData();
+  }, [fetchData]);
 
-    // Set endDate to today
-    const today = new Date();
-    setEndDate(today.toISOString().split('T')[0]);
-
-    fetchData(); // Fetch data with default dates
-  }, [startDate,endDate]);
-
-  const fetchData = async () => {
-    try {
-      setIsLoading(true); // Set loading state to true before fetching
-      const response = await generateLaporanPenggunaanBahanBaku({
-        tanggal_awal: startDate,
-        tanggal_akhir: endDate,
-      });
-      setBahanBakuData(response.data);
-      setIsLoading(false); // Set loading state to false after fetching
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setIsLoading(false); // Set loading state to false if there's an error
-      // You can handle the error here, e.g., show a toast message
-      toast.error("Failed to fetch data. Please try again later.");
-    }
+  const handleTanggalAwalChange = (e) => {
+    setTanggalAwal(e.target.value);
   };
-  
 
-  const bahanBakuTableData = bahanBakuData.map((item) => ({
-    // id_bahan_baku: item.id_bahan_baku,
-    nama: item.nama_bahan_baku,
-    stok: item.total_jumlah_pemakaian,
-    satuan: item.satuan_bahan_baku,
-  }));
+  const handleTanggalAkhirChange = (e) => {
+    setTanggalAkhir(e.target.value);
+  };
 
-  const handleViewPDF = () => setShowPDFViewer(true);
-  const handleClosePDFViewer = () => setShowPDFViewer(false);
+  const handleViewPDF = () => {
+    setShowPDFViewer(true);
+  };
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = bahanBakuTableData
-    .filter((item) =>
-      Object.values(item)
-        .join(" ")
-        .toLowerCase()
-        .includes(searchValue.toLowerCase())
-    )
-    .slice(indexOfFirstItem, indexOfLastItem);
-
-  const totalPages = Math.ceil(bahanBakuTableData.length / itemsPerPage);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const handleClosePDFViewer = () => {
+    setShowPDFViewer(false);
+  };
 
   return (
-    <div className="mt-12 mb-8 flex flex-col gap-12">
+    <div className="mt-12 mb-8 flex flex-col gap-12 mx-10">
       <Card>
         <CardHeader
           variant="gradient"
@@ -94,90 +84,107 @@ const ReadPenggunaanBahanBaku = () => {
           className="mb-8 p-6 flex justify-between items-center"
         >
           <Typography variant="h6" color="white">
-            Penggunaan Bahan Baku
+            Laporan Penggunaan Bahan Baku
           </Typography>
+          <div className="flex items-center gap-4">
+            <Input
+              type="date"
+              color="white"
+              value={tanggalAwal}
+              onChange={handleTanggalAwalChange}
+              className="mr-4"
+              placeholder="Tanggal Awal"
+              label="Tanggal Awal"
+            />
+            <Input
+              type="date"
+              color="white"
+              value={tanggalAkhir}
+              onChange={handleTanggalAkhirChange}
+              className="mr-4"
+              placeholder="Tanggal Akhir"
+              label="Tanggal Akhir"
+            />
+          </div>
         </CardHeader>
         <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
-          <div className="ml-auto mt-1 mb-4 mr-4 w-56 flex justify-end items-center">
-            <div className="flex gap-4">
-              <Input
-                label="Start Date"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-              <Input
-                label="End Date"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </div>
-            <div className="flex flex-col md:flex-row justify-end items-center gap-4 p-4">
-              {showPDFViewer && (
-                <div className="">
-                  <Button
-                    color="red"
-                    buttonType="filled"
-                    rounded={false}
-                    block={false}
-                    iconOnly={false}
-                    ripple="light"
-                    className="py-2 px-4 mr-10"
-                    onClick={handleClosePDFViewer}
-                  >
-                    Close PDF
-                  </Button>
-                </div>
-              )}
-              <Button
-                color="green"
-                buttonType="filled"
-                rounded={false}
-                block={false}
-                iconOnly={false}
-                ripple="light"
-                className="py-2 px-4 ml-5 mr-5"
-                onClick={handleViewPDF}
-              >
-                View PDF
-              </Button>
-              <Button
-                color="blue"
-                buttonType="filled"
-                rounded={false}
-                block={false}
-                iconOnly={false}
-                ripple="light"
-                className="py-2 px-4"
-              >
-                <PDFDownloadLink
-                  document={<CetakStokBahanBaku data={bahanBakuTableData} />}
-                  fileName={`Laporan_Stok_Bahan_Baku.pdf`}
-                >
-                  {({ loading }) =>
-                    loading ? "Loading document..." : "Download PDF"
-                  }
-                </PDFDownloadLink>
-              </Button>
-            </div>
-          </div>
-          
           {isLoading ? (
             <Typography className="text-center">Loading...</Typography>
           ) : (
             <>
+              <div className="flex flex-col md:flex-row justify-end items-center gap-4 p-4">
+                {showPDFViewer && (
+                  <div className="">
+                    <Button
+                      color="red"
+                      buttonType="filled"
+                      rounded={false}
+                      block={false}
+                      iconOnly={false}
+                      ripple="light"
+                      className="py-2 px-4 mr-10"
+                      onClick={handleClosePDFViewer}
+                    >
+                      Close PDF
+                    </Button>
+                  </div>
+                )}
+                <Button
+                  color="green"
+                  buttonType="filled"
+                  rounded={false}
+                  block={false}
+                  iconOnly={false}
+                  ripple="light"
+                  className="py-2 px-4 ml-5 mr-5"
+                  onClick={handleViewPDF}
+                >
+                  View PDF
+                </Button>
+                <Button
+                  color="blue"
+                  buttonType="filled"
+                  rounded={false}
+                  block={false}
+                  iconOnly={false}
+                  ripple="light"
+                  className="py-2 px-4"
+                >
+                  <PDFDownloadLink
+                    document={
+                      <CetakPenggunaanBahan
+                        tanggalAwal={tanggalAwal}
+                        tanggalAkhir={tanggalAkhir}
+                        penggunaanBahanData={penggunaanBahanData}
+                      />
+                    }
+                    fileName={`Laporan_Penggunaan_Bahan_Baku_${tanggalAwal}_${tanggalAkhir}.pdf`}
+                  >
+                    {({ loading }) =>
+                      loading ? "Loading document..." : "Download PDF"
+                    }
+                  </PDFDownloadLink>
+                </Button>
+              </div>
               {showPDFViewer ? (
-                <div className="relative z-50">
-                  <PDFViewer width="100%" height="500px">
-                    <CetakStokBahanBaku data={bahanBakuTableData} />
+                <div className="relative">
+                  <PDFViewer width="100%" height="600px">
+                    <CetakPenggunaanBahan
+                      tanggalAwal={tanggalAwal}
+                      tanggalAkhir={tanggalAkhir}
+                      penggunaanBahanData={penggunaanBahanData}
+                    />
                   </PDFViewer>
                 </div>
               ) : (
-                <table className="w-full min-w-[640px] table-auto">
+                <table className="w-full min-w-[640px] table-auto mt-4">
                   <thead>
                     <tr>
-                      {["Nama Bahan Baku", "Stok"].map((el) => (
+                      {[
+                        "Nama Bahan",
+                        "Satuan",
+                        "Digunakan",
+                      ].map((el) => (
                         <th
                           key={el}
                           className="border-b border-blue-gray-50 py-3 px-5 text-left"
@@ -193,7 +200,38 @@ const ReadPenggunaanBahanBaku = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {currentItems.length === 0 ? (
+                    {penggunaanBahanData.length > 0 ? (
+                      penggunaanBahanData.map((item, key) => {
+                        const className = `py-3 px-5 ${
+                          key === penggunaanBahanData.length - 1
+                            ? ""
+                            : "border-b border-blue-gray-50"
+                        }`;
+
+                        return (
+                          <tr key={item.nama_bahan_baku}>
+                            <td className={className}>
+                              <Typography
+                                variant="small"
+                                className="text-[11px] font-semibold text-blue-gray-600"
+                              >
+                                {item.nama_bahan_baku}
+                              </Typography>
+                            </td>
+                            <td className={className}>
+                              <Typography className="text-xs font-semibold text-blue-gray-600">
+                                {item.satuan_bahan_baku}
+                              </Typography>
+                            </td>
+                            <td className={className}>
+                              <Typography className="text-xs font-semibold text-blue-gray-600">
+                                {item.total_jumlah_pemakaian}
+                              </Typography>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
                       <tr>
                         <td
                           className="p-10 text-center text-xs font-semibold text-blue-gray-600"
@@ -202,70 +240,12 @@ const ReadPenggunaanBahanBaku = () => {
                           Data Tidak Ditemukan
                         </td>
                       </tr>
-                    ) : (
-                      currentItems.map(
-                        ({ id_bahan_baku, nama, stok, satuan }, key) => {
-                          const className = `py-3 px-5 ${
-                            key === currentItems.length - 1
-                              ? ""
-                              : "border-b border-blue-gray-50"
-                          }`;
-                          return (
-                            <tr key={id_bahan_baku}>
-                              <td className={className}>
-                                <Typography
-                                  variant="small"
-                                  className="text-[11px] font-semibold text-blue-gray-600"
-                                >
-                                  {nama}
-                                </Typography>
-                              </td>
-                              <td className={className}>
-                                <Typography className="text-xs font-semibold text-blue-gray-600">
-                                  {stok} {satuan}
-                                </Typography>
-                              </td>
-                            </tr>
-                          );
-                        }
-                      )
                     )}
                   </tbody>
                 </table>
               )}
             </>
           )}
-          <div className="mt-4 flex justify-end">
-            <nav className="relative z-0 inline-flex">
-              <button
-                onClick={() => paginate(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="px-3 py-1 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
-                Previous
-              </button>
-              {[...Array(totalPages)].map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => paginate(index + 1)}
-                  className={`px-3 py-1 border border-gray-300 text-sm font-medium ${
-                    currentPage === index + 1
-                      ? "bg-blue-500 text-white"
-                      : "bg-white text-gray-700"
-                  }`}
-                >
-                  {index + 1}
-                </button>
-              ))}
-              <button
-                onClick={() => paginate(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 mr-4"
-              >
-                Next
-              </button>
-            </nav>
-          </div>
         </CardBody>
       </Card>
       <ToastContainer />

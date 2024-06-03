@@ -22,19 +22,19 @@ import "react-toastify/dist/ReactToastify.css";
 
 const TABS = [
   {
-    label: "Diproses",
-    value: "Diproses",
+    label: "Terkirim",
+    value: ["Sedang dikirim kurir", "Siap di-pickup"]
   },
   {
-    label: "Dikirim",
-    value: "Dikirim",
+    label: "Dipickup",
+    value: ["Sudah di-pickup"],
   },
 ];
 
 const ReadPesananDikirim = () => {
   let { id } = useParams();
   console.log("masuk history", id);
-  const [selectedTab, setSelectedTab] = useState("Diproses");
+  const [selectedTab, setSelectedTab] = useState(TABS[0].value);
   const [historyData, setHistoryData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,9 +45,13 @@ const ReadPesananDikirim = () => {
     try {
       console.log("masuk fetch", id);
       const response = await showAllTransaksiHistoryCustomer();
-      const filteredData = response.data.filter(
-        (item) => item.transaksi && item.transaksi.status_transaksi === selectedTab
-      );
+      const filteredData = response.data.filter((item) => {
+        const statusIncluded = selectedTab.includes(item.transaksi.status_transaksi);
+        if (selectedTab.includes("Sudah di-pickup")) {
+          return statusIncluded && item.transaksi.jenis_pengiriman === "Pickup";
+        }
+        return statusIncluded;
+      });
       const mappedData = filteredData.map((item) => ({
         id: item.transaksi.id_transaksi,
         tanggal: item.transaksi.tanggal_transaksi,
@@ -91,7 +95,7 @@ const ReadPesananDikirim = () => {
       toast.error("Gagal mengubah status transaksi");
     }
   };
-  
+
 
   const handleClickPrevious = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
@@ -219,9 +223,9 @@ const TransactionCard = ({ groupKey, items, editStatusByAdmin }) => {
             variant="ghost"
             value={firstItem.status}
             color={
-              firstItem.status === "Sudah Dibayar"
-                ? "green"
-                : "red"
+              firstItem.status === "Siap di-pickup"
+                ? "indigo"
+                : "cyan"
             }
           />
         </Typography>
@@ -316,24 +320,24 @@ const TransactionCard = ({ groupKey, items, editStatusByAdmin }) => {
 
       <div className="flex justify-end items-center mt-4">
         {/* Jika jenis pengiriman adalah 'antar', tampilkan tombol "Kirim Pesanan" */}
-        {firstItem.statusPengiriman === "Diantar" ? (
+        {(firstItem.status === "Sedang dikirim kurir" || firstItem.status === "Siap di-pickup") && (
           <Button
             variant="filled"
             size="sm"
             color="blue"
-            onClick={() => editStatusByAdmin(firstItem.id, "Siap di-pickup")}
+            onClick={() => editStatusByAdmin(firstItem.id, "Sudah di-pickup")}
           >
-            Kirim Pesanan
+            Sudah di-pickup
           </Button>
-        ) : (
-          // Jika jenis pengiriman adalah 'pickup', tampilkan tombol "Selesai"
+        )}
+        {firstItem.statusPengiriman === "Pickup" && firstItem.status === "Sudah di-pickup" && (
           <Button
             variant="filled"
             size="sm"
             color="green"
-            onClick={() => editStatusByAdmin(firstItem.id, "Sedang dikirim kurir")}
+            onClick={() => editStatusByAdmin(firstItem.id, "Selesai")}
           >
-            Siap Di Pickup
+            Selesai
           </Button>
         )}
       </div>

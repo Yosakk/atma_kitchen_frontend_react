@@ -94,3 +94,18 @@ export const generateLaporanPresensiPegawai = async (data) => {
         throw error.response.data;
     }
 }
+export const generateLaporanKomisiPenitip = async (data) => {
+    const token = sessionStorage.getItem("token");
+    try {
+        const response = await urlAxios.post("/laporan/rekap/penitip", data, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { PDFViewer, PDFDownloadLink } from "@react-pdf/renderer";
-import { ToastContainer, toast } from "react-toastify";
+import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
   Card,
@@ -10,34 +10,46 @@ import {
   Input,
   Button,
 } from "@material-tailwind/react";
-import CetakPemasukanPengeluaran from "./cetakPemasukanPengeluaran";
 import { generateLaporanPresensiPegawai } from "../../api/admin/LaporanApi";
+import CetakPresensiGaji from "./cetakPresensiGaji";
 
 const ReadPresensiGaji = () => {
   const [year, setYear] = useState(new Date().getFullYear());
   const [month, setMonth] = useState(new Date().getMonth() + 1);
-  const [attendanceReport, setAttendanceReport] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showPDFViewer, setShowPDFViewer] = useState(false);
+  const [presensiData, setPresensiData] = useState([]);
 
   useEffect(() => {
-    fetchReportData();
+    fetchData();
   }, [year, month]);
 
-  const fetchReportData = async () => {
+  const fetchData = async () => {
     setIsLoading(true);
     try {
       const response = await generateLaporanPresensiPegawai({
         tahun: year,
         bulan: month,
       });
-      setAttendanceReport(response.data);
+      setPresensiData(response.data);
       setIsLoading(false);
     } catch (error) {
-      console.error("Error fetching report data:", error);
-      // toast.error("Failed to fetch attendance report");
+      setPresensiData([]);
+      console.error("Error fetching data:", error);
       setIsLoading(false);
     }
+  };
+
+  const handleYearChange = (e) => {
+    setYear(e.target.value);
+    setPresensiData([]); // Mengosongkan presensiData saat mengubah tahun
+    fetchData();
+  };
+
+  const handleMonthChange = (e) => {
+    setMonth(e.target.value);
+    setPresensiData([]); // Mengosongkan presensiData saat mengubah bulan
+    fetchData();
   };
 
   const handleViewPDF = () => {
@@ -82,7 +94,7 @@ const ReadPresensiGaji = () => {
               type="number"
               color="white"
               value={year}
-              onChange={(e) => setYear(e.target.value)}
+              onChange={handleYearChange}
               className="mr-4"
               placeholder="Year"
               label="Tahun"
@@ -91,7 +103,7 @@ const ReadPresensiGaji = () => {
               type="number"
               color="white"
               value={month}
-              onChange={(e) => setMonth(e.target.value)}
+              onChange={handleMonthChange}
               className="mr-4"
               placeholder="Month"
               label="Bulan"
@@ -142,14 +154,14 @@ const ReadPresensiGaji = () => {
                   className="py-2 px-4"
                 >
                   <PDFDownloadLink
-                    // document={
-                    //   <CetakPemasukanPengeluaran
-                    //     year={year}
-                    //     month={month}
-                    //     attendanceReport={attendanceReport}
-                    //   />
-                    // }
-                    fileName={`Laporan_Presensi_Gaji_${getMonthName(
+                    document={
+                      <CetakPresensiGaji
+                        year={year}
+                        month={month}
+                        presensiData={presensiData} // Menggunakan presensiData sebagai presensiData
+                      />
+                    }
+                    fileName={`Laporan_Presensi_Gaji_Pegawai_${getMonthName(
                       month
                     )}_${year}.pdf`}
                   >
@@ -161,13 +173,13 @@ const ReadPresensiGaji = () => {
               </div>
               {showPDFViewer ? (
                 <div className="relative">
-                  {/* <PDFViewer width="100%" height="600px">
-                    <CetakPemasukanPengeluaran
+                  <PDFViewer width="100%" height="600px">
+                    <CetakPresensiGaji
                       year={year}
                       month={month}
-                      attendanceReport={attendanceReport}
+                      presensiData={presensiData} // Menggunakan presensiData sebagai presensiData
                     />
-                  </PDFViewer> */}
+                  </PDFViewer>
                 </div>
               ) : (
                 <table className="w-full min-w-[640px] table-auto mt-4">
@@ -196,56 +208,49 @@ const ReadPresensiGaji = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {isLoading ? (
-                      <tr>
-                        <td
-                          className="p-10 text-center text-xs font-semibold text-blue-gray-600"
-                          colSpan="6"
-                        >
-                          Loading...
-                        </td>
-                      </tr>
-                    ) : attendanceReport?.length >= 0 ? (
-                      attendanceReport.map((item, key) => {
+                    {presensiData.length > 0 ? (
+                      presensiData.map((item, key) => {
                         const className = `py-3 px-5 ${
-                          key === attendanceReport.length - 1
+                          key === presensiData.length - 1
                             ? ""
                             : "border-b border-blue-gray-50"
                         }`;
 
                         return (
-                          <tr key={item.namaPegawai}>
+                          <tr key={item.nama_pegawai}>
                             <td className={className}>
                               <Typography
                                 variant="small"
                                 className="text-[11px] font-semibold text-blue-gray-600"
                               >
-                                {item.namaPegawai}
+                                {item.nama_pegawai}
                               </Typography>
                             </td>
                             <td className={className}>
                               <Typography className="text-xs font-semibold text-blue-gray-600">
-                                {item.jumlahHadir}
+                                {item.jumlah_hadir}
                               </Typography>
                             </td>
                             <td className={className}>
                               <Typography className="text-xs font-semibold text-blue-gray-600">
-                                {item.jumlahAlpa}
+                                {item.jumlah_alpa}
                               </Typography>
                             </td>
                             <td className={className}>
                               <Typography className="text-xs font-semibold text-blue-gray-600">
-                                {item.honorHarian}
+                                {item.honor_harian.toLocaleString("id-ID")}
                               </Typography>
                             </td>
                             <td className={className}>
                               <Typography className="text-xs font-semibold text-blue-gray-600">
-                                {item.bonusRajin}
+                                {item.bonus_rajin
+                                  ? item.bonus_rajin.toLocaleString("id-ID")
+                                  : "-"}
                               </Typography>
                             </td>
                             <td className={className}>
                               <Typography className="text-xs font-semibold text-blue-gray-600">
-                                {item.totalHonor}
+                                {item.total_honor.toLocaleString("id-ID")}
                               </Typography>
                             </td>
                           </tr>
@@ -264,16 +269,6 @@ const ReadPresensiGaji = () => {
                   </tbody>
                 </table>
               )}
-              {/* <div className="mt-4">
-                <Typography className="text-right text-lg font-semibold ml-auto mr-10">
-                  Total Honor Bulan {getMonthName(month)} Tahun {year} :{" "}
-                  {attendanceReport.length > 0
-                    ? attendanceReport
-                        .reduce((acc, item) => acc + item.totalHonor, 0)
-                        
-                    : 0}
-                </Typography>
-              </div> */}
             </>
           )}
         </CardBody>

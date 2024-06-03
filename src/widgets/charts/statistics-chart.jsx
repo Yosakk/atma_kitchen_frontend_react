@@ -9,37 +9,52 @@ import {
 import PropTypes from "prop-types";
 import Chart from "react-apexcharts";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export function StatisticsChart({ color, chart, title, description, footer }) {
   const navigate = useNavigate();
 
+  // Mendapatkan peran pengguna dari penyimpanan sesi
+  const userRole = sessionStorage.getItem("userRole");
+
   const handleButtonClick = (chartTitle) => {
     return () => {
-      switch (chartTitle) {
-        case "Penjualan Bulanan":
-          navigate("/penjualanBulanan");
-          break;
-        case "Penjualan Produk":
-          navigate("/penjualanProduk");
-          break;
-        case "Stok Bahan Baku":
-          navigate("/stokBahanBaku");
-          break;
-        case "Penggunaan Bahan Baku":
-          navigate("/penggunaanBahanBaku");
-          break;
-        case "Presensi Pegawai":
-          navigate("/presensiPegawai");
-          break;
-        case "Pemasukan Dan Pengeluaran":
-          navigate("/pemasukanPengeluaran");
-          break;
-        case "Transaksi Penitip":
-          navigate("/transaksiPenitip");
-          break;
-        default:
-          navigate("/");
+      // Menahan akses berdasarkan peran pengguna
+      if (userRole === "Manager Operasional" || userRole === "Owner") {
+        switch (chartTitle) {
+          case "Penjualan Bulanan":
+            navigate("/penjualanBulanan");
+            break;
+          case "Penjualan Produk":
+            navigate("/penjualanProduk");
+            break;
+          case "Stok Bahan Baku":
+            navigate("/stokBahanBaku");
+            break;
+          case "Penggunaan Bahan Baku":
+            navigate("/penggunaanBahanBaku");
+            break;
+          case "Presensi Pegawai":
+            navigate("/presensiPegawai");
+            break;
+          case "Pemasukan Dan Pengeluaran":
+            navigate("/pemasukanPengeluaran");
+            break;
+          case "Transaksi Penitip":
+            navigate("/transaksiPenitip");
+            break;
+          default:
+            navigate("/");
+        }
+        // Tambahkan logika untuk menampilkan pesan atau mengarahkan pengguna ke halaman lain yang sesuai
+      }else {
+        // Tampilkan pesan kesalahan
+        toast.error("Anda tidak memiliki akses untuk melihat rincian.");
+        console.log("Anda tidak memiliki akses untuk melihat rincian.");
+        return;
       }
+      
     };
   };
 
@@ -52,7 +67,7 @@ export function StatisticsChart({ color, chart, title, description, footer }) {
         shadow={false}
         className="mb-4"
       >
-        {/* <Chart {...chart} /> */}
+        <Chart {...chart} />
       </CardHeader>
       <CardBody className="px-6 pt-0 pb-6">
         <Typography variant="h6" color="blue-gray" className="mb-2">
@@ -75,7 +90,9 @@ export function StatisticsChart({ color, chart, title, description, footer }) {
           {footer}
         </CardFooter>
       )}
+    <ToastContainer/>
     </Card>
+    
   );
 }
 
