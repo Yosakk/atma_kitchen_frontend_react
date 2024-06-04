@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
     padding: 30,
   },
   header: {
-    textAlign: 'center',
+    textAlign: 'left',
     marginBottom: 20,
   },
   title: {
@@ -16,6 +16,12 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     marginBottom: 5,
+  },
+  subtitle1: {
+    fontSize: 12,
+    marginBottom: 5,
+    marginTop: 20,
+    textDecoration: 'underline',
   },
   table: {
     display: 'table',
@@ -75,21 +81,21 @@ const CetakStokBahanBaku = ({ data }) => {
         <View style={styles.header}>
           <Text style={styles.title}>Atma Kitchen</Text>
           <Text style={styles.subtitle}>Jl. Centralpark No. 10 Yogyakarta</Text>
-          <Text style={styles.subtitle}>LAPORAN Stok Bahan Baku</Text>
+          <Text style={styles.subtitle1}>LAPORAN Stok Bahan Baku</Text>
           <Text style={styles.subtitle}>Tanggal cetak: {formatDate(new Date())}</Text>
         </View>
 
         <View style={styles.table}>
           <View style={styles.tableRow}>
             <Text style={styles.tableColHeader}>Nama Bahan</Text>
-            <Text style={styles.tableColHeader}>Stok</Text>
             <Text style={styles.tableColHeader}>Satuan</Text>
+            <Text style={styles.tableColHeader}>Stok</Text>
           </View>
           {data.map((item, index) => (
             <View style={styles.tableRow} key={index}>
               <Text style={styles.tableCol}>{item.nama}</Text>
-              <Text style={styles.tableCol}>{item.stok}</Text>
               <Text style={styles.tableCol}>{item.satuan}</Text>
+              <Text style={styles.tableCol}>{item.stok}</Text>
             </View>
           ))}
         </View>

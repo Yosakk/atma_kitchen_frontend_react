@@ -17,6 +17,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 5,
   },
+  subtitle1: {
+    fontSize: 12,
+    marginBottom: 5,
+    marginTop: 20,
+    textDecoration: 'underline',
+  },
   table: {
     display: 'table',
     width: 'auto',
@@ -72,7 +78,7 @@ const CetakPenjualanBulananProduk = ({ year, month, salesReport, totalSales }) =
       <View style={styles.header}>
         <Text style={styles.title}>Atma Kitchen</Text>
         <Text style={styles.subtitle}>Jl. Centralpark No. 10 Yogyakarta</Text>
-        <Text style={styles.subtitle}>LAPORAN PENJUALAN BULANAN</Text>
+        <Text style={styles.subtitle1}>LAPORAN PENJUALAN BULANAN</Text>
         <Text style={styles.subtitle}>Bulan: {getMonthName(month)} Tahun: {year}</Text>
         <Text style={styles.subtitle}>
           Tanggal cetak: {new Date().toLocaleDateString('id-ID')}

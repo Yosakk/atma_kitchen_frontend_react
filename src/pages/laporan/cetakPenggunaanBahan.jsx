@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
     padding: 30,
   },
   header: {
-    textAlign: 'center',
+    textAlign: 'left',
     marginBottom: 20,
   },
   title: {
@@ -16,6 +16,12 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 12,
     marginBottom: 5,
+  },
+  subtitle1: {
+    fontSize: 12,
+    marginBottom: 5,
+    marginTop: 20,
+    textDecoration: 'underline',
   },
   table: {
     display: 'table',
@@ -61,7 +67,7 @@ const CetakPenggunaanBahan = ({ tanggalAwal, tanggalAkhir, penggunaanBahanData }
         <View style={styles.header}>
           <Text style={styles.title}>Atma Kitchen</Text>
           <Text style={styles.subtitle}>Jl. Centralpark No. 10 Yogyakarta</Text>
-          <Text style={styles.subtitle}>LAPORAN Penggunaan Bahan Baku</Text>
+          <Text style={styles.subtitle1}>LAPORAN Penggunaan Bahan Baku</Text>
           <Text style={styles.subtitle}>Periode : {tanggalAwal} - {tanggalAkhir}</Text>
           <Text style={styles.subtitle}>Tanggal cetak: {currentDate}</Text>
         </View>

@@ -4,18 +4,27 @@ import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 const styles = StyleSheet.create({
   page: {
     padding: 30,
+    fontSize: 11,
   },
   header: {
-    textAlign: 'center',
+    textAlign: 'left',
     marginBottom: 20,
   },
   title: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
+    textAlign: 'left',
+    marginBottom: 5,
   },
   subtitle: {
+    fontSize: 11,
+    marginBottom: 2,
+  },
+  subtitle1: {
     fontSize: 12,
     marginBottom: 5,
+    marginTop: 20,
+    textDecoration: 'underline',
   },
   table: {
     display: 'table',
@@ -38,8 +47,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#E4E4E4',
     textAlign: 'center',
     fontWeight: 'bold',
-    padding: 5,
-    fontSize: 12,
+    padding: 3,
+    fontSize: 11,
   },
   tableCol: {
     width: '16.66%',
@@ -48,8 +57,18 @@ const styles = StyleSheet.create({
     borderLeftWidth: 0,
     borderTopWidth: 0,
     textAlign: 'center',
-    padding: 5,
+    padding: 3,
     fontSize: 11,
+  },
+
+  tableColMerged: {
+    width: '83.32%',
+    borderStyle: 'solid',
+    borderWidth: 1,
+    borderLeftWidth: 0,
+    borderTopWidth: 0,
+    padding: 3,
+    textAlign: 'right',
   },
   totalRow: {
     fontWeight: 'bold',
@@ -79,7 +98,7 @@ const formatToRupiah = (amount) => {
     style: "currency",
     currency: "IDR",
   });
-  return formatter.format(amount).replace(/\s/g, '.');
+  return formatter.format(amount).replace(/\s/g, '.').replace(/\,00/g, '');
 };
 
 const CetakKomisiPenitip = ({ data, month, year }) => {
@@ -96,9 +115,10 @@ const CetakKomisiPenitip = ({ data, month, year }) => {
         return (
           <Page style={styles.page} key={index}>
             <View style={styles.header}>
-              <Text style={styles.title}>Atma Kitchen</Text>
+              <Text style={styles.subtitle}>Atma Kitchen</Text>
               <Text style={styles.subtitle}>Jl. Centralpark No. 10 Yogyakarta</Text>
-              <Text style={styles.subtitle}>LAPORAN TRANSAKSI PENITIP</Text>
+              <Text style={styles.subtitle1}>LAPORAN TRANSAKSI PENITIP</Text>
+              <Text style={styles.subtitle}>ID Penitip : {penitipData.id_penitip}</Text>
               <Text style={styles.subtitle}>Nama Penitip : {penitipData.penitip}</Text>
               <Text style={styles.subtitle}>Bulan : {getMonthName(month)}</Text>
               <Text style={styles.subtitle}>Tahun : {year}</Text>
@@ -124,12 +144,8 @@ const CetakKomisiPenitip = ({ data, month, year }) => {
                   <Text style={styles.tableCol}>{formatToRupiah(produk.diterima)}</Text>
                 </View>
               ))}
-              <View style={styles.tableRow}>
-                <Text style={styles.tableCol}>Total</Text>
-                <Text style={styles.tableCol}></Text>
-                <Text style={styles.tableCol}></Text>
-                <Text style={styles.tableCol}>{formatToRupiah(penitipData.total)}</Text>
-                <Text style={styles.tableCol}>{formatToRupiah(penitipData.komisi)}</Text>
+              <View style={[styles.tableRow, styles.totalRow]}>
+                <Text style={styles.tableColMerged}>Total</Text>
                 <Text style={styles.tableCol}>{formatToRupiah(penitipData.diterima)}</Text>
               </View>
             </View>
