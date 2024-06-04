@@ -243,7 +243,7 @@ const ReadKonfirmasiPesanan = () => {
           setProsesError(message);
         }
         setSuccessProcess("");
-        toast.success("Pesanan Gagal Diproses");
+        toast.error("Pesanan Gagal Diproses");
       })
   };
 

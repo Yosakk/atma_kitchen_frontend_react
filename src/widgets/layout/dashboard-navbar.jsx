@@ -13,6 +13,7 @@ export function DashboardNavbar() {
     // Hapus session storage di sini
     sessionStorage.removeItem('token');
     sessionStorage.removeItem("isLogin");
+    sessionStorage.clear('userRole');
   };
 
 

@@ -290,7 +290,7 @@ const TransactionCard = ({ groupKey, items, editStatusByAdmin }) => {
             variant="filled"
             size="sm"
             color="blue"
-            onClick={() => editStatusByAdmin(firstItem.id, "Siap di-pickup")}
+            onClick={() => editStatusByAdmin(firstItem.id, "Sedang dikirim kurir")}
           >
             Kirim Pesanan
           </Button>
@@ -300,7 +300,7 @@ const TransactionCard = ({ groupKey, items, editStatusByAdmin }) => {
             variant="filled"
             size="sm"
             color="green"
-            onClick={() => editStatusByAdmin(firstItem.id, "Sedang dikirim kurir")}
+            onClick={() => editStatusByAdmin(firstItem.id, "Siap di-pickup")}
           >
             Siap Di Pickup
           </Button>

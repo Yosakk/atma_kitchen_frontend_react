@@ -47,7 +47,7 @@ const ReadPesananDikirim = () => {
       const response = await showAllTransaksiHistoryCustomer();
       const filteredData = response.data.filter((item) => {
         const statusIncluded = selectedTab.includes(item.transaksi.status_transaksi);
-        if (selectedTab.includes("Sudah di-pickup")) {
+        if (selectedTab.includes("Siap di-pickup")) {
           return statusIncluded && item.transaksi.jenis_pengiriman === "Pickup";
         }
         return statusIncluded;

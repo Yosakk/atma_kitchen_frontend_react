@@ -62,13 +62,14 @@ const LoginPage = () => {
                 setIsLoggedIn(true);
 
                 // Menyimpan peran pengguna dalam penyimpanan sesi
-                sessionStorage.setItem("userRole", res.user.pegawai.jabatan);
-                console.log("ini role nya", res.user.pegawai.jabatan);
+                
                 if (res.user.role === "Pelanggan") {
                     console.log("Masuk Sebagai Pelanggan");
                     navigate(`/home`);
                     // navigate(`/customer/profile/${res.user.id}`);
                 } else if (res.user.role === "Pegawai"){
+                    sessionStorage.setItem("userRole", res.user.pegawai.jabatan);
+                console.log("ini role nya", res.user.pegawai.jabatan);
                     if(res.user.pegawai.jabatan === "Manager Operasional"){
                         navigate("/mo/home");
                         console.log("Masuk MO");

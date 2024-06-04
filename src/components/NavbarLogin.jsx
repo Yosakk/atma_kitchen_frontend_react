@@ -269,6 +269,7 @@ const NavbarLogin = () => {
     // console.log(cart)
     sessionStorage.removeItem("isLogin");
     sessionStorage.removeItem("token");
+    sessionStorage.clear('userRole');
 
     // Emit event untuk memberi tahu perubahan pada keranjang
     window.dispatchEvent(new Event("cartUpdated"));
