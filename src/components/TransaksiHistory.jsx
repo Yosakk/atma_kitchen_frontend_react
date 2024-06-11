@@ -30,7 +30,7 @@ const TABS = [
   { label: "Ditolak", value: "Ditolak" },
   { label: "Diproses", value: "Diproses" },
   { label: "Dikirim", value: "Dikirim" }, // Custom filter
-  { label: "Dipickup", value: "Sudah di-pickup" },
+  { label: "Dipickup", value: "Dipickup" },
   { label: "Selesai", value: "Selesai" },
   { label: "Dibatalkan", value: "Telat Bayar" },
 ];
@@ -127,14 +127,20 @@ const TransaksiHistory = () => {
       : selectedTab === "Dikirim"
         ? historyData.filter(
           (item) =>
-            (item.status === "Sedang dikirim kurir" || item.status === "Siap di-pickup") &&
+            (item.status === "Siap di-pickup" || item.status === "Sedang dikirim kurir") &&
             item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
         )
-        : historyData.filter(
-          (item) =>
-            item.status === selectedTab &&
-            item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
-        );
+        : selectedTab === "Dipickup"
+          ? historyData.filter(
+            (item) =>
+              (item.status === "Sudah di-pickup") &&
+              item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
+          )
+          : historyData.filter(
+            (item) =>
+              item.status === selectedTab &&
+              item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
+          );
 
   const groupedData = groupBy(filteredData, "id");
   const totalPages = Math.ceil(Object.keys(groupedData).length / itemsPerPage);
@@ -346,7 +352,7 @@ const TransactionCard = ({ groupKey, items, updateStatus }) => {
           </Typography>
         </div>
       </div>
-      {firstItem.status === "Belum Dibayar" && (
+      {firstItem.status === "Belum Dibayar" || (firstItem.status === "-" && firstItem.jenisPengiriman === "Pickup") &&(
         <div className="flex justify-end items-center mt-4">
           <Link to={`/pembayaran/${groupKey}`}>
             <Button variant="filled" color="lightBlue">
@@ -370,7 +376,14 @@ const TransactionCard = ({ groupKey, items, updateStatus }) => {
           )}
         {firstItem.status === "Sedang dikirim kurir" && (
           <div className="flex justify-end items-center mt-4">
-            <Button variant="filled" color="blue" onClick={() => updateStatus(firstItem.id, "Sudah dipickup")}>
+            <Button variant="filled" color="blue" onClick={() => updateStatus(firstItem.id, "Sudah di-pickup")}>
+              Sudah Dipickup
+            </Button>
+          </div>
+        )}
+        {firstItem.status === "Siap di-pickup" && (
+          <div className="flex justify-end items-center mt-4">
+            <Button variant="filled" color="blue" onClick={() => updateStatus(firstItem.id, "Sudah di-pickup")}>
               Sudah Dipickup
             </Button>
           </div>

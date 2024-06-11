@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
     padding: 30,
   },
   header: {
-    textAlign: 'center',
+    textAlign: 'left',
     marginBottom: 20,
   },
   title: {
@@ -16,6 +16,13 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     marginBottom: 5,
+  },
+  subtitle1: {
+    fontSize: 12,
+    marginBottom: 5,
+    marginTop: 20,
+    textDecoration: 'underline',
+    fontWeight: 'bold',
   },
   table: {
     display: 'table',
@@ -56,7 +63,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderLeftWidth: 0,
     borderTopWidth: 0,
-    textAlign: 'center',
+    textAlign: 'right',
+    padding: 5,
   },
   tableCell: {
     margin: 'auto',
@@ -71,7 +79,7 @@ const CetakPenjualanBulanan = ({ year, salesReport, totalSales }) => (
       <View style={styles.header}>
         <Text style={styles.title}>Atma Kitchen</Text>
         <Text style={styles.subtitle}>Jl. Centralpark No. 10 Yogyakarta</Text>
-        <Text style={styles.subtitle}>LAPORAN PENJUALAN BULANAN</Text>
+        <Text style={styles.subtitle1}>LAPORAN PENJUALAN BULANAN</Text>
         <Text style={styles.subtitle}>Tahun: {year}</Text>
         <Text style={styles.subtitle}>
           Tanggal cetak: {new Date().toLocaleDateString('id-ID')}
