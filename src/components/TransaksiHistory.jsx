@@ -122,25 +122,26 @@ const TransaksiHistory = () => {
   const filteredData =
     selectedTab === "Semua"
       ? historyData.filter((item) =>
-        item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
-      )
+          item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
+        )
       : selectedTab === "Dikirim"
-        ? historyData.filter(
+      ? historyData.filter(
           (item) =>
-            (item.status === "Siap di-pickup" || item.status === "Sedang dikirim kurir") &&
+            (item.status === "Siap di-pickup" ||
+              item.status === "Sedang dikirim kurir") &&
             item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
         )
-        : selectedTab === "Dipickup"
-          ? historyData.filter(
-            (item) =>
-              (item.status === "Sudah di-pickup") &&
-              item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
-          )
-          : historyData.filter(
-            (item) =>
-              item.status === selectedTab &&
-              item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
-          );
+      : selectedTab === "Dipickup"
+      ? historyData.filter(
+          (item) =>
+            item.status === "Sudah di-pickup" &&
+            item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
+        )
+      : historyData.filter(
+          (item) =>
+            item.status === selectedTab &&
+            item.produk.nama.toLowerCase().includes(searchValue.toLowerCase())
+        );
 
   const groupedData = groupBy(filteredData, "id");
   const totalPages = Math.ceil(Object.keys(groupedData).length / itemsPerPage);
@@ -159,7 +160,10 @@ const TransaksiHistory = () => {
           </div>
         </div>
         <div className="flex items-center gap-4 md:flex-row">
-          <Tabs value={selectedTab} className="w-full overflow-x-auto mb-10 md:flex-col">
+          <Tabs
+            value={selectedTab}
+            className="w-full overflow-x-auto mb-10 md:flex-col"
+          >
             <TabsHeader>
               {TABS.map(({ label, value }) => (
                 <Tab
@@ -254,20 +258,31 @@ const TransactionCard = ({ groupKey, items, updateStatus }) => {
           <Chip
             size="sm"
             variant="ghost"
-            value={firstItem.status === "Dikirim" ?
-              (firstItem.jenisPengiriman === "Pickup" ? "Pickup" : "Diantar")
-              : firstItem.status
+            value={
+              firstItem.status === "Dikirim"
+                ? firstItem.jenisPengiriman === "Pickup"
+                  ? "Pickup"
+                  : "Diantar"
+                : firstItem.status
             }
             color={
-              firstItem.status === "Selesai" ? "green" :
-                firstItem.status === "Sudah di-pickup" ? "amber" :
-                  firstItem.status === "Diterima" ? "blue" :
-                    firstItem.status === "-" ? "purple" :
-                      firstItem.status === "Belum Dibayar" ? "purple" :
-                        firstItem.status === "Sudah Dibayar" ? "lightBlue" :
-                          firstItem.status === "Sedang dikirim kurir" ? "indigo" :
-                            firstItem.status === "Siap di-pickup" ? "teal" :
-                              "red"
+              firstItem.status === "Selesai"
+                ? "green"
+                : firstItem.status === "Sudah di-pickup"
+                ? "amber"
+                : firstItem.status === "Diterima"
+                ? "blue"
+                : firstItem.status === "-"
+                ? "purple"
+                : firstItem.status === "Belum Dibayar"
+                ? "purple"
+                : firstItem.status === "Sudah Dibayar"
+                ? "lightBlue"
+                : firstItem.status === "Sedang dikirim kurir"
+                ? "indigo"
+                : firstItem.status === "Siap di-pickup"
+                ? "teal"
+                : "red"
             }
           />
         </Typography>
@@ -307,12 +322,12 @@ const TransactionCard = ({ groupKey, items, updateStatus }) => {
                   item.produk.kategori === "Cake"
                     ? "green"
                     : item.produk.kategori === "Roti"
-                      ? "amber"
-                      : item.produk.kategori === "Minuman"
-                        ? "blue"
-                        : item.produk.kategori === "Titipan"
-                          ? "purple"
-                          : "red"
+                    ? "amber"
+                    : item.produk.kategori === "Minuman"
+                    ? "blue"
+                    : item.produk.kategori === "Titipan"
+                    ? "purple"
+                    : "red"
                 }
               />
             </div>
@@ -352,7 +367,9 @@ const TransactionCard = ({ groupKey, items, updateStatus }) => {
           </Typography>
         </div>
       </div>
-      {firstItem.status === "Belum Dibayar" || (firstItem.status === "-" && firstItem.jenisPengiriman === "Pickup") &&(
+      {(firstItem.status === "Belum Dibayar" ||
+        (firstItem.status === "-" &&
+          firstItem.jenisPengiriman === "Pickup")) && (
         <div className="flex justify-end items-center mt-4">
           <Link to={`/pembayaran/${groupKey}`}>
             <Button variant="filled" color="lightBlue">
@@ -361,6 +378,7 @@ const TransactionCard = ({ groupKey, items, updateStatus }) => {
           </Link>
         </div>
       )}
+
       <div className="flex justify-end gap-2">
         {firstItem.status !== "Belum Dibayar" &&
           firstItem.status !== "Ditolak" &&
@@ -376,21 +394,33 @@ const TransactionCard = ({ groupKey, items, updateStatus }) => {
           )}
         {firstItem.status === "Sedang dikirim kurir" && (
           <div className="flex justify-end items-center mt-4">
-            <Button variant="filled" color="blue" onClick={() => updateStatus(firstItem.id, "Sudah di-pickup")}>
-              Sudah Dipickup
+            <Button
+              variant="filled"
+              color="blue"
+              onClick={() => updateStatus(firstItem.id, "Sudah di-pickup")}
+            >
+              Sudah Diterima
             </Button>
           </div>
         )}
         {firstItem.status === "Siap di-pickup" && (
           <div className="flex justify-end items-center mt-4">
-            <Button variant="filled" color="blue" onClick={() => updateStatus(firstItem.id, "Sudah di-pickup")}>
+            <Button
+              variant="filled"
+              color="blue"
+              onClick={() => updateStatus(firstItem.id, "Sudah di-pickup")}
+            >
               Sudah Dipickup
             </Button>
           </div>
         )}
         {firstItem.status === "Sudah di-pickup" && (
           <div className="flex justify-end items-center mt-4">
-            <Button variant="filled" color="blue" onClick={() => updateStatus(firstItem.id, "Selesai")}>
+            <Button
+              variant="filled"
+              color="blue"
+              onClick={() => updateStatus(firstItem.id, "Selesai")}
+            >
               Selesai
             </Button>
           </div>

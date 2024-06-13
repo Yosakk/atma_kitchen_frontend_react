@@ -176,7 +176,9 @@ const OurProductCatalogue = () => {
       navigate("/login");
     }
     // Mengambil ID produk, dengan prioritas dari id_produk_hampers jika tersedia
-    const productId = product.id_produk_hampers ? product.id_produk_hampers : product.id_produk;
+    const productId = product.id_produk_hampers
+      ? product.id_produk_hampers
+      : product.id_produk;
     const item = {
       product: product,
       type: type,
@@ -233,7 +235,7 @@ const OurProductCatalogue = () => {
     const categoryStatus = checkCategory(kategori);
     console.log("Category Status:", categoryStatus);
     // Simpan tombol mana yang ditekan ke localStorage
-};
+  };
 
   const checkCategory = (kategori) => {
     // Pastikan kategori adalah array
@@ -331,7 +333,7 @@ const OurProductCatalogue = () => {
                     <img
                       src={getImage(product.gambar_produk)}
                       alt={product.nama_produk}
-                      className="h-full w-full object-fit rounded-t-xl"
+                      className="h-full w-full object-cover rounded-t-xl"
                     />
                   </div>
 
@@ -362,13 +364,13 @@ const OurProductCatalogue = () => {
                       <p className="text-sm text-gray-600 mt-2">
                         {product.limitHarian
                           ? `Limit Harian : ${product.limitHarian}`
-                          : "Limit harian tidak tersedia"}
+                          : "Limit Harian : 0"}
                       </p>
-                      <p className="text-sm text-gray-600 mt-2">
+                      {/* <p className="text-sm text-gray-600 mt-2">
                         {product.limitHarian
                           ? `Tanggal Limit Harian : ${product.tanggalLimit}`
-                          : "Limit harian tidak tersedia"}
-                      </p>
+                          : ""}
+                      </p> */}
                     </div>
                   </div>
                 </Link>
@@ -395,7 +397,7 @@ const OurProductCatalogue = () => {
                     }}
                     disabled={
                       isDateBeforeMinPreOrder(selectedDate) || // Jika tanggal tidak H+2
-                      product.limitHarian <= 0 || // Jika limit harian tidak tersedia
+                      product.limitHarian <= 0 || // Jika
                       product.tanggalLimit !== todayDate // Jika tanggal limit tidak sama dengan tanggal yang dipilih
                     }
                   >
@@ -431,7 +433,7 @@ const OurProductCatalogue = () => {
                   <img
                     src={getImage(productHampers.gambar_produk_hampers)}
                     alt={productHampers.nama_produk_hampers}
-                    className="h-full w-full object-fit rounded-t-xl"
+                    className="h-full w-full object-cover rounded-t-xl"
                   />
                 </div>
 
