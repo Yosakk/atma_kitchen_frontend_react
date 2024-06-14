@@ -6,6 +6,8 @@ import { faPlus, faSave, faClose, faTrash } from "@fortawesome/free-solid-svg-ic
 import { storeDataResep } from "../../../api/admin/ResepApi";
 import { showDataBahanBaku } from "../../../api/admin/BahanBakuApi";
 import { showDataProduk } from "../../../api/admin/ProdukApi";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const formReducer = (state, event) => {
     return {
@@ -78,11 +80,15 @@ const AddResep = () => {
             .then((res) => {
                 sessionStorage.setItem("dataResep", JSON.stringify(res.data));
                 setLoading(false);
-                navigate("/admin/resep/read")
+                toast.success("Data Resep berhasil diubah"); 
+                setTimeout(() => {// Delay selama 2 detik
+                    navigate("/admin/resep/read")
+                }, 2000);
             })
             .catch((err) => {
                 setLoading(false);
                 console.log("Error", err);
+                toast.error("Terjadi kesalahan saat mengubah data Resep");
             })
     };
 
@@ -214,6 +220,7 @@ const AddResep = () => {
                     </form>
                 </CardBody>
             </Card>
+            <ToastContainer/>
         </div>
     );
 };

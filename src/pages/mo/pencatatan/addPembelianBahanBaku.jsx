@@ -5,6 +5,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faSave, faClose, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { storePembelianBahan } from "../../../api/mo/PembelianBahanBakuApi";
 import { showDataBahanBaku } from "../../../api/admin/BahanBakuApi";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const formReducer = (state, event) => {
     return {
@@ -70,11 +72,15 @@ const AddPembelianBahanBaku = () => {
             .then((res) => {
                 sessionStorage.setItem("dataPembelianBahan", JSON.stringify(res.data));
                 setLoading(false);
-                navigate("/mo/pencatatanPembelianBahanBaku/read")
+                toast.success("Data Pembelian Bahan Baku berhasil ditambah"); 
+                setTimeout(() => {
+                    navigate("/mo/pencatatanPembelianBahanBaku/read")
+                }, 2000);
             })
             .catch((err) => {
                 setLoading(false);
                 console.log("Error", err);
+                toast.error("Terjadi kesalahan saat menambah data Pembelian Bahan Baku");
             })
     };
 
@@ -263,6 +269,7 @@ const AddPembelianBahanBaku = () => {
                     </form>
                 </CardBody>
             </Card>
+            <ToastContainer/>
         </div>
     );
 };

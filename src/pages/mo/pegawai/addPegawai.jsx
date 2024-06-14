@@ -49,7 +49,7 @@ const AddPegawai = () => {
                 }, 2000);
             })
             .catch((err) => {
-                toast.error("Terjadi kesalahan saat mengubah data penitip");
+                toast.error("Terjadi kesalahan saat mengubah data Pegawai");
                 console.log("Error", err);
             })
     };

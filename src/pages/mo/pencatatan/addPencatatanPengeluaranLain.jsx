@@ -57,11 +57,15 @@ const AddPencatatanPengeluaranLain = () => {
             .then((res) => {
                 sessionStorage.setItem("dataPengeluaranLain", JSON.stringify(res.data));
                 setLoading(false);
-                navigate("/mo/pencatatanPengeluaranLain/read")
+                toast.success("Data Pencatanan Pengeluaran Lain berhasil ditambah"); 
+                setTimeout(() => {
+                    navigate("/mo/pencatatanPengeluaranLain/read")
+                }, 2000);
             })
             .catch((err) => {
                 setLoading(false);
                 console.log("Error", err);
+                toast.error("Terjadi kesalahan saat menambah data Pencatanan Pengeluaran Lain");
             })
     };
 
@@ -212,6 +216,7 @@ const AddPencatatanPengeluaranLain = () => {
                     </form>
                 </CardBody>
             </Card>
+            <ToastContainer/>
         </div>
     );
 };

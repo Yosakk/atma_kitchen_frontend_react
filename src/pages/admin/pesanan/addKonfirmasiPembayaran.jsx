@@ -54,14 +54,14 @@ const AddKonfirmasiPembayaran = () => {
 
     editStatusTransaksiAdmin(id, formData)
       .then((res) => {
-        toast.success("Data Bahan Baku berhasil diubah");
+        toast.success("Pembayaran Sudah Dikonfirmasi");
         setTimeout(() => {
           navigate("/admin/konfirmasi/read");
         }, 2000);
       })
       .catch((err) => {
         console.log("Error", err);
-        toast.error("Terjadi kesalahan saat menginput jarak");
+        toast.error("Terjadi kesalahan saat melakukan Konfirmasi Pembayaran");
       });
   };
 

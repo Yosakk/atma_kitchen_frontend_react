@@ -180,14 +180,14 @@ const TransactionCard = ({ groupKey, items, setCurrentTransactionId, setIsAccept
     try {
       await editStatusTransaksiDiantar(firstItem.id, formData);
       console.log("Saved:", formData);
-      toast.success("Data saved successfully!");
+      toast.success("Status transaksi berhasil diubah");
       toggleModal();
     } catch (error) {
       console.error("Error saving data:", error);
-      toast.error("Failed to save data.");
+      toast.error("Gagal mengubah status transaksi");
+      
     }
   };
-
   return (
     <div className="border p-3 rounded-lg mb-4">
       <div className="flex justify-between">
