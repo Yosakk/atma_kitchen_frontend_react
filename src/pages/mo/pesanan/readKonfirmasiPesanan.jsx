@@ -189,7 +189,6 @@ const ReadKonfirmasiPesanan = () => {
       .then((res) => {
         console.log(res);
         const { message, bahan_baku_terpakai } = res;
-
         if (Array.isArray(bahan_baku_terpakai)) {
           console.log("cek", bahan_baku_terpakai);
           const successMessage = (

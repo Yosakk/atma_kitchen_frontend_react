@@ -18,6 +18,8 @@ import { useParams } from "react-router-dom";
 import { showAllTransaksiHistoryCustomer, editStatusTransaksiDiantar } from "../../../api/customer/TransaksiApi";
 import { getImage } from "../../../api";
 import useRefresh from "../../../services/useRefresh";
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 const formReducer = (state, event) => {
   return {
@@ -158,6 +160,7 @@ const ReadPesananCustomer = () => {
           </Button>
         </DialogFooter>
       </Dialog>
+      <ToastContainer />
     </Card>
   );
 };
@@ -177,10 +180,11 @@ const TransactionCard = ({ groupKey, items, setCurrentTransactionId, setIsAccept
     try {
       await editStatusTransaksiDiantar(firstItem.id, formData);
       console.log("Saved:", formData);
+      toast.success("Data saved successfully!");
       toggleModal();
-
     } catch (error) {
       console.error("Error saving data:", error);
+      toast.error("Failed to save data.");
     }
   };
 
@@ -288,19 +292,6 @@ const TransactionCard = ({ groupKey, items, setCurrentTransactionId, setIsAccept
         </div>
       </div>
       <div className="flex justify-end items-center mt-4 gap-4 ">
-        {firstItem.status === "Belum Bayar" && (
-          <Button
-            variant="filled"
-            size="sm"
-            color="red"
-            onClick={() => {
-              setCurrentTransactionId(groupKey); // Set the current transaction ID
-              setIsAcceptModalOpen(true); // Open the accept modal
-            }}
-          >
-            Telat Bayar
-          </Button>
-        )}
         <Button variant="filled" size="sm" color="blue" onClick={toggleModal}>
           Input Jarak
         </Button>
