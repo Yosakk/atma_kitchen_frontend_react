@@ -5,6 +5,8 @@ import { Button } from "@material-tailwind/react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import CetakNota from "./CetakNota";
 import { showDataNota } from "../../api/customer/TransaksiApi";
+import FooterUser from "../../components/Footer";
+import NavbarLogin from "../../components/NavbarLogin";
 
 function PembayaranBerhasil() {
   let { id } = useParams();
@@ -46,6 +48,7 @@ function PembayaranBerhasil() {
 
   return (
     <>
+    <NavbarLogin/>
       <div className="flex flex-col items-center mt-8 w-full">
         <div className="flex w-full justify-center max-w-6xl">
           <div className="flex w-full">
@@ -86,6 +89,7 @@ function PembayaranBerhasil() {
           </div>
         </div>
       </div>
+      <FooterUser/>
     </>
   );
 }

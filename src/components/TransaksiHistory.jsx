@@ -30,7 +30,7 @@ const TABS = [
   { label: "Ditolak", value: "Ditolak" },
   { label: "Diproses", value: "Diproses" },
   { label: "Dikirim", value: "Dikirim" }, // Custom filter
-  { label: "Dipickup", value: "Dipickup" },
+  { label: "Diterima", value: "Sudah di-pickup" },
   { label: "Selesai", value: "Selesai" },
   { label: "Dibatalkan", value: "Telat Bayar" },
 ];
